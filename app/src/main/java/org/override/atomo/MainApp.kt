@@ -6,8 +6,9 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
-import org.override.atomo.di.AuthModule
-import org.override.atomo.di.SupabaseModule
+import org.override.atomo.di.data.DataModule
+import org.override.atomo.di.data.SupabaseModule
+import org.override.atomo.di.feature.FeaturesModule
 
 class MainApp : Application(), KoinComponent {
     override fun onCreate() {
@@ -18,8 +19,7 @@ class MainApp : Application(), KoinComponent {
             androidLogger()
             androidContext(this@MainApp)
             modules(
-                AuthModule,
-                SupabaseModule
+                modules = FeaturesModule + DataModule + SupabaseModule
             )
         }
     }

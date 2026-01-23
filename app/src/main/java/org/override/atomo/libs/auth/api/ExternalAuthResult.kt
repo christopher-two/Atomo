@@ -1,7 +1,7 @@
-package org.christophertwo.spot.libs.auth.api
+package org.override.atomo.libs.auth.api
 
 sealed class ExternalAuthResult {
-    data class Success(val idToken: String) : ExternalAuthResult()
+    object Success : ExternalAuthResult()
     data class Error(val message: String) : ExternalAuthResult()
     object Cancelled : ExternalAuthResult()
 }

@@ -1,0 +1,150 @@
+[versions]
+
+# Android
+agp = "9.0.0"
+coreKtx = "1.17.0"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.12.2"
+biometric = "1.2.0-alpha05"
+core-splashscreen = "1.2.0"
+accompanist-permissions = "0.37.3"
+
+# Test
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+
+# Kotlin
+kotlin = "2.3.0"
+kotlinxCoroutinesCore = "1.10.2"
+kotlinxDatetime = "0.7.1"
+kotlinxSerializationJson = "1.10.0"
+ksp = "2.3.3"
+
+# Compose
+composeShimmer = "1.3.3"
+coil = "3.3.0"
+coilNetworkKtor3 = "3.3.0"
+materialKolor = "4.1.0"
+composeBom = "2026.01.00"
+material3Android = "1.5.0-alpha12"
+
+# Koin
+koin = "4.1.1"
+
+# Ktor
+ktor = "3.4.0"
+
+# Other
+filekit = "0.12.0"
+qrose = "1.0.1"
+compressor = "3.0.1"
+
+# Data
+datastore-pref = "1.2.0"
+datastore-pref-core = "1.2.0"
+room = "2.8.4"
+
+# Nav
+navigation3 = "1.0.0"
+
+# Google
+googleid = "1.2.0"
+gms-plugin = "4.4.4"
+gms-auth = "21.5.0"
+cred-play-services = "1.5.0"
+credentials = "1.5.0"
+
+
+[libraries]
+# Test
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+
+# Android
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist-permissions" }
+
+# Compose
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material3-android = { module = "androidx.compose.material3:material3-android", version.ref = "material3Android" }
+
+compose-shimmer = { module = "com.valentinilk.shimmer:compose-shimmer", version.ref = "composeShimmer" }
+material-kolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
+qrose = { module = "io.github.alexzhirkevich:qrose", version.ref = "qrose" }
+androidx-biometric = { group = "androidx.biometric", name = "biometric", version.ref = "biometric" }
+
+# Supabase
+supabase-bom = { module = "io.github.jan-tennert.supabase:bom", version = "3.3.0" }
+auth-kt = { module = "io.github.jan-tennert.supabase:auth-kt" }
+realtime-kt = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+postgrest-kt = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+storage-kt = { module = "io.github.jan-tennert.supabase:storage-kt" }
+
+# Kotlin
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+
+# Koin
+koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
+koin-android = { group = "io.insert-koin", name = "koin-android" }
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
+koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel" }
+koin-compose-navigation3 = { module = "io.insert-koin:koin-compose-navigation3", version.ref = "koin" }
+
+# Ktor
+ktor-bom = { module = "io.ktor:ktor-bom", version.ref = "ktor" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilNetworkKtor3" }
+
+# Coil
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+
+# FileKit
+filekit-core = { module = "io.github.vinceglb:filekit-core", version.ref = "filekit" }
+filekit-dialogs = { module = "io.github.vinceglb:filekit-dialogs", version.ref = "filekit" }
+filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekit" }
+filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekit" }
+
+# Other
+compressor = { module = "id.zelory:compressor", version.ref = "compressor" }
+
+# Data
+datastore-pref = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-pref" }
+datastore-pref-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore-pref-core" }
+
+# Room
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+
+# Google
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+gms-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "gms-auth" }
+cred-play-services = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "cred-play-services" }
+credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentials" }
+
+# Navigation 3
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+gms-plugin = { id = "com.google.gms.google-services", version.ref = "gms-plugin" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+room = { id = "androidx.room", version.ref = "room" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

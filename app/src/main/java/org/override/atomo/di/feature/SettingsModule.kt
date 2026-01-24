@@ -15,7 +15,7 @@ import org.override.atomo.feature.settings.presentation.SettingsViewModel
 val SettingsModule: Module
     get() = module {
         viewModelOf(::SettingsViewModel)
-        navigation<RouteApp> {
+        navigation<RouteApp.Settings> {
             SettingsRoot(
                 viewModel = koinViewModel()
             )

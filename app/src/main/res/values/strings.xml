@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Atomo</string>
-    <string name="default_web_client_id">https://gqlhnmmofiwybodymufy.supabase.co</string>
+    <string name="default_web_client_id">812234342739-7ujl21k9u849n33a3rsllevpv95o0rc0.apps.googleusercontent.com</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="created_by">Created by Override</string>
+    <string name="web_url" translatable="false">https://www.override.com.mx</string>
 </resources>

@@ -33,7 +33,8 @@ class GoogleAuthManagerImpl(
     override suspend fun signIn(activityContext: Context): Result<ExternalAuthResult> {
         return try {
             // 1. Generar un nonce para seguridad (evita ataques de repetición)
-            val hashedNonce = getHashedNonce()
+            val rawNonce = UUID.randomUUID().toString()
+            val hashedNonce = sha256(rawNonce)
 
             // 2. Configurar la opción de Google ID
             val googleIdOption = GetGoogleIdOption.Builder()
@@ -57,25 +58,23 @@ class GoogleAuthManagerImpl(
             // 5. Procesar la credencial recibida
             val credential = result.credential
             if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-
-                // 2. La convertimos manualmente usando el helper de Google
-                try {
-                    val googleIdTokenCredential = GoogleIdTokenCredential
-                        .createFrom(result.credential.data)
-                    val googleIdToken = googleIdTokenCredential.idToken
-                    supabase.auth.signInWith(IDToken) {
-                        idToken = googleIdToken
-                        provider = Google
-                        nonce = hashedNonce
-                    }
-
-                    Result.success(ExternalAuthResult.Success)
-
-                } catch (e: Exception) {
-                    Log.e("GoogleAuth", "Error al convertir la credencial", e)
-                    Result.failure(e)
+                val googleIdTokenCredential = GoogleIdTokenCredential
+                    .createFrom(result.credential.data)
+                val googleIdToken = googleIdTokenCredential.idToken
+                
+                supabase.auth.signInWith(IDToken) {
+                    idToken = googleIdToken
+                    provider = Google
+                    nonce = rawNonce
                 }
-
+                
+                // Obtener el userId del usuario autenticado
+                val userId = supabase.auth.currentUserOrNull()?.id
+                if (userId != null) {
+                    Result.success(ExternalAuthResult.Success(userId))
+                } else {
+                    Result.failure(Exception("No se pudo obtener el userId"))
+                }
             } else {
                 // Log para depurar qué tipo de credencial llegó si no es la esperada
                 Log.e(
@@ -84,12 +83,8 @@ class GoogleAuthManagerImpl(
                 )
                 Result.failure(Exception("Tipo de credencial no reconocido: ${credential.type}"))
             }
-
         } catch (e: Exception) {
-            Log.e(TAG, "Error en Credential Manager: ${e.message}", e)
-            Result.failure(e)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error general durante el sign-in", e)
+            Log.e(TAG, "Error durante el sign-in: ${e.message}", e)
             Result.failure(e)
         }
     }
@@ -108,10 +103,8 @@ class GoogleAuthManagerImpl(
         }
     }
 
-    // Métodos auxiliares de seguridad
-    private fun getHashedNonce(): String {
-        val rawNonce = UUID.randomUUID().toString()
-        val bytes = rawNonce.toByteArray()
+    private fun sha256(string: String): String {
+        val bytes = string.toByteArray()
         val md = MessageDigest.getInstance("SHA-256")
         val digest = md.digest(bytes)
         return digest.fold("") { str, it -> str + "%02x".format(it) }

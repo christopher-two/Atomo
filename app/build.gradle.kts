@@ -4,7 +4,6 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.gms.plugin)
     alias(libs.plugins.kotlinx.serialization)
     alias(libs.plugins.room)
     alias(libs.plugins.google.devtools.ksp)
@@ -94,6 +93,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.material.icons.ext)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -135,6 +135,7 @@ dependencies {
     // Ktor
     implementation(platform(libs.ktor.bom))
     implementation(libs.coil.network.ktor3)
+    implementation(libs.ktor.client.android)
 
     // Coil
     implementation(libs.coil.network.okhttp)
@@ -160,7 +161,6 @@ dependencies {
 
     // Google
     implementation(libs.googleid)
-    implementation(libs.gms.auth)
     implementation(libs.cred.play.services)
     implementation(libs.credentials)
 

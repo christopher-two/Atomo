@@ -15,7 +15,7 @@ import org.override.atomo.feature.home.presentation.HomeViewModel
 val HomeModule: Module
     get() = module {
         viewModelOf(::HomeViewModel)
-        navigation<RouteApp> {
+        navigation<RouteApp.Home> {
             HomeRoot(
                 viewModel = koinViewModel()
             )

@@ -1,5 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Atomo" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Tema base de la app -->
+    <style name="Theme.Atomo.Base" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- Tema del Splash Screen -->
+    <style name="Theme.Atomo" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/splash_background_light</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_app_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/splash_icon_background_light</item>
+        <item name="postSplashScreenTheme">@style/Theme.Atomo.Base</item>
+    </style>
+
+    <!-- Colores del Splash -->
+    <color name="splash_background_light">#FFFFFFFF</color>
+    <color name="splash_icon_background_light">#1A1A1A</color>
+
 </resources>

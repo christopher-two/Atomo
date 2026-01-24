@@ -15,10 +15,28 @@ data class DashboardState(
     val error: String? = null,
     val profile: Profile? = null,
     val services: List<ServiceModule> = emptyList(),
-    val deleteDialog: DeleteDialogState? = null
+    val deleteDialog: DeleteDialogState? = null,
+    val activeSheet: DashboardSheet? = null,
+    val isOperationLoading: Boolean = false
 ) {
     val hasAnyServices: Boolean
         get() = services.any { it.isActive }
+}
+
+sealed interface DashboardEvent {
+    data class ShowSnackbar(val message: String) : DashboardEvent
+}
+
+sealed interface DashboardSheet {
+    data class EditMenu(val menuId: String) : DashboardSheet
+    data class EditPortfolio(val portfolioId: String) : DashboardSheet
+    data class EditCv(val cvId: String) : DashboardSheet
+    data class EditShop(val shopId: String) : DashboardSheet
+    data class EditInvitation(val invitationId: String) : DashboardSheet
+    
+    // Sub-items (null object = create mode)
+    data class EditDish(val dish: Dish?, val menuId: String) : DashboardSheet
+    data class EditPortfolioItem(val item: PortfolioItem?, val portfolioId: String) : DashboardSheet
 }
 
 sealed interface DeleteDialogState {

@@ -21,6 +21,8 @@ import org.override.atomo.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.libs.session.api.SessionRepository
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 
 class DashboardViewModel(
     private val sessionRepository: SessionRepository,
@@ -44,6 +46,9 @@ class DashboardViewModel(
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = DashboardState()
         )
+        
+    private val _events = Channel<DashboardEvent>()
+    val events = _events.receiveAsFlow()
 
     init {
         loadDashboardData()
@@ -53,12 +58,40 @@ class DashboardViewModel(
         when (action) {
             DashboardAction.Refresh -> loadDashboardData()
             
-            // Edit actions - navigate to edit screens
-            is DashboardAction.EditMenu -> rootNavigation.navTo(RouteApp.EditDigitalMenu(action.menuId))
-            is DashboardAction.EditPortfolio -> rootNavigation.navTo(RouteApp.EditPortfolio(action.portfolioId))
-            is DashboardAction.EditCv -> rootNavigation.navTo(RouteApp.EditCV(action.cvId))
-            is DashboardAction.EditShop -> rootNavigation.navTo(RouteApp.EditShop(action.shopId))
-            is DashboardAction.EditInvitation -> rootNavigation.navTo(RouteApp.EditInvitation(action.invitationId))
+            // Edit actions - open bottom sheet
+            is DashboardAction.EditMenu -> _state.update { it.copy(activeSheet = DashboardSheet.EditMenu(action.menuId)) }
+            is DashboardAction.EditPortfolio -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolio(action.portfolioId)) }
+            is DashboardAction.EditCv -> _state.update { it.copy(activeSheet = DashboardSheet.EditCv(action.cvId)) }
+            is DashboardAction.EditShop -> _state.update { it.copy(activeSheet = DashboardSheet.EditShop(action.shopId)) }
+            is DashboardAction.EditInvitation -> _state.update { it.copy(activeSheet = DashboardSheet.EditInvitation(action.invitationId)) }
+            
+            // Update actions - save from sheet
+            is DashboardAction.UpdateMenu -> updateService { menuUseCases.updateMenu(action.menu).map { } }
+            is DashboardAction.UpdatePortfolio -> updateService { portfolioUseCases.updatePortfolio(action.portfolio).map { } }
+            is DashboardAction.UpdateCv -> updateService { cvUseCases.updateCv(action.cv).map { } }
+            is DashboardAction.UpdateShop -> updateService { shopUseCases.updateShop(action.shop).map { } }
+            is DashboardAction.UpdateInvitation -> updateService { invitationUseCases.updateInvitation(action.invitation).map { } }
+            
+            // Sub-item actions
+            is DashboardAction.AddDish -> _state.update { it.copy(activeSheet = DashboardSheet.EditDish(null, action.menuId)) }
+            is DashboardAction.EditDish -> _state.update { it.copy(activeSheet = DashboardSheet.EditDish(action.dish, action.dish.menuId)) }
+            is DashboardAction.UpdateDish -> {
+                updateService {
+                    if (action.dish.id.isEmpty()) {
+                        // Generate ID for new dish
+                        val newDish = action.dish.copy(id = java.util.UUID.randomUUID().toString())
+                        menuUseCases.createDish(newDish).map { }
+                    } else {
+                        menuUseCases.updateDish(action.dish).map { }
+                    }
+                }
+            }
+            
+            is DashboardAction.AddPortfolioItem -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolioItem(null, action.portfolioId)) }
+            is DashboardAction.EditPortfolioItem -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolioItem(action.item, action.item.portfolioId)) }
+            
+            // Sheet actions
+            DashboardAction.DismissSheet -> _state.update { it.copy(activeSheet = null) }
             
             // Delete confirmation
             is DashboardAction.ConfirmDeleteMenu -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteMenu(action.menu)) }
@@ -86,13 +119,29 @@ class DashboardViewModel(
             DashboardAction.CreateInvitation -> rootNavigation.navTo(RouteApp.CreateInvitation)
         }
     }
+    
+    private fun updateService(updateCall: suspend () -> Result<Unit>) {
+        viewModelScope.launch {
+            _state.update { it.copy(isOperationLoading = true) }
+            val result = updateCall()
+            
+            result.onSuccess {
+                _state.update { it.copy(activeSheet = null, isOperationLoading = false) }
+                _events.send(DashboardEvent.ShowSnackbar("Cambios guardados correctamente"))
+                loadDashboardData()
+            }.onFailure { error ->
+                _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
+                _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
+            }
+        }
+    }
 
     private fun deleteService() {
         val currentState = _state.value
         val dialogState = currentState.deleteDialog ?: return
         
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, deleteDialog = null) }
+            _state.update { it.copy(isOperationLoading = true, deleteDialog = null) }
             
             val result = when (dialogState) {
                 is DeleteDialogState.DeleteMenu -> menuUseCases.deleteMenu(dialogState.menu.id)
@@ -105,11 +154,14 @@ class DashboardViewModel(
             result
                 .onSuccess {
                     Log.d(TAG, "Service deleted successfully")
+                    _state.update { it.copy(isOperationLoading = false) }
+                    _events.send(DashboardEvent.ShowSnackbar("Servicio eliminado correctamente"))
                     loadDashboardData() // Reload to reflect changes
                 }
                 .onFailure { error ->
                     Log.e(TAG, "Failed to delete service", error)
-                    _state.update { it.copy(isLoading = false, error = "Error al eliminar: ${error.message}") }
+                    _state.update { it.copy(isOperationLoading = false, error = "Error al eliminar: ${error.message}") }
+                    _events.send(DashboardEvent.ShowSnackbar("Error al eliminar: ${error.message}"))
                 }
         }
     }

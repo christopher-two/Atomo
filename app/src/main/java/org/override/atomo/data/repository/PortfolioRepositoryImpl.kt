@@ -83,7 +83,9 @@ class PortfolioRepositoryImpl(
     }
     
     override suspend fun updatePortfolio(portfolio: Portfolio): Result<Portfolio> = runCatching {
-        supabase.from("portfolios").upsert(portfolio.toDto())
+        supabase.from("portfolios").update(portfolio.toDto()) {
+            filter { eq("id", portfolio.id) }
+        }
         portfolioDao.updatePortfolio(portfolio.toEntity())
         portfolio
     }
@@ -104,7 +106,9 @@ class PortfolioRepositoryImpl(
     }
     
     override suspend fun updateItem(item: PortfolioItem): Result<PortfolioItem> = runCatching {
-        supabase.from("portfolio_items").upsert(item.toDto())
+        supabase.from("portfolio_items").update(item.toDto()) {
+            filter { eq("id", item.id) }
+        }
         portfolioDao.updateItem(item.toEntity())
         item
     }

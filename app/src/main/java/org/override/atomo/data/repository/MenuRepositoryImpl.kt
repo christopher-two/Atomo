@@ -110,7 +110,9 @@ class MenuRepositoryImpl(
     
     override suspend fun updateMenu(menu: Menu): Result<Menu> = runCatching {
         val dto = menu.toDto()
-        supabase.from("menus").upsert(dto)
+        supabase.from("menus").update(dto) {
+            filter { eq("id", menu.id) }
+        }
         menuDao.updateMenu(menu.toEntity())
         menu
     }
@@ -153,7 +155,9 @@ class MenuRepositoryImpl(
     }
     
     override suspend fun updateDish(dish: Dish): Result<Dish> = runCatching {
-        supabase.from("dishes").upsert(dish.toDto())
+        supabase.from("dishes").update(dish.toDto()) {
+            filter { eq("id", dish.id) }
+        }
         menuDao.updateDish(dish.toEntity())
         dish
     }

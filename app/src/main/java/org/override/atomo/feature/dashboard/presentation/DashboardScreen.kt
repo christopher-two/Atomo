@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,7 +60,7 @@ fun DashboardScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-
+            
             // Operations loading overlay (small indicator)
             AnimatedVisibility(
                 visible = state.isOperationLoading,
@@ -73,60 +74,64 @@ fun DashboardScreen(
                     modifier = Modifier.size(24.dp),
                 )
             }
-
+            
             // Main content
             AnimatedVisibility(
                 visible = !state.isLoading,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                PullToRefreshBox(
+                    isRefreshing = state.isRefreshing,
+                    onRefresh = { onAction(DashboardAction.Refresh) },
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    // Header with greeting
-                    item(key = "header") {
-                        DashboardHeader(
-                            displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
-                    }
-
-                    // Empty state when no services
-                    if (!state.hasAnyServices && !state.isLoading) {
-                        item(key = "empty") {
-                            DashboardEmptyState(
-                                modifier = Modifier.padding(horizontal = 24.dp)
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Header with greeting
+                        item(key = "header") {
+                            DashboardHeader(
+                                displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
+                                modifier = Modifier.padding(top = 8.dp)
                             )
                         }
-                    }
-
-                    // Sections
-                    state.services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let {
-                        menuSection(it, onAction)
-                    }
-
-                    state.services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()
-                        ?.let {
-                            portfolioSection(it, onAction)
+    
+                        // Empty state when no services
+                        if (!state.hasAnyServices && !state.isLoading && !state.isRefreshing) {
+                            item(key = "empty") {
+                                DashboardEmptyState(
+                                    modifier = Modifier.padding(horizontal = 24.dp)
+                                )
+                            }
                         }
-
-                    state.services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let {
-                        cvSection(it, onAction)
-                    }
-
-                    state.services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let {
-                        shopSection(it, onAction)
-                    }
-
-                    state.services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()
-                        ?.let {
-                            invitationSection(it, onAction)
+                        
+                        // Sections
+                        state.services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let { 
+                            menuSection(it, onAction) 
                         }
+                        
+                        state.services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()?.let { 
+                            portfolioSection(it, onAction) 
+                        }
+                        
+                        state.services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let { 
+                            cvSection(it, onAction) 
+                        }
+                        
+                        state.services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let { 
+                            shopSection(it, onAction) 
+                        }
+                        
+                        state.services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()?.let { 
+                            invitationSection(it, onAction) 
+                        }
+                    }
                 }
             }
-
+            
             // Dialogs
             state.deleteDialog?.let { dialogState ->
                 DashboardDeleteDialog(
@@ -134,7 +139,7 @@ fun DashboardScreen(
                     onAction = onAction
                 )
             }
-
+            
             // Sheets
             DashboardSheetsHandler(
                 state = state,

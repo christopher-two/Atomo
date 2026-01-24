@@ -51,12 +51,12 @@ class DashboardViewModel(
     val events = _events.receiveAsFlow()
 
     init {
-        loadDashboardData()
+        observeLocalData()
     }
 
     fun onAction(action: DashboardAction) {
         when (action) {
-            DashboardAction.Refresh -> loadDashboardData()
+            DashboardAction.Refresh -> refreshDashboard()
             
             // Edit actions - open bottom sheet
             is DashboardAction.EditMenu -> _state.update { it.copy(activeSheet = DashboardSheet.EditMenu(action.menuId)) }
@@ -128,7 +128,7 @@ class DashboardViewModel(
             result.onSuccess {
                 _state.update { it.copy(activeSheet = null, isOperationLoading = false) }
                 _events.send(DashboardEvent.ShowSnackbar("Cambios guardados correctamente"))
-                loadDashboardData()
+                // No need to reload, flow updates automatically
             }.onFailure { error ->
                 _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
                 _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
@@ -156,7 +156,6 @@ class DashboardViewModel(
                     Log.d(TAG, "Service deleted successfully")
                     _state.update { it.copy(isOperationLoading = false) }
                     _events.send(DashboardEvent.ShowSnackbar("Servicio eliminado correctamente"))
-                    loadDashboardData() // Reload to reflect changes
                 }
                 .onFailure { error ->
                     Log.e(TAG, "Failed to delete service", error)
@@ -166,66 +165,28 @@ class DashboardViewModel(
         }
     }
 
-    private fun loadDashboardData() {
+    /**
+     * Optimizado: Carga solo datos locales.
+     * Observa la DB y actualiza la UI. No hace peticiones de red.
+     */
+    private fun observeLocalData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
             
             val userId = sessionRepository.getCurrentUserId().firstOrNull()
-            Log.d(TAG, "loadDashboardData: userId = $userId")
+            Log.d(TAG, "observeLocalData: userId = $userId")
             
             if (userId == null) {
                 _state.update { it.copy(isLoading = false, error = "Usuario no autenticado") }
                 return@launch
             }
             
-            // Sync profile from remote first
-            profileUseCases.syncProfile(userId)
-                .onSuccess { profile ->
-                    Log.d(TAG, "Profile synced: ${profile.displayName}")
-                    _state.update { it.copy(profile = profile) }
-                }
-                .onFailure { error ->
-                    Log.e(TAG, "Profile sync failed: ${error.message}")
-                    // Try to get from local cache
-                    profileUseCases.getProfile(userId).firstOrNull()?.let { profile ->
-                        _state.update { it.copy(profile = profile) }
-                    }
-                }
+            // Get local profile if available
+            profileUseCases.getProfile(userId).firstOrNull()?.let { profile ->
+                _state.update { it.copy(profile = profile) }
+            }
             
-            // Sync ALL services from remote and WAIT for completion using async/await
-            val syncJobs = listOf(
-                async { 
-                    menuUseCases.syncMenus(userId)
-                        .onSuccess { Log.d(TAG, "Menus synced: ${it.size}") }
-                        .onFailure { Log.e(TAG, "Menus sync failed: ${it.message}") }
-                },
-                async { 
-                    portfolioUseCases.syncPortfolios(userId)
-                        .onSuccess { Log.d(TAG, "Portfolios synced: ${it.size}") }
-                        .onFailure { Log.e(TAG, "Portfolios sync failed: ${it.message}") }
-                },
-                async { 
-                    cvUseCases.syncCvs(userId)
-                        .onSuccess { Log.d(TAG, "CVs synced: ${it.size}") }
-                        .onFailure { Log.e(TAG, "CVs sync failed: ${it.message}") }
-                },
-                async { 
-                    shopUseCases.syncShops(userId)
-                        .onSuccess { Log.d(TAG, "Shops synced: ${it.size}") }
-                        .onFailure { Log.e(TAG, "Shops sync failed: ${it.message}") }
-                },
-                async { 
-                    invitationUseCases.syncInvitations(userId)
-                        .onSuccess { Log.d(TAG, "Invitations synced: ${it.size}") }
-                        .onFailure { Log.e(TAG, "Invitations sync failed: ${it.message}") }
-                }
-            )
-            
-            // Wait for all syncs to complete
-            syncJobs.awaitAll()
-            Log.d(TAG, "All syncs completed, now collecting flows")
-            
-            // Now combine all service flows - data should be in Room
+            // Combine flows from Room DB
             combine(
                 menuUseCases.getMenus(userId),
                 portfolioUseCases.getPortfolios(userId),
@@ -233,13 +194,12 @@ class DashboardViewModel(
                 shopUseCases.getShops(userId),
                 invitationUseCases.getInvitations(userId)
             ) { menus, portfolios, cvs, shops, invitations ->
-                Log.d(TAG, "Flows updated: menus=${menus.size}, portfolios=${portfolios.size}, cvs=${cvs.size}, shops=${shops.size}, invitations=${invitations.size}")
+                Log.d(TAG, "Local flows emitted: menus=${menus.size}")
                 
-                val services = mutableListOf<ServiceModule>()
+                 val services = mutableListOf<ServiceModule>()
                 
-                // Menu Module - always add
+                // Menu Module
                 val allDishes = menus.flatMap { it.dishes }
-                Log.d(TAG, "Menu details: menus=${menus.map { "${it.name}(${it.dishes.size} dishes)" }}")
                 services.add(
                     ServiceModule.MenuModule(
                         menus = menus,
@@ -248,7 +208,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // Portfolio Module - always add
+                // Portfolio Module
                 val allItems = portfolios.flatMap { it.items }
                 services.add(
                     ServiceModule.PortfolioModule(
@@ -258,7 +218,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // CV Module - always add
+                // CV Module
                 val totalSkills = cvs.sumOf { it.skills.size }
                 val totalExperiences = cvs.sumOf { it.experience.size }
                 services.add(
@@ -269,7 +229,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // Shop Module - always add
+                // Shop Module
                 val allProducts = shops.flatMap { it.products }
                 services.add(
                     ServiceModule.ShopModule(
@@ -279,7 +239,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // Invitation Module - always add
+                // Invitation Module
                 val activeInvitations = invitations.filter { it.isActive }
                 val upcomingEvent = invitations
                     .filter { it.eventDate != null && it.eventDate > System.currentTimeMillis() }
@@ -294,14 +254,43 @@ class DashboardViewModel(
                 
                 services.toList()
             }.collect { services ->
-                Log.d(TAG, "Updating state with ${services.size} services")
                 _state.update { 
                     it.copy(
                         isLoading = false,
-                        services = services // Show ALL services
+                        services = services 
                     ) 
                 }
             }
+        }
+    }
+
+    /**
+     * Optimizado: Sincroniza con el backend solo cuando es solicitado (Swipe Refresh).
+     */
+    private fun refreshDashboard() {
+        viewModelScope.launch {
+            _state.update { it.copy(isRefreshing = true, error = null) }
+            
+            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+            
+            // Sync Profile
+            profileUseCases.syncProfile(userId)
+                .onSuccess { profile -> _state.update { it.copy(profile = profile) } }
+                .onFailure { Log.e(TAG, "Sync profile failed: ${it.message}") }
+            
+            // Sync Services
+            val syncJobs = listOf(
+                async { menuUseCases.syncMenus(userId) },
+                async { portfolioUseCases.syncPortfolios(userId) },
+                async { cvUseCases.syncCvs(userId) },
+                async { shopUseCases.syncShops(userId) },
+                async { invitationUseCases.syncInvitations(userId) }
+            )
+            
+            syncJobs.awaitAll()
+            
+            Log.d(TAG, "Refresh completed")
+            _state.update { it.copy(isRefreshing = false) }
         }
     }
 }

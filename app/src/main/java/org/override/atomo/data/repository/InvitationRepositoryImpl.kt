@@ -83,7 +83,9 @@ class InvitationRepositoryImpl(
     }
     
     override suspend fun updateInvitation(invitation: Invitation): Result<Invitation> = runCatching {
-        supabase.from("invitations").upsert(invitation.toDto())
+        supabase.from("invitations").update(invitation.toDto()) {
+            filter { eq("id", invitation.id) }
+        }
         invitationDao.updateInvitation(invitation.toEntity())
         invitation
     }
@@ -108,7 +110,9 @@ class InvitationRepositoryImpl(
     }
     
     override suspend fun updateResponse(response: InvitationResponse): Result<InvitationResponse> = runCatching {
-        supabase.from("invitation_responses").upsert(response)
+        supabase.from("invitation_responses").update(response) {
+            filter { eq("id", response.id) }
+        }
         invitationDao.updateResponse(response.toEntity())
         response
     }

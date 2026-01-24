@@ -123,7 +123,9 @@ class CvRepositoryImpl(
     }
     
     override suspend fun updateCv(cv: Cv): Result<Cv> = runCatching {
-        supabase.from("cvs").upsert(cv.toDto())
+        supabase.from("cvs").update(cv.toDto()) {
+            filter { eq("id", cv.id) }
+        }
         cvDao.updateCv(cv.toEntity())
         cv
     }
@@ -140,7 +142,9 @@ class CvRepositoryImpl(
     }
     
     override suspend fun updateEducation(education: CvEducation): Result<CvEducation> = runCatching {
-        supabase.from("cv_education").upsert(education)
+        supabase.from("cv_education").update(education) {
+            filter { eq("id", education.id) }
+        }
         cvDao.updateEducation(education.toEntity())
         education
     }
@@ -156,7 +160,9 @@ class CvRepositoryImpl(
     }
     
     override suspend fun updateExperience(experience: CvExperience): Result<CvExperience> = runCatching {
-        supabase.from("cv_experience").upsert(experience)
+        supabase.from("cv_experience").update(experience) {
+            filter { eq("id", experience.id) }
+        }
         cvDao.updateExperience(experience.toEntity())
         experience
     }
@@ -172,7 +178,9 @@ class CvRepositoryImpl(
     }
     
     override suspend fun updateSkill(skill: CvSkill): Result<CvSkill> = runCatching {
-        supabase.from("cv_skills").upsert(skill)
+        supabase.from("cv_skills").update(skill) {
+            filter { eq("id", skill.id) }
+        }
         cvDao.updateSkill(skill.toEntity())
         skill
     }

@@ -108,7 +108,9 @@ class ShopRepositoryImpl(
     }
     
     override suspend fun updateShop(shop: Shop): Result<Shop> = runCatching {
-        supabase.from("shops").upsert(shop.toDto())
+        supabase.from("shops").update(shop.toDto()) {
+            filter { eq("id", shop.id) }
+        }
         shopDao.updateShop(shop.toEntity())
         shop
     }
@@ -129,7 +131,9 @@ class ShopRepositoryImpl(
     }
     
     override suspend fun updateCategory(category: ProductCategory): Result<ProductCategory> = runCatching {
-        supabase.from("product_categories").upsert(category)
+        supabase.from("product_categories").update(category) {
+            filter { eq("id", category.id) }
+        }
         shopDao.updateCategory(category.toEntity())
         category
     }
@@ -149,7 +153,9 @@ class ShopRepositoryImpl(
     }
     
     override suspend fun updateProduct(product: Product): Result<Product> = runCatching {
-        supabase.from("products").upsert(product.toDto())
+        supabase.from("products").update(product.toDto()) {
+            filter { eq("id", product.id) }
+        }
         shopDao.updateProduct(product.toEntity())
         product
     }

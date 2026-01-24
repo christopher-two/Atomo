@@ -17,7 +17,8 @@ data class DashboardState(
     val services: List<ServiceModule> = emptyList(),
     val deleteDialog: DeleteDialogState? = null,
     val activeSheet: DashboardSheet? = null,
-    val isOperationLoading: Boolean = false
+    val isOperationLoading: Boolean = false,
+    val isRefreshing: Boolean = false
 ) {
     val hasAnyServices: Boolean
         get() = services.any { it.isActive }

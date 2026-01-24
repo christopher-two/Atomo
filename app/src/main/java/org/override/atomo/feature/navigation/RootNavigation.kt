@@ -6,7 +6,8 @@ import kotlinx.coroutines.flow.update
 import org.override.atomo.core.common.RouteApp
 
 class RootNavigation {
-    private val _backstack = MutableStateFlow<MutableList<RouteApp>>(mutableListOf(RouteApp.Auth))
+    // Iniciar con lista vacía para evitar mostrar una ruta por defecto antes de verificar la sesión
+    private val _backstack = MutableStateFlow<MutableList<RouteApp>>(mutableListOf())
     val backstack = _backstack.asStateFlow()
 
     fun setInitialRoute(isLoggedIn: Boolean) {

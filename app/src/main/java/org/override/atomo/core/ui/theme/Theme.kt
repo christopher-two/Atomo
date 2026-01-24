@@ -26,27 +26,6 @@ fun AtomoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val poppins = mapOf(
-        "regular" to R.font.poppins_regular,
-        "medium" to R.font.poppins_medium,
-        "semibold" to R.font.poppins_semi_bold,
-        "bold" to R.font.poppins_bold,
-        "black" to R.font.poppins_black,
-        "thin" to R.font.poppins_thin,
-        "extrabold" to R.font.poppins_extra_bold,
-        "light" to R.font.poppins_light,
-        "extralight" to R.font.poppins_extra_light,
-        "italic" to R.font.poppins_italic,
-        "mediumitalic" to R.font.poppins_medium_italic,
-        "semibolditalic" to R.font.poppins_semi_bold_italic,
-        "bolditalic" to R.font.poppins_bold_italic,
-        "blackitalic" to R.font.poppins_black_italic,
-        "thinitalic" to R.font.poppins_thin_italic,
-        "extrabolditalic" to R.font.poppins_extra_bold_italic,
-        "lightitalic" to R.font.poppins_light_italic,
-        "extralightitalic" to R.font.poppins_extra_light_italic
-    )
-
     // Crear una FontFamily que incluya las variantes relevantes (normales y cursivas)
     val poppinsFamily = FontFamily(
         Font(R.font.poppins_thin, weight = FontWeight.Thin),

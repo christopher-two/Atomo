@@ -88,7 +88,7 @@ fun DashboardScreen(
                     // Header with greeting
                     item(key = "header") {
                         DashboardHeader(
-                            displayName = state.profile?.displayName,
+                            displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }

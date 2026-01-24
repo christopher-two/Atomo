@@ -9,5 +9,9 @@ val FeaturesModule: List<Module>
         MenuModule,
         ProfileModule,
         SettingsModule,
-        CreateModule
+        CvModule,
+        DigitalMenuModule,
+        InvitationModule,
+        PortfolioModule,
+        ShopModule
     )

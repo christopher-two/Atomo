@@ -1,4 +1,4 @@
-package org.override.atomo.feature.settings.presentation
+package org.override.atomo.feature.digital_menu.presentation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,29 +17,30 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import org.override.atomo.core.ui.components.AtomoButton
 import org.override.atomo.core.ui.components.AtomoScaffold
+import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.theme.AtomoTheme
 
 @Composable
-fun SettingsRoot(
-    viewModel: SettingsViewModel = koinViewModel()
+fun DigitalMenuRoot(
+    viewModel: DigitalMenuViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    SettingsScreen(
+    DigitalMenuScreen(
         state = state,
         onAction = viewModel::onAction
     )
 }
 
 @Composable
-fun SettingsScreen(
-    state: SettingsState,
-    onAction: (SettingsAction) -> Unit,
+fun DigitalMenuScreen(
+    state: DigitalMenuState,
+    onAction: (DigitalMenuAction) -> Unit,
 ) {
     AtomoScaffold(
         topBar = {
             Text(
-                text = "Settings",
+                text = "Create Menu",
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(16.dp)
             )
@@ -51,18 +52,31 @@ fun SettingsScreen(
                 .padding(paddingValues)
                 .padding(16.dp)
         ) {
-            Text(
-                text = "Account",
-                style = MaterialTheme.typography.titleLarge
+            AtomoTextField(
+                value = state.menuName,
+                onValueChange = { onAction(DigitalMenuAction.UpdateName(it)) },
+                label = { Text("Menu Name") },
+                modifier = Modifier.fillMaxWidth()
             )
+            
             Spacer(modifier = Modifier.height(16.dp))
             
+            AtomoTextField(
+                value = state.menuDescription,
+                onValueChange = { onAction(DigitalMenuAction.UpdateDescription(it)) },
+                label = { Text("Description") },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 3
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
             AtomoButton(
-                onClick = { onAction(SettingsAction.Logout) },
+                onClick = { onAction(DigitalMenuAction.SaveMenu) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !state.isLoading
             ) {
-                Text(if (state.isLoading) "Logging out..." else "Logout")
+                Text(if (state.isLoading) "Saving..." else "Create Menu")
             }
         }
     }
@@ -72,8 +86,8 @@ fun SettingsScreen(
 @Composable
 private fun Preview() {
     AtomoTheme {
-        SettingsScreen(
-            state = SettingsState(),
+        DigitalMenuScreen(
+            state = DigitalMenuState(),
             onAction = {}
         )
     }

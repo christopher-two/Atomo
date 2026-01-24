@@ -18,7 +18,7 @@ import org.override.atomo.libs.session.api.SessionRepository
 class MainActivity : ComponentActivity() {
     private val sessionRepository: SessionRepository by inject()
     private val rootNavigation: RootNavigation by inject()
-    private var isCheckingSession = true
+    private var isCheckingSession = false
 
     @OptIn(KoinExperimentalAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             val isLoggedIn = sessionRepository.isUserLoggedIn().first()
             rootNavigation.setInitialRoute(isLoggedIn)
-            isCheckingSession = false
+            isCheckingSession = true
         }
 
         enableEdgeToEdge()

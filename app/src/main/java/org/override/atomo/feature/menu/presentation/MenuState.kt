@@ -1,6 +1,7 @@
 package org.override.atomo.feature.menu.presentation
 
 data class MenuState(
-    val paramOne: String = "default",
-    val paramTwo: List<String> = emptyList(),
+    val isLoading: Boolean = false,
+    val menus: List<org.override.atomo.domain.model.Menu> = emptyList(),
+    val error: String? = null
 )

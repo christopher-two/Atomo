@@ -11,7 +11,9 @@ val DatabaseModule = module {
             androidContext(),
             AtomoDatabase::class.java,
             "atomo_database"
-        ).build()
+        )
+            .fallbackToDestructiveMigration(false)
+            .build()
     }
     
     single { get<AtomoDatabase>().profileDao() }

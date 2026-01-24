@@ -47,7 +47,7 @@ import org.override.atomo.data.local.entity.SubscriptionEntity
         PlanEntity::class,
         SubscriptionEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class AtomoDatabase : RoomDatabase() {

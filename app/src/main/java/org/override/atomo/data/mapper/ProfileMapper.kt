@@ -1,6 +1,9 @@
 package org.override.atomo.data.mapper
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.override.atomo.data.local.entity.ProfileEntity
 import org.override.atomo.data.remote.dto.ProfileDto
 import org.override.atomo.domain.model.Profile
@@ -35,7 +38,7 @@ fun ProfileDto.toEntity(): ProfileEntity = ProfileEntity(
     username = username,
     displayName = displayName,
     avatarUrl = avatarUrl,
-    socialLinks = socialLinks,
+    socialLinks = socialLinks?.toString(),
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis(),
     updatedAt = updatedAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
@@ -45,7 +48,11 @@ fun Profile.toDto(): ProfileDto = ProfileDto(
     username = username,
     displayName = displayName,
     avatarUrl = avatarUrl,
-    socialLinks = socialLinks?.let { json.encodeToString(kotlinx.serialization.serializer(), it) }
+    socialLinks = socialLinks?.let { 
+        buildJsonObject { 
+            it.forEach { (key, value) -> put(key, JsonPrimitive(value)) }
+        }
+    }
 )
 
 internal fun parseTimestamp(iso: String): Long = runCatching {

@@ -7,8 +7,11 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.override.atomo.di.NavModule
+import org.override.atomo.di.data.DatabaseModule
 import org.override.atomo.di.data.DataModule
+import org.override.atomo.di.data.RepositoryModule
 import org.override.atomo.di.data.SupabaseModule
+import org.override.atomo.di.domain.UseCaseModule
 import org.override.atomo.di.feature.FeaturesModule
 
 class MainApp : Application(), KoinComponent {
@@ -21,6 +24,7 @@ class MainApp : Application(), KoinComponent {
             androidContext(this@MainApp)
             modules(
                 modules = FeaturesModule + DataModule + SupabaseModule +
+                        DatabaseModule + RepositoryModule + UseCaseModule +
                         NavModule
             )
         }

@@ -5,6 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface RouteMain : NavKey {
-    object Menu : RouteMain
+    object Dashboard : RouteMain
     object Profile : RouteMain
 }

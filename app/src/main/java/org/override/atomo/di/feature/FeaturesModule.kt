@@ -6,7 +6,7 @@ val FeaturesModule: List<Module>
     get() = listOf(
         AuthModule,
         HomeModule,
-        MenuModule,
+        DashboardModule,
         ProfileModule,
         SettingsModule,
         CvModule,

@@ -8,11 +8,11 @@ import androidx.navigation3.runtime.NavKey
 import org.override.atomo.core.common.RouteMain
 
 class HomeNavigation() {
-    var currentTab by mutableStateOf(AppTab.MENU)
+    var currentTab by mutableStateOf(AppTab.DASHBOARD)
         private set
 
     private val stacks = mapOf(
-        AppTab.MENU to mutableStateListOf<NavKey>(RouteMain.Menu),
+        AppTab.DASHBOARD to mutableStateListOf<NavKey>(RouteMain.Dashboard),
         AppTab.PROFILE to mutableStateListOf<NavKey>(RouteMain.Profile)
     )
 

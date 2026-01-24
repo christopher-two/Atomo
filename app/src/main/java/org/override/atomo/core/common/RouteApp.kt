@@ -15,4 +15,16 @@ sealed interface RouteApp : NavKey {
     object CreateCV : RouteApp
     object CreateShop : RouteApp
     object CreateInvitation : RouteApp
+    
+    // Service Edit Routes
+    @Serializable
+    data class EditDigitalMenu(val menuId: String) : RouteApp
+    @Serializable
+    data class EditPortfolio(val portfolioId: String) : RouteApp
+    @Serializable
+    data class EditCV(val cvId: String) : RouteApp
+    @Serializable
+    data class EditShop(val shopId: String) : RouteApp
+    @Serializable
+    data class EditInvitation(val invitationId: String) : RouteApp
 }

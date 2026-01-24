@@ -4,6 +4,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.ShopDao
 import org.override.atomo.data.mapper.toDomain
@@ -22,8 +24,27 @@ class ShopRepositoryImpl(
     private val supabase: SupabaseClient
 ) : ShopRepository {
     
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getShopsFlow(userId: String): Flow<List<Shop>> {
-        return shopDao.getShopsFlow(userId).map { it.map { s -> s.toDomain() } }
+        return shopDao.getShopsFlow(userId).flatMapLatest { shopEntities ->
+            if (shopEntities.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    shopEntities.map { shop ->
+                        combine(
+                            shopDao.getCategoriesFlow(shop.id),
+                            shopDao.getProductsFlow(shop.id)
+                        ) { categories, products ->
+                            shop.toDomain().copy(
+                                categories = categories.map { it.toDomain() },
+                                products = products.map { it.toDomain() }
+                            )
+                        }
+                    }
+                ) { it.toList() }
+            }
+        }
     }
     
     override suspend fun getShops(userId: String): List<Shop> {

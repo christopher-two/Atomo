@@ -4,6 +4,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.PortfolioDao
 import org.override.atomo.data.mapper.toDomain
@@ -20,8 +22,21 @@ class PortfolioRepositoryImpl(
     private val supabase: SupabaseClient
 ) : PortfolioRepository {
     
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getPortfoliosFlow(userId: String): Flow<List<Portfolio>> {
-        return portfolioDao.getPortfoliosFlow(userId).map { it.map { p -> p.toDomain() } }
+        return portfolioDao.getPortfoliosFlow(userId).flatMapLatest { portfolioEntities ->
+            if (portfolioEntities.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    portfolioEntities.map { portfolio ->
+                        portfolioDao.getItemsFlow(portfolio.id).map { items ->
+                            portfolio.toDomain().copy(items = items.map { it.toDomain() })
+                        }
+                    }
+                ) { it.toList() }
+            }
+        }
     }
     
     override suspend fun getPortfolios(userId: String): List<Portfolio> {

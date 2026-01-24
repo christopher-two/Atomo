@@ -4,6 +4,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.InvitationDao
 import org.override.atomo.data.mapper.toDomain
@@ -20,8 +22,21 @@ class InvitationRepositoryImpl(
     private val supabase: SupabaseClient
 ) : InvitationRepository {
     
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getInvitationsFlow(userId: String): Flow<List<Invitation>> {
-        return invitationDao.getInvitationsFlow(userId).map { it.map { i -> i.toDomain() } }
+        return invitationDao.getInvitationsFlow(userId).flatMapLatest { invitationEntities ->
+            if (invitationEntities.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    invitationEntities.map { invitation ->
+                        invitationDao.getResponsesFlow(invitation.id).map { responses ->
+                            invitation.toDomain().copy(responses = responses.map { it.toDomain() })
+                        }
+                    }
+                ) { it.toList() }
+            }
+        }
     }
     
     override suspend fun getInvitations(userId: String): List<Invitation> {

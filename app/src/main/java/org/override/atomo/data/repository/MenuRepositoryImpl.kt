@@ -4,6 +4,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.MenuDao
 import org.override.atomo.data.mapper.toDomain
@@ -22,9 +24,26 @@ class MenuRepositoryImpl(
     private val supabase: SupabaseClient
 ) : MenuRepository {
     
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getMenusFlow(userId: String): Flow<List<Menu>> {
-        return menuDao.getMenusFlow(userId).map { entities ->
-            entities.map { it.toDomain() }
+        return menuDao.getMenusFlow(userId).flatMapLatest { menuEntities ->
+            if (menuEntities.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    menuEntities.map { menu ->
+                        combine(
+                            menuDao.getCategoriesFlow(menu.id),
+                            menuDao.getDishesFlow(menu.id)
+                        ) { categories, dishes ->
+                            menu.toDomain().copy(
+                                categories = categories.map { it.toDomain() },
+                                dishes = dishes.map { it.toDomain() }
+                            )
+                        }
+                    }
+                ) { it.toList() }
+            }
         }
     }
     

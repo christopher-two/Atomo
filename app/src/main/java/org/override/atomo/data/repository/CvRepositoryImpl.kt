@@ -4,6 +4,8 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.CvDao
 import org.override.atomo.data.mapper.toDomain
@@ -24,8 +26,29 @@ class CvRepositoryImpl(
     private val supabase: SupabaseClient
 ) : CvRepository {
     
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getCvsFlow(userId: String): Flow<List<Cv>> {
-        return cvDao.getCvsFlow(userId).map { it.map { c -> c.toDomain() } }
+        return cvDao.getCvsFlow(userId).flatMapLatest { cvEntities ->
+            if (cvEntities.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                combine(
+                    cvEntities.map { cv ->
+                        combine(
+                            cvDao.getEducationFlow(cv.id),
+                            cvDao.getExperienceFlow(cv.id),
+                            cvDao.getSkillsFlow(cv.id)
+                        ) { education, experience, skills ->
+                            cv.toDomain().copy(
+                                education = education.map { it.toDomain() },
+                                experience = experience.map { it.toDomain() },
+                                skills = skills.map { it.toDomain() }
+                            )
+                        }
+                    }
+                ) { it.toList() }
+            }
+        }
     }
     
     override suspend fun getCvs(userId: String): List<Cv> {

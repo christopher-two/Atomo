@@ -1,6 +1,8 @@
 package org.override.atomo.feature.home.presentation
 
+import org.override.atomo.feature.navigation.AppTab
+
 data class HomeState(
-    val paramOne: String = "default",
-    val paramTwo: List<String> = emptyList(),
+    val isFabExpanded: Boolean = false,
+    val currentTab: AppTab = AppTab.MENU,
 )

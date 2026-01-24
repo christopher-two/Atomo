@@ -8,5 +8,6 @@ val FeaturesModule: List<Module>
         HomeModule,
         MenuModule,
         ProfileModule,
-        SettingsModule
+        SettingsModule,
+        CreateModule
     )

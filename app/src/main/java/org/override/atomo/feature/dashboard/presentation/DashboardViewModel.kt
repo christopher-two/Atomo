@@ -53,19 +53,64 @@ class DashboardViewModel(
         when (action) {
             DashboardAction.Refresh -> loadDashboardData()
             
-            // Navigation to edit existing services
-            is DashboardAction.NavigateToMenu -> rootNavigation.navTo(RouteApp.EditDigitalMenu(action.menuId))
-            is DashboardAction.NavigateToPortfolio -> rootNavigation.navTo(RouteApp.EditPortfolio(action.portfolioId))
-            is DashboardAction.NavigateToCv -> rootNavigation.navTo(RouteApp.EditCV(action.cvId))
-            is DashboardAction.NavigateToShop -> rootNavigation.navTo(RouteApp.EditShop(action.shopId))
-            is DashboardAction.NavigateToInvitation -> rootNavigation.navTo(RouteApp.EditInvitation(action.invitationId))
+            // Edit actions - navigate to edit screens
+            is DashboardAction.EditMenu -> rootNavigation.navTo(RouteApp.EditDigitalMenu(action.menuId))
+            is DashboardAction.EditPortfolio -> rootNavigation.navTo(RouteApp.EditPortfolio(action.portfolioId))
+            is DashboardAction.EditCv -> rootNavigation.navTo(RouteApp.EditCV(action.cvId))
+            is DashboardAction.EditShop -> rootNavigation.navTo(RouteApp.EditShop(action.shopId))
+            is DashboardAction.EditInvitation -> rootNavigation.navTo(RouteApp.EditInvitation(action.invitationId))
             
-            // Quick create new services
+            // Delete confirmation
+            is DashboardAction.ConfirmDeleteMenu -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteMenu(action.menu)) }
+            is DashboardAction.ConfirmDeletePortfolio -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeletePortfolio(action.portfolio)) }
+            is DashboardAction.ConfirmDeleteCv -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteCv(action.cv)) }
+            is DashboardAction.ConfirmDeleteShop -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteShop(action.shop)) }
+            is DashboardAction.ConfirmDeleteInvitation -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteInvitation(action.invitation)) }
+            
+            // Share actions - TODO: implement share
+            is DashboardAction.ShareMenu -> { /* TODO: share menu link */ }
+            is DashboardAction.SharePortfolio -> { /* TODO: share portfolio link */ }
+            is DashboardAction.ShareCv -> { /* TODO: share CV link */ }
+            is DashboardAction.ShareShop -> { /* TODO: share shop link */ }
+            is DashboardAction.ShareInvitation -> { /* TODO: share invitation link */ }
+            
+            // Dialog actions
+            DashboardAction.DismissDeleteDialog -> _state.update { it.copy(deleteDialog = null) }
+            DashboardAction.ConfirmDelete -> deleteService()
+            
+            // Create new services
             DashboardAction.CreateMenu -> rootNavigation.navTo(RouteApp.CreateDigitalMenu)
             DashboardAction.CreatePortfolio -> rootNavigation.navTo(RouteApp.CreatePortfolio)
             DashboardAction.CreateCv -> rootNavigation.navTo(RouteApp.CreateCV)
             DashboardAction.CreateShop -> rootNavigation.navTo(RouteApp.CreateShop)
             DashboardAction.CreateInvitation -> rootNavigation.navTo(RouteApp.CreateInvitation)
+        }
+    }
+
+    private fun deleteService() {
+        val currentState = _state.value
+        val dialogState = currentState.deleteDialog ?: return
+        
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true, deleteDialog = null) }
+            
+            val result = when (dialogState) {
+                is DeleteDialogState.DeleteMenu -> menuUseCases.deleteMenu(dialogState.menu.id)
+                is DeleteDialogState.DeletePortfolio -> portfolioUseCases.deletePortfolio(dialogState.portfolio.id)
+                is DeleteDialogState.DeleteCv -> cvUseCases.deleteCv(dialogState.cv.id)
+                is DeleteDialogState.DeleteShop -> shopUseCases.deleteShop(dialogState.shop.id)
+                is DeleteDialogState.DeleteInvitation -> invitationUseCases.deleteInvitation(dialogState.invitation.id)
+            }
+            
+            result
+                .onSuccess {
+                    Log.d(TAG, "Service deleted successfully")
+                    loadDashboardData() // Reload to reflect changes
+                }
+                .onFailure { error ->
+                    Log.e(TAG, "Failed to delete service", error)
+                    _state.update { it.copy(isLoading = false, error = "Error al eliminar: ${error.message}") }
+                }
         }
     }
 

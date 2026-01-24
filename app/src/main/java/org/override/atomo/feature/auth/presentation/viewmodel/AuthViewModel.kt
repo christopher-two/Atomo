@@ -19,15 +19,14 @@ class AuthViewModel(
     private val continueWithGoogleUseCase: ContinueWithGoogleUseCase,
     private val saveUserSessionUseCase: SaveUserSessionUseCase,
     private val rootNavigation: RootNavigation,
-    private val ctx: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthState())
     val state = _state.asStateFlow()
 
-    fun onAction(action: AuthAction) {
+    fun onAction(action: AuthAction, ctx: Context) {
         when (action) {
-            AuthAction.ContinueWithGoogle -> continueWithGoogle()
+            AuthAction.ContinueWithGoogle -> continueWithGoogle(ctx)
             is AuthAction.OpenUrl -> {
                 val intent = Intent(Intent.ACTION_VIEW, action.url.toUri())
                 ctx.startActivity(intent)
@@ -35,11 +34,11 @@ class AuthViewModel(
         }
     }
 
-    private fun continueWithGoogle() {
+    private fun continueWithGoogle(ctx: Context) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             try {
-                continueWithGoogleUseCase().fold(
+                continueWithGoogleUseCase(ctx).fold(
                     onSuccess = { result ->
                         when (result) {
                             is ExternalAuthResult.Success -> {
@@ -47,9 +46,11 @@ class AuthViewModel(
                                 saveUserSessionUseCase(result.userId)
                                 rootNavigation.replaceWith(RouteApp.Home)
                             }
+
                             is ExternalAuthResult.Error -> {
                                 _state.update { it.copy(error = result.message) }
                             }
+
                             ExternalAuthResult.Cancelled -> {
                                 // Usuario canceló, no hacer nada
                             }

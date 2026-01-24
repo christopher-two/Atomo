@@ -24,10 +24,10 @@ val AuthModule: Module
         // Use cases
         factoryOf(::ContinueWithGoogleUseCase)
         factoryOf(::SaveUserSessionUseCase)
-        
+
         // ViewModel
         viewModelOf(::AuthViewModel)
-        
+
         // Navigation
         navigation<RouteApp.Auth> {
             AuthRoot(

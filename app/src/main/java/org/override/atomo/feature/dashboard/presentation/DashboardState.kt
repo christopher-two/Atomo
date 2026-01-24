@@ -14,8 +14,20 @@ data class DashboardState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val profile: Profile? = null,
-    val services: List<ServiceModule> = emptyList()
-)
+    val services: List<ServiceModule> = emptyList(),
+    val deleteDialog: DeleteDialogState? = null
+) {
+    val hasAnyServices: Boolean
+        get() = services.any { it.isActive }
+}
+
+sealed interface DeleteDialogState {
+    data class DeleteMenu(val menu: Menu) : DeleteDialogState
+    data class DeletePortfolio(val portfolio: Portfolio) : DeleteDialogState
+    data class DeleteCv(val cv: Cv) : DeleteDialogState
+    data class DeleteShop(val shop: Shop) : DeleteDialogState
+    data class DeleteInvitation(val invitation: Invitation) : DeleteDialogState
+}
 
 sealed interface ServiceModule {
     val isActive: Boolean

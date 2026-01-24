@@ -6,7 +6,6 @@ import org.override.atomo.libs.auth.api.GoogleAuthManager
 
 class ContinueWithGoogleUseCase(
     private val repository: GoogleAuthManager,
-    private val ctx: Context
 ) {
-    suspend operator fun invoke(): Result<ExternalAuthResult> = repository.signIn(ctx)
+    suspend operator fun invoke(ctx: Context): Result<ExternalAuthResult> = repository.signIn(ctx)
 }

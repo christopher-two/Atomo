@@ -133,6 +133,9 @@ private fun ExpandableFab(
     onToggle: () -> Unit,
     onCreateService: (ServiceType) -> Unit
 ) {
+    val containerColor = colorScheme.primaryContainer
+    val contentColor = colorScheme.onPrimaryContainer
+
     val items = listOf(
         FabItem(ServiceType.DIGITAL_MENU, Icons.Default.Restaurant, "Digital Menu"),
         FabItem(ServiceType.PORTFOLIO, Icons.Default.Folder, "Portfolio"),
@@ -140,7 +143,7 @@ private fun ExpandableFab(
         FabItem(ServiceType.SHOP, Icons.Default.Storefront, "Shop"),
         FabItem(ServiceType.INVITATION, Icons.Default.CardGiftcard, "Invitation")
     )
-    
+
     val fabRotation by animateFloatAsState(
         targetValue = if (expanded) 45f else 0f,
         label = "fab_rotation"
@@ -165,6 +168,7 @@ private fun ExpandableFab(
                 ToggleFloatingActionButton(
                     modifier = Modifier.semantics { traversalIndex = -1f },
                     checked = expanded,
+                    containerColor = { containerColor },
                     onCheckedChange = { onToggle() }
                 ) {
                     val imageVector by remember {
@@ -175,7 +179,8 @@ private fun ExpandableFab(
                     Icon(
                         imageVector = imageVector,
                         contentDescription = if (expanded) "Close" else "Add service",
-                        modifier = Modifier.rotate(fabRotation)
+                        modifier = Modifier.rotate(fabRotation),
+                        tint = contentColor
                     )
                 }
             }

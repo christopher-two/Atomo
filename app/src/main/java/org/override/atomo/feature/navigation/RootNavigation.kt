@@ -15,8 +15,11 @@ class RootNavigation {
     }
 
     fun back() {
-        _backstack.update {
-            it.apply { removeLastOrNull() }
+        _backstack.update { current ->
+            // Nunca dejemos el backstack vacío; siempre mantenemos al menos una ruta
+            if (current.size <= 1) return@update current
+            // Creamos una nueva lista para evitar mutar la lista compartida
+            current.toMutableList().apply { removeLastOrNull() }
         }
     }
 
@@ -31,12 +34,28 @@ class RootNavigation {
     fun navTo(
         route: RouteApp
     ) {
-        if (_backstack.value.last() == route) return
-        if (_backstack.value.contains(route)) {
-            _backstack.update { navKeys -> navKeys.apply { dropLastWhile { it != route } } }
+        // Si el backstack está vacío no hacemos nada
+        val current = _backstack.value
+        if (current.isEmpty()) return
+
+        // Si ya es la ruta actual, ignoramos
+        if (current.last() == route) return
+
+        // Si la ruta existe en el backstack hacemos un "pop-to" hasta esa ruta
+        if (current.contains(route)) {
+            _backstack.update { navKeys ->
+                val idx = navKeys.indexOf(route)
+                if (idx >= 0) {
+                    // crear una nueva lista que contenga los elementos hasta e incluyendo 'route'
+                    navKeys.subList(0, idx + 1).toMutableList()
+                } else {
+                    navKeys
+                }
+            }
             return
         }
-        if (_backstack.value.isEmpty()) return
-        _backstack.update { it.apply { add(route) } }
+
+        // Si no está en el backstack, añadimos una nueva entrada (nueva lista para evitar aliasing)
+        _backstack.update { navKeys -> navKeys.toMutableList().apply { add(route) } }
     }
 }

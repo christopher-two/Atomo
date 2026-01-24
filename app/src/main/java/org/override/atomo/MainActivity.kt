@@ -7,6 +7,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.foundation.isSystemInDarkTheme
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -18,6 +21,7 @@ import org.override.atomo.libs.session.api.SessionRepository
 
 class MainActivity : ComponentActivity() {
     private val sessionRepository: SessionRepository by inject()
+    private val getSettingsUseCase: org.override.atomo.feature.settings.domain.usecase.GetSettingsUseCase by inject()
     private val rootNavigation: RootNavigation by inject()
     // Mantener true mientras hacemos la comprobación inicial; la splash se mantiene mientras esto sea true
     private var isCheckingSession = true
@@ -50,7 +54,26 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            AtomoTheme {
+            val settingsState by getSettingsUseCase().collectAsState(initial = null)
+            val appearance = settingsState?.appearance
+
+            val isDarkTheme = appearance?.let {
+                if (it.isSystemThemeEnabled) isSystemInDarkTheme() else it.isDarkModeEnabled
+            } ?: isSystemInDarkTheme()
+
+            val seedColor = when (appearance?.theme) {
+                "pink" -> androidx.compose.ui.graphics.Color(0xFFFFB5E8)
+                "green" -> androidx.compose.ui.graphics.Color(0xFFB5FFD9) 
+                "purple" -> androidx.compose.ui.graphics.Color(0xFFDDB5FF)
+                "blue" -> androidx.compose.ui.graphics.Color(0xFFB5DEFF)
+                else -> androidx.compose.ui.graphics.Color(0xFFDAEDFF) // Default/Auto
+            }
+
+            AtomoTheme(
+                darkTheme = isDarkTheme,
+                useDynamicColor = appearance?.isDynamicColorEnabled ?: false,
+                seedColor = seedColor
+            ) {
                 WrapperRootNavigation()
             }
         }

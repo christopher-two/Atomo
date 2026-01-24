@@ -1,80 +1,152 @@
 package org.override.atomo.feature.settings.presentation
-
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ContainedLoadingIndicator
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.koin.androidx.compose.koinViewModel
-import org.override.atomo.core.ui.components.AtomoButton
-import org.override.atomo.core.ui.components.AtomoScaffold
-import org.override.atomo.core.ui.theme.AtomoTheme
+import org.override.atomo.feature.settings.presentation.components.SettingsDropdown
+import org.override.atomo.feature.settings.presentation.components.SettingsSection
+import org.override.atomo.feature.settings.presentation.components.SettingsSlider
+import org.override.atomo.feature.settings.presentation.components.SettingsSwitch
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsRoot(
-    viewModel: SettingsViewModel = koinViewModel()
+    viewModel: SettingsViewModel
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsState()
 
-    SettingsScreen(
-        state = state,
-        onAction = viewModel::onAction
-    )
-}
-
-@Composable
-fun SettingsScreen(
-    state: SettingsState,
-    onAction: (SettingsAction) -> Unit,
-) {
-    AtomoScaffold(
+    Scaffold(
         topBar = {
-            Text(
-                text = "Settings",
-                style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(16.dp)
+            TopAppBar(
+                title = { Text("Settings") },
+                navigationIcon = {
+                    IconButton(onClick = { viewModel.onAction(SettingsAction.NavigateBack) }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
             )
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Account",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            AtomoButton(
-                onClick = { onAction(SettingsAction.Logout) },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isLoading
+    ) { padding ->
+        if (state.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
             ) {
-                Text(if (state.isLoading) "Logging out..." else "Logout")
+                ContainedLoadingIndicator()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Appearance Section
+                SettingsSection(title = "Appearance") {
+                    SettingsSwitch(
+                        title = "Dark Mode",
+                        checked = state.appearance.isDarkModeEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleDarkMode(it)) },
+                        description = "Enable dark mode for a darker appearance, easier on the eyes in low light."
+                    )
+                    SettingsDropdown(
+                        title = "Theme",
+                        options = listOf("auto", "pink", "blue", "green", "purple"),
+                        selectedOption = state.appearance.theme,
+                        onOptionSelected = { viewModel.onAction(SettingsAction.SetTheme(it)) },
+                        description = "Choose the base color theme for the application manually."
+                    )
+                    SettingsSwitch(
+                        title = "Dynamic Color",
+                        checked = state.appearance.isDynamicColorEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleDynamicColor(it)) },
+                        description = "Use your wallpaper's colors to theme the app (Android 12+)."
+                    )
+                    SettingsSwitch(
+                        title = "System Theme",
+                        checked = state.appearance.isSystemThemeEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleSystemTheme(it)) },
+                        description = "Follow the system's Light/Dark mode setting automatically."
+                    )
+                }
+
+                // Notifications Section
+                SettingsSection(title = "Notifications") {
+                    SettingsSwitch(
+                        title = "Enable Notifications",
+                        checked = state.notifications.areNotificationsEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleNotifications(it)) },
+                        description = "Receive push notifications from the app."
+                    )
+                    SettingsSwitch(
+                        title = "Notification Sound",
+                        checked = state.notifications.isNotificationSoundEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleNotificationSound(it)) },
+                        description = "Play a sound when a notification is received."
+                    )
+                    SettingsSlider(
+                        title = "Priority",
+                        value = state.notifications.notificationPriority,
+                        onValueChange = { viewModel.onAction(SettingsAction.SetNotificationPriority(it)) },
+                        valueRange = 0f..5f,
+                        steps = 4,
+                        description = "Set the priority level for notifications (0 = Low, 5 = High)."
+                    )
+                }
+
+                // Privacy Section
+                SettingsSection(title = "Privacy") {
+                    SettingsSwitch(
+                        title = "Biometric Auth",
+                        checked = state.privacy.isBiometricAuthEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleBiometricAuth(it)) },
+                        description = "Require fingerprint or face unlock to access the app."
+                    )
+                    SettingsSwitch(
+                        title = "Analytics",
+                        checked = state.privacy.isAnalyticsEnabled,
+                        onCheckedChange = { viewModel.onAction(SettingsAction.ToggleAnalytics(it)) },
+                        description = "Send anonymous usage data to help us improve."
+                    )
+                }
+
+                // Account Actions
+                SettingsSection(title = "Account") {
+                     Button(
+                        onClick = { viewModel.onAction(SettingsAction.Logout) },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        Text("Logout")
+                    }
+                }
             }
         }
-    }
-}
-
-@Preview
-@Composable
-private fun Preview() {
-    AtomoTheme {
-        SettingsScreen(
-            state = SettingsState(),
-            onAction = {}
-        )
     }
 }

@@ -99,7 +99,7 @@ private fun ColumnScope.Content(onAction: (AuthAction) -> Unit) {
     Text(
         text = stringResource(id = R.string.app_name),
         style = typography.headlineLarge.copy(
-            fontSize = 40.sp,
+            fontSize = 70.sp,
             color = colorScheme.onBackground
         )
     )

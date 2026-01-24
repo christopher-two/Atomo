@@ -13,6 +13,7 @@ import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
+import org.override.atomo.feature.auth.domain.usecase.LogoutUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.auth.presentation.AuthRoot
 import org.override.atomo.feature.auth.presentation.viewmodel.AuthViewModel
@@ -24,6 +25,7 @@ val AuthModule: Module
         // Use cases
         factoryOf(::ContinueWithGoogleUseCase)
         factoryOf(::SaveUserSessionUseCase)
+        factoryOf(::LogoutUseCase)
 
         // ViewModel
         viewModelOf(::AuthViewModel)

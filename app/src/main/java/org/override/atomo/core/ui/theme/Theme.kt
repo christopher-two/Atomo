@@ -1,14 +1,18 @@
 package org.override.atomo.core.ui.theme
 
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Typography
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import com.materialkolor.DynamicMaterialTheme
 import com.materialkolor.PaletteStyle
 import com.materialkolor.dynamiccolor.ColorSpec
@@ -24,6 +28,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun AtomoTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    useDynamicColor: Boolean = false,
+    seedColor: Color = Color(0xFFDAEDFF),
     content: @Composable () -> Unit
 ) {
     // Crear una FontFamily que incluya las variantes relevantes (normales y cursivas)
@@ -158,22 +164,51 @@ fun AtomoTheme(
         )
     )
 
-    DynamicMaterialTheme(
-        seedColor = Color(0xFFDAEDFF),
-        isDark = darkTheme,
-        specVersion = ColorSpec.SpecVersion.SPEC_2025,
-        style = PaletteStyle.Expressive,
-        shapes = MaterialTheme.shapes,
-        animate = true,
-        animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
-        typography = typography,
-        content = {
-            Surface(
-                color = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.fillMaxSize(),
-                content = content
-            )
-        },
-    )
+    val context = LocalContext.current
+    // Logic for dynamic color:
+    // If useDynamicColor is true AND supported, pass true to DynamicMaterialTheme's useDynamicColor (if it exists)
+    // or manually pick the dynamic scheme.
+    // Based on materialkolor docs/usage, simplest is often passing the seed.
+    // However, for REAL dynamic color (wallpaper), we use MaterialTheme primitives if available or a specific flag.
+    // Let's assume we pass `useDynamicColor` to it if we can, OR we calculate the colorScheme ourselves.
+
+    // Since I don't know the exact API of DynamicMaterialTheme in this version,
+    // I will try to use the system dynamic color scheme if enabled and supported (S+).
+    // If NOT enabled, we use DynamicMaterialTheme with the seed.
+
+    if (useDynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+       val colorScheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+       MaterialTheme(
+           colorScheme = colorScheme,
+           typography = typography,
+           shapes = MaterialTheme.shapes,
+           content = {
+               Surface(
+                   color = MaterialTheme.colorScheme.background,
+                   contentColor = MaterialTheme.colorScheme.onBackground,
+                   modifier = Modifier.fillMaxSize(),
+                   content = content
+               )
+           }
+       )
+    } else {
+        DynamicMaterialTheme(
+            seedColor = seedColor,
+            isDark = darkTheme,
+            specVersion = ColorSpec.SpecVersion.SPEC_2025,
+            style = PaletteStyle.Expressive,
+            shapes = MaterialTheme.shapes,
+            animate = true,
+            animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
+            typography = typography,
+            content = {
+                Surface(
+                    color = MaterialTheme.colorScheme.background,
+                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.fillMaxSize(),
+                    content = content
+                )
+            },
+        )
+    }
 }

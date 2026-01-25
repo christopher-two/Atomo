@@ -35,17 +35,20 @@ class DigitalMenuViewModel(
             is DigitalMenuAction.UpdateDescription -> _state.update { it.copy(menuDescription = action.description) }
             is DigitalMenuAction.SaveMenu -> saveMenu()
             is DigitalMenuAction.Back -> rootNavigation.back()
-            
+
             // Dish Actions
-            is DigitalMenuAction.CloseDishDialog -> _state.update { 
-                it.copy(isDishDialogVisible = false, dishToEdit = null) 
+            is DigitalMenuAction.CloseDishDialog -> _state.update {
+                it.copy(isDishDialogVisible = false, dishToEdit = null)
             }
-            is DigitalMenuAction.OpenAddDishDialog -> _state.update { 
-                it.copy(isDishDialogVisible = true, dishToEdit = null) 
+
+            is DigitalMenuAction.OpenAddDishDialog -> _state.update {
+                it.copy(isDishDialogVisible = true, dishToEdit = null)
             }
-            is DigitalMenuAction.OpenEditDishDialog -> _state.update { 
-                it.copy(isDishDialogVisible = true, dishToEdit = action.dish) 
+
+            is DigitalMenuAction.OpenEditDishDialog -> _state.update {
+                it.copy(isDishDialogVisible = true, dishToEdit = action.dish)
             }
+
             is DigitalMenuAction.SaveDish -> saveDish(action)
             is DigitalMenuAction.DeleteDish -> deleteDish(action.dish)
         }
@@ -84,12 +87,12 @@ class DigitalMenuViewModel(
             currentDishes.add(newDish)
         }
 
-        _state.update { 
+        _state.update {
             it.copy(
                 dishes = currentDishes,
                 isDishDialogVisible = false,
                 dishToEdit = null
-            ) 
+            )
         }
     }
 
@@ -105,9 +108,9 @@ class DigitalMenuViewModel(
 
             _state.update { it.copy(isLoading = true) }
             val current = _state.value
-            
+
             val newMenuId = UUID.randomUUID().toString()
-            
+
             val newMenu = Menu(
                 id = newMenuId,
                 userId = uid,
@@ -121,7 +124,7 @@ class DigitalMenuViewModel(
                 createdAt = System.currentTimeMillis(),
                 dishes = emptyList() // We save dishes separately
             )
-            
+
             // 1. Create Menu
             menuUseCases.createMenu(newMenu).onSuccess {
                 // 2. Create Dishes
@@ -133,14 +136,19 @@ class DigitalMenuViewModel(
                     val result = menuUseCases.createDish(dishWithMenuId)
                     if (result.isFailure) allSuccess = false
                 }
-                
+
                 if (allSuccess) {
                     _state.update { it.copy(isLoading = false, isSaved = true) }
                     rootNavigation.back()
                 } else {
-                    _state.update { it.copy(isLoading = false, error = "Menu created but some dishes failed") }
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = "Menu created but some dishes failed"
+                        )
+                    }
                 }
-                
+
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
             }

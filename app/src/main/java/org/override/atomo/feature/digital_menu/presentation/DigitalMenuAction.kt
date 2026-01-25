@@ -7,11 +7,17 @@ sealed interface DigitalMenuAction {
     data class UpdateDescription(val description: String) : DigitalMenuAction
     data object SaveMenu : DigitalMenuAction
     data object Back : DigitalMenuAction
-    
+
     // Dish Actions
     data object OpenAddDishDialog : DigitalMenuAction
     data class OpenEditDishDialog(val dish: Dish) : DigitalMenuAction
     data object CloseDishDialog : DigitalMenuAction
-    data class SaveDish(val name: String, val description: String, val price: Double, val imageUrl: String?) : DigitalMenuAction
+    data class SaveDish(
+        val name: String,
+        val description: String,
+        val price: Double,
+        val imageUrl: String?
+    ) : DigitalMenuAction
+
     data class DeleteDish(val dish: Dish) : DigitalMenuAction
 }

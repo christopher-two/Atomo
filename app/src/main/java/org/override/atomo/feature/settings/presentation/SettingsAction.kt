@@ -14,5 +14,6 @@ sealed interface SettingsAction {
     data class ToggleAnalytics(val enabled: Boolean) : SettingsAction
 
     data object Logout : SettingsAction
+    data object NavigateToPay : SettingsAction
     data object NavigateBack : SettingsAction
 }

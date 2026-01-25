@@ -76,9 +76,23 @@ class MenuRepositoryImpl(
             .select { filter { eq("user_id", userId) } }
             .decodeList<MenuDto>()
         
+        // Get current local menu IDs to detect deleted menus
+        val localMenuIds = menuDao.getMenus(userId).map { it.id }.toSet()
+        val remoteMenuIds = dtos.map { it.id }.toSet()
+        
+        // Delete menus that exist locally but not on server
+        val deletedMenuIds = localMenuIds - remoteMenuIds
+        deletedMenuIds.forEach { menuId ->
+            menuDao.deleteDishesByMenuId(menuId)
+            menuDao.deleteCategoriesByMenuId(menuId)
+            menuDao.deleteMenuById(menuId)
+        }
+        
+        // Insert/update menus from server
         val entities = dtos.map { it.toEntity() }
         menuDao.insertMenus(entities)
         
+        // Sync categories and dishes for each menu (clear old data first)
         dtos.forEach { menuDto ->
             syncMenuCategories(menuDto.id)
             syncMenuDishes(menuDto.id)
@@ -88,6 +102,9 @@ class MenuRepositoryImpl(
     }
     
     private suspend fun syncMenuCategories(menuId: String) {
+        // Clear old categories for this menu
+        menuDao.deleteCategoriesByMenuId(menuId)
+        
         val categories = supabase.from("menu_categories")
             .select { filter { eq("menu_id", menuId) } }
             .decodeList<MenuCategoryDto>()
@@ -95,6 +112,9 @@ class MenuRepositoryImpl(
     }
     
     private suspend fun syncMenuDishes(menuId: String) {
+        // Clear old dishes for this menu
+        menuDao.deleteDishesByMenuId(menuId)
+        
         val dishes = supabase.from("dishes")
             .select { filter { eq("menu_id", menuId) } }
             .decodeList<DishDto>()

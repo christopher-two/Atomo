@@ -1,7 +1,11 @@
 package org.override.atomo.feature.home.presentation
 
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +46,25 @@ fun HomeScreen(
         },
         onAction = onAction
     )
+    
+    // Upgrade Dialog
+    if (state.showUpgradeDialog) {
+        AlertDialog(
+            onDismissRequest = { onAction(HomeAction.DismissUpgradeDialog) },
+            title = { Text("Límite alcanzado") },
+            text = { Text(state.upgradeDialogMessage) },
+            confirmButton = {
+                Button(onClick = { onAction(HomeAction.NavigateToPay) }) {
+                    Text("Ver Planes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(HomeAction.DismissUpgradeDialog) }) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
 @Preview

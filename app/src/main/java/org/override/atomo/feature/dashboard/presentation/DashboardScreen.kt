@@ -39,112 +39,104 @@ fun DashboardScreen(
     onAction: (DashboardAction) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-    ) { padding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(
-                    horizontal = padding.calculateLeftPadding(LocalLayoutDirection.current),
-                )
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        // Loading overlay
+        AnimatedVisibility(
+            visible = state.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.align(Alignment.Center)
         ) {
-            // Loading overlay
-            AnimatedVisibility(
-                visible = state.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut(),
+            ContainedLoadingIndicator(
                 modifier = Modifier.align(Alignment.Center)
+            )
+        }
+        
+        // Operations loading overlay (small indicator)
+        AnimatedVisibility(
+            visible = state.isOperationLoading,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            ContainedLoadingIndicator(
+                modifier = Modifier.size(24.dp),
+            )
+        }
+        
+        // Main content
+        AnimatedVisibility(
+            visible = !state.isLoading,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            PullToRefreshBox(
+                isRefreshing = state.isRefreshing,
+                onRefresh = { onAction(DashboardAction.Refresh) },
+                modifier = Modifier.fillMaxSize()
             ) {
-                ContainedLoadingIndicator(
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            
-            // Operations loading overlay (small indicator)
-            AnimatedVisibility(
-                visible = state.isOperationLoading,
-                enter = fadeIn(),
-                exit = fadeOut(),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                ContainedLoadingIndicator(
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            
-            // Main content
-            AnimatedVisibility(
-                visible = !state.isLoading,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                PullToRefreshBox(
-                    isRefreshing = state.isRefreshing,
-                    onRefresh = { onAction(DashboardAction.Refresh) },
-                    modifier = Modifier.fillMaxSize()
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        // Header with greeting
-                        item(key = "header") {
-                            DashboardHeader(
-                                displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
-                                modifier = Modifier.padding(top = 8.dp)
+                    // Header with greeting
+                    item(key = "header") {
+                        DashboardHeader(
+                            displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
+                    // Empty state when no services
+                    if (!state.hasAnyServices && !state.isLoading && !state.isRefreshing) {
+                        item(key = "empty") {
+                            DashboardEmptyState(
+                                modifier = Modifier.padding(horizontal = 24.dp)
                             )
                         }
-    
-                        // Empty state when no services
-                        if (!state.hasAnyServices && !state.isLoading && !state.isRefreshing) {
-                            item(key = "empty") {
-                                DashboardEmptyState(
-                                    modifier = Modifier.padding(horizontal = 24.dp)
-                                )
-                            }
-                        }
-                        
-                        // Sections
-                        state.services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let { 
-                            menuSection(it, onAction) 
-                        }
-                        
-                        state.services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()?.let { 
-                            portfolioSection(it, onAction) 
-                        }
-                        
-                        state.services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let { 
-                            cvSection(it, onAction) 
-                        }
-                        
-                        state.services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let { 
-                            shopSection(it, onAction) 
-                        }
-                        
-                        state.services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()?.let { 
-                            invitationSection(it, onAction) 
-                        }
+                    }
+                    
+                    // Sections
+                    state.services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let { 
+                        menuSection(it, onAction) 
+                    }
+                    
+                    state.services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()?.let { 
+                        portfolioSection(it, onAction) 
+                    }
+                    
+                    state.services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let { 
+                        cvSection(it, onAction) 
+                    }
+                    
+                    state.services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let { 
+                        shopSection(it, onAction) 
+                    }
+                    
+                    state.services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()?.let { 
+                        invitationSection(it, onAction) 
                     }
                 }
             }
-            
-            // Dialogs
-            state.deleteDialog?.let { dialogState ->
-                DashboardDeleteDialog(
-                    dialogState = dialogState,
-                    onAction = onAction
-                )
-            }
-            
-            // Sheets
-            DashboardSheetsHandler(
-                state = state,
+        }
+        
+        // Dialogs
+        state.deleteDialog?.let { dialogState ->
+            DashboardDeleteDialog(
+                dialogState = dialogState,
                 onAction = onAction
             )
         }
+        
+        // Sheets
+        DashboardSheetsHandler(
+            state = state,
+            onAction = onAction
+        )
     }
 }

@@ -63,10 +63,26 @@ class PortfolioRepositoryImpl(
             .select { filter { eq("user_id", userId) } }
             .decodeList<PortfolioDto>()
         
+        // Get current local portfolio IDs to detect deleted portfolios
+        val localPortfolioIds = portfolioDao.getPortfolios(userId).map { it.id }.toSet()
+        val remotePortfolioIds = dtos.map { it.id }.toSet()
+        
+        // Delete portfolios that exist locally but not on server
+        val deletedPortfolioIds = localPortfolioIds - remotePortfolioIds
+        deletedPortfolioIds.forEach { portfolioId ->
+            portfolioDao.deleteItemsByPortfolioId(portfolioId)
+            portfolioDao.deletePortfolioById(portfolioId)
+        }
+        
+        // Insert/update portfolios from server
         val entities = dtos.map { it.toEntity() }
         portfolioDao.insertPortfolios(entities)
         
+        // Sync items for each portfolio (clear old data first)
         dtos.forEach { dto ->
+            // Clear old items for this portfolio
+            portfolioDao.deleteItemsByPortfolioId(dto.id)
+            
             val items = supabase.from("portfolio_items")
                 .select { filter { eq("portfolio_id", dto.id) } }
                 .decodeList<PortfolioItemDto>()

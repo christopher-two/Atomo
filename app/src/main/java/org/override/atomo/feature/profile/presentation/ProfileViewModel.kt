@@ -33,6 +33,7 @@ class ProfileViewModel(
 
     fun onAction(action: ProfileAction) {
         when (action) {
+            ProfileAction.Refresh -> forceRefreshProfile()
             ProfileAction.EnterEditMode -> {
                 val profile = state.value.profile ?: return
                 _state.update { it.copy(
@@ -72,6 +73,20 @@ class ProfileViewModel(
                      _state.update { it.copy(editSocialLinks = currentLinks) }
                 }
             }
+        }
+    }
+    
+    private fun forceRefreshProfile() {
+        viewModelScope.launch {
+            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+            _state.update { it.copy(isLoading = true) }
+            useCases.syncProfile(userId)
+                .onSuccess {
+                    _state.update { it.copy(isLoading = false) }
+                }
+                .onFailure { e ->
+                    _state.update { it.copy(isLoading = false, error = e.message) }
+                }
         }
     }
 

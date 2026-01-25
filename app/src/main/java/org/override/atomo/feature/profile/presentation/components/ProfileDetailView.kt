@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
@@ -51,6 +52,7 @@ import java.util.Locale
 fun ProfileDetailView(
     profile: Profile,
     onEditClick: () -> Unit,
+    onSyncClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -145,9 +147,12 @@ fun ProfileDetailView(
             // Link Sharing Actions
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                FilledIconButton(onClick = onSyncClick) {
+                    Icon(Icons.Default.Sync, contentDescription = "Sync Profile")
+                }
                 FilledIconButton(
                     onClick = {
                         val sendIntent = Intent().apply {

@@ -7,4 +7,5 @@ import kotlinx.serialization.Serializable
 sealed interface RouteMain : NavKey {
     object Dashboard : RouteMain
     object Profile : RouteMain
+    object Pay : RouteMain
 }

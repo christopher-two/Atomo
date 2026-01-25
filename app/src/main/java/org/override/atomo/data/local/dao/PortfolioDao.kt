@@ -65,4 +65,10 @@ interface PortfolioDao {
     
     @Query("DELETE FROM portfolio_items WHERE id = :itemId")
     suspend fun deleteItemById(itemId: String)
+    
+    @Query("DELETE FROM portfolio_items WHERE portfolioId = :portfolioId")
+    suspend fun deleteItemsByPortfolioId(portfolioId: String)
+    
+    @Query("DELETE FROM portfolios WHERE userId = :userId")
+    suspend fun deleteAllPortfoliosByUser(userId: String)
 }

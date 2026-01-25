@@ -86,4 +86,9 @@ val UseCaseModule = module {
     singleOf(::SyncSubscriptionUseCase)
     singleOf(::CancelSubscriptionUseCase)
     singleOf(::SubscriptionUseCases)
+    
+    // Service Limits
+    singleOf(::GetServiceLimitsUseCase)
+    singleOf(::CanCreateServiceUseCase)
+    singleOf(::GetExistingServicesUseCase)
 }

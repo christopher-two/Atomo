@@ -1,6 +1,7 @@
 package org.override.atomo.feature.profile.presentation
 
 sealed interface ProfileAction {
+    data object Refresh : ProfileAction
     data object EnterEditMode : ProfileAction
     data object CancelEdit : ProfileAction
     data object SaveProfile : ProfileAction

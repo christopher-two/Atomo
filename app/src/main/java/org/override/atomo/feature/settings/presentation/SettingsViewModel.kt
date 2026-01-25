@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.feature.auth.domain.usecase.LogoutUseCase
+import org.override.atomo.feature.navigation.AppTab
+import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.settings.domain.usecase.SettingsUseCases
 
 import org.override.atomo.feature.navigation.RootNavigation
@@ -17,7 +19,8 @@ import org.override.atomo.feature.navigation.RootNavigation
 class SettingsViewModel(
     private val useCases: SettingsUseCases,
     private val rootNavigation: RootNavigation,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
+    private val homeNavigation: HomeNavigation
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsState())
@@ -43,6 +46,7 @@ class SettingsViewModel(
             is SettingsAction.ToggleBiometricAuth -> updateBiometricAuth(action.enabled)
             is SettingsAction.ToggleAnalytics -> updateAnalytics(action.enabled)
             is SettingsAction.Logout -> logout()
+            is SettingsAction.NavigateToPay -> homeNavigation.switchTab(AppTab.PAY)
             is SettingsAction.NavigateBack -> rootNavigation.back()
         }
     }

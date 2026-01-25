@@ -62,4 +62,10 @@ interface InvitationDao {
     
     @Delete
     suspend fun deleteResponse(response: InvitationResponseEntity)
+    
+    @Query("DELETE FROM invitation_responses WHERE invitationId = :invitationId")
+    suspend fun deleteResponsesByInvitationId(invitationId: String)
+    
+    @Query("DELETE FROM invitations WHERE userId = :userId")
+    suspend fun deleteAllInvitationsByUser(userId: String)
 }

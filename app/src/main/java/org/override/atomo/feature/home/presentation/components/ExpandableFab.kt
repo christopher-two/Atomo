@@ -23,6 +23,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
@@ -35,24 +37,33 @@ import org.override.atomo.feature.home.presentation.ServiceType
 @Composable
 fun ExpandableFab(
     expanded: Boolean,
+    availableServiceTypes: List<ServiceType>,
     onToggle: () -> Unit,
     onCreateService: (ServiceType) -> Unit
 ) {
     val containerColor = colorScheme.primaryContainer
     val contentColor = colorScheme.onPrimaryContainer
 
-    val items = listOf(
+    val allItems = listOf(
         FabItem(ServiceType.DIGITAL_MENU, Icons.Default.Restaurant, "Digital Menu"),
         FabItem(ServiceType.PORTFOLIO, Icons.Default.Folder, "Portfolio"),
         FabItem(ServiceType.CV, Icons.Default.Badge, "CV"),
         FabItem(ServiceType.SHOP, Icons.Default.Storefront, "Shop"),
         FabItem(ServiceType.INVITATION, Icons.Default.CardGiftcard, "Invitation")
     )
+    
+    // Filter to only show available items (services that don't exist yet)
+    val items = allItems.filter { it.type in availableServiceTypes }
 
     val fabRotation by animateFloatAsState(
         targetValue = if (expanded) 45f else 0f,
         label = "fab_rotation"
     )
+    
+    // Don't show FAB if no services can be created
+    if (items.isEmpty() && !expanded) {
+        return
+    }
 
     Box(
         modifier = Modifier
@@ -90,21 +101,37 @@ fun ExpandableFab(
                 }
             }
         ) {
-            items.forEachIndexed { index, item ->
+            if (items.isEmpty()) {
+                // Show message when no services available
                 FloatingActionButtonMenuItem(
-                    modifier = Modifier.semantics {
-                        traversalIndex = (items.size - index).toFloat()
-                    },
-                    onClick = { onCreateService(item.type) },
-                    icon = {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(text = item.label) }
+                    modifier = Modifier.semantics { traversalIndex = 0f },
+                    onClick = { onToggle() },
+                    icon = {},
+                    text = { Text(text = "Actualiza tu plan para crear más servicios") }
                 )
+            } else {
+                items.forEachIndexed { index, item ->
+                    FloatingActionButtonMenuItem(
+                        modifier = Modifier.semantics {
+                            traversalIndex = (items.size - index).toFloat()
+                        },
+                        onClick = { onCreateService(item.type) },
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = null
+                            )
+                        },
+                        text = { Text(text = item.label) }
+                    )
+                }
             }
         }
     }
 }
+
+data class FabItem(
+    val type: ServiceType,
+    val icon: ImageVector,
+    val label: String
+)

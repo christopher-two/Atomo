@@ -99,4 +99,16 @@ interface CvDao {
     
     @Delete
     suspend fun deleteSkill(skill: CvSkillEntity)
+    
+    @Query("DELETE FROM cv_education WHERE cvId = :cvId")
+    suspend fun deleteEducationByCvId(cvId: String)
+    
+    @Query("DELETE FROM cv_experience WHERE cvId = :cvId")
+    suspend fun deleteExperienceByCvId(cvId: String)
+    
+    @Query("DELETE FROM cv_skills WHERE cvId = :cvId")
+    suspend fun deleteSkillsByCvId(cvId: String)
+    
+    @Query("DELETE FROM cvs WHERE userId = :userId")
+    suspend fun deleteAllCvsByUser(userId: String)
 }

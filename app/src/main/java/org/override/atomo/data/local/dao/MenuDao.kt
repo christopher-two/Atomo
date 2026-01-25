@@ -92,4 +92,10 @@ interface MenuDao {
     
     @Query("DELETE FROM dishes WHERE id = :dishId")
     suspend fun deleteDishById(dishId: String)
+    
+    @Query("DELETE FROM dishes WHERE menuId = :menuId")
+    suspend fun deleteDishesByMenuId(menuId: String)
+    
+    @Query("DELETE FROM menu_categories WHERE menuId = :menuId")
+    suspend fun deleteCategoriesByMenuId(menuId: String)
 }

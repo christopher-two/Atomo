@@ -88,4 +88,13 @@ interface ShopDao {
     
     @Query("DELETE FROM products WHERE id = :productId")
     suspend fun deleteProductById(productId: String)
+    
+    @Query("DELETE FROM products WHERE shopId = :shopId")
+    suspend fun deleteProductsByShopId(shopId: String)
+    
+    @Query("DELETE FROM product_categories WHERE shopId = :shopId")
+    suspend fun deleteCategoriesByShopId(shopId: String)
+    
+    @Query("DELETE FROM shops WHERE userId = :userId")
+    suspend fun deleteAllShopsByUser(userId: String)
 }

@@ -135,6 +135,18 @@ fun SettingsRoot(
                     )
                 }
 
+                // Subscription Section
+                SettingsSection(title = "Suscripción") {
+                    Button(
+                        onClick = { viewModel.onAction(SettingsAction.NavigateToPay) },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        Text("Ver Planes de Suscripción")
+                    }
+                }
+
                 // Account Actions
                 SettingsSection(title = "Account") {
                      Button(

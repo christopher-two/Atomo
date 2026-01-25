@@ -76,9 +76,23 @@ class ShopRepositoryImpl(
             .select { filter { eq("user_id", userId) } }
             .decodeList<ShopDto>()
         
+        // Get current local shop IDs to detect deleted shops
+        val localShopIds = shopDao.getShops(userId).map { it.id }.toSet()
+        val remoteShopIds = dtos.map { it.id }.toSet()
+        
+        // Delete shops that exist locally but not on server
+        val deletedShopIds = localShopIds - remoteShopIds
+        deletedShopIds.forEach { shopId ->
+            shopDao.deleteProductsByShopId(shopId)
+            shopDao.deleteCategoriesByShopId(shopId)
+            shopDao.deleteShopById(shopId)
+        }
+        
+        // Insert/update shops from server
         val entities = dtos.map { it.toEntity() }
         shopDao.insertShops(entities)
         
+        // Sync categories and products for each shop (clear old data first)
         dtos.forEach { dto ->
             syncShopCategories(dto.id)
             syncShopProducts(dto.id)
@@ -88,6 +102,9 @@ class ShopRepositoryImpl(
     }
     
     private suspend fun syncShopCategories(shopId: String) {
+        // Clear old categories for this shop
+        shopDao.deleteCategoriesByShopId(shopId)
+        
         val categories = supabase.from("product_categories")
             .select { filter { eq("shop_id", shopId) } }
             .decodeList<ProductCategoryDto>()
@@ -95,6 +112,9 @@ class ShopRepositoryImpl(
     }
     
     private suspend fun syncShopProducts(shopId: String) {
+        // Clear old products for this shop
+        shopDao.deleteProductsByShopId(shopId)
+        
         val products = supabase.from("products")
             .select { filter { eq("shop_id", shopId) } }
             .decodeList<ProductDto>()

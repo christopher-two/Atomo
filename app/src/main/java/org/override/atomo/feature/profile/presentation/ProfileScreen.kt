@@ -37,7 +37,8 @@ fun ProfileScreen(
             } else {
                 ProfileDetailView(
                     profile = state.profile,
-                    onEditClick = { onAction(ProfileAction.EnterEditMode) }
+                    onEditClick = { onAction(ProfileAction.EnterEditMode) },
+                    onSyncClick = { onAction(ProfileAction.Refresh) }
                 )
             }
         }

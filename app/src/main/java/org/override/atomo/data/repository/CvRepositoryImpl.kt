@@ -83,9 +83,24 @@ class CvRepositoryImpl(
             .select { filter { eq("user_id", userId) } }
             .decodeList<CvDto>()
         
+        // Get current local CV IDs to detect deleted CVs
+        val localCvIds = cvDao.getCvs(userId).map { it.id }.toSet()
+        val remoteCvIds = dtos.map { it.id }.toSet()
+        
+        // Delete CVs that exist locally but not on server
+        val deletedCvIds = localCvIds - remoteCvIds
+        deletedCvIds.forEach { cvId ->
+            cvDao.deleteEducationByCvId(cvId)
+            cvDao.deleteExperienceByCvId(cvId)
+            cvDao.deleteSkillsByCvId(cvId)
+            cvDao.deleteCvById(cvId)
+        }
+        
+        // Insert/update CVs from server
         val entities = dtos.map { it.toEntity() }
         cvDao.insertCvs(entities)
         
+        // Sync sub-items for each CV (clear old data first)
         dtos.forEach { dto ->
             syncCvEducation(dto.id)
             syncCvExperience(dto.id)
@@ -96,6 +111,9 @@ class CvRepositoryImpl(
     }
     
     private suspend fun syncCvEducation(cvId: String) {
+        // Clear old education for this CV
+        cvDao.deleteEducationByCvId(cvId)
+        
         val education = supabase.from("cv_education")
             .select { filter { eq("cv_id", cvId) } }
             .decodeList<CvEducationDto>()
@@ -103,6 +121,9 @@ class CvRepositoryImpl(
     }
     
     private suspend fun syncCvExperience(cvId: String) {
+        // Clear old experience for this CV
+        cvDao.deleteExperienceByCvId(cvId)
+        
         val experience = supabase.from("cv_experience")
             .select { filter { eq("cv_id", cvId) } }
             .decodeList<CvExperienceDto>()
@@ -110,6 +131,9 @@ class CvRepositoryImpl(
     }
     
     private suspend fun syncCvSkills(cvId: String) {
+        // Clear old skills for this CV
+        cvDao.deleteSkillsByCvId(cvId)
+        
         val skills = supabase.from("cv_skills")
             .select { filter { eq("cv_id", cvId) } }
             .decodeList<CvSkillDto>()

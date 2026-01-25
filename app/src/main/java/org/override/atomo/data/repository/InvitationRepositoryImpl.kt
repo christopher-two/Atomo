@@ -63,10 +63,26 @@ class InvitationRepositoryImpl(
             .select { filter { eq("user_id", userId) } }
             .decodeList<InvitationDto>()
         
+        // Get current local invitation IDs to detect deleted invitations
+        val localInvitationIds = invitationDao.getInvitations(userId).map { it.id }.toSet()
+        val remoteInvitationIds = dtos.map { it.id }.toSet()
+        
+        // Delete invitations that exist locally but not on server
+        val deletedInvitationIds = localInvitationIds - remoteInvitationIds
+        deletedInvitationIds.forEach { invitationId ->
+            invitationDao.deleteResponsesByInvitationId(invitationId)
+            invitationDao.deleteInvitationById(invitationId)
+        }
+        
+        // Insert/update invitations from server
         val entities = dtos.map { it.toEntity() }
         invitationDao.insertInvitations(entities)
         
+        // Sync responses for each invitation (clear old data first)
         dtos.forEach { dto ->
+            // Clear old responses for this invitation
+            invitationDao.deleteResponsesByInvitationId(dto.id)
+            
             val responses = supabase.from("invitation_responses")
                 .select { filter { eq("invitation_id", dto.id) } }
                 .decodeList<InvitationResponseDto>()

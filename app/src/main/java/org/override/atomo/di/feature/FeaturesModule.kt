@@ -13,5 +13,6 @@ val FeaturesModule: List<Module>
         DigitalMenuModule,
         InvitationModule,
         PortfolioModule,
-        ShopModule
+        ShopModule,
+        PayModule
     )

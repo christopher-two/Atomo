@@ -29,6 +29,8 @@ materialKolor = "4.1.0"
 composeBom = "2026.01.00"
 material3Android = "1.5.0-alpha12"
 material-icons-ext = "1.7.8"
+material3Adaptive = "1.2.0"
+material3AdaptiveNavSuite = "1.4.0"
 
 # Koin
 koin = "4.1.1"
@@ -68,6 +70,8 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist-permissions" }
+androidx-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "material3Adaptive" }
+androidx-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite", version.ref = "material3AdaptiveNavSuite" }
 
 # Compose
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }

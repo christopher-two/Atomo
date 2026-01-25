@@ -93,6 +93,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.android)
     implementation(libs.material.icons.ext)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -105,6 +106,8 @@ dependencies {
     // Android / utilidades
     implementation(libs.core.splashscreen)
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.material3.adaptive)
+    implementation(libs.androidx.material3.adaptive.navigation.suite)
 
     // Compose extras
     implementation(libs.compose.shimmer)

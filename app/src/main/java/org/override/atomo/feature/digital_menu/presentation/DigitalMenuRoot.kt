@@ -225,7 +225,7 @@ fun DigitalMenuScreen(
                                     previewPendingPreview.value?.let { trySendPreviewToSheet(it) }
                                 }
                             }
-                            loadUrl("https://atomo.click/preview/default")
+                            loadUrl("https://atomo.click/preview/elegance")
                             previewWebViewState.value = this
                         }
                     },
@@ -244,33 +244,6 @@ fun DigitalMenuScreen(
         val json = buildPreviewJson(state.menuName, state.menuDescription)
         trySendPreviewToAll(json)
     }
-}
-
-@Composable
-fun MenuEditorScreen(
-    onWebViewCreated: (WebView) -> Unit = {},
-    onPageFinished: () -> Unit = {}
-) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                // Cargar la preview
-                webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        super.onPageFinished(view, url)
-                        onPageFinished()
-                    }
-                }
-                loadUrl("https://atomo.click/preview/default")
-                onWebViewCreated(this)
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp)
-    )
 }
 
 @Preview

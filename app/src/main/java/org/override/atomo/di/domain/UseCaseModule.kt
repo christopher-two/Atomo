@@ -15,6 +15,7 @@ val UseCaseModule = module {
     singleOf(::GetProfileUseCase)
     singleOf(::SyncProfileUseCase)
     singleOf(::UpdateProfileUseCase)
+    singleOf(::CheckUsernameAvailabilityUseCase)
     singleOf(::ProfileUseCases)
     
     // Menu

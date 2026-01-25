@@ -39,6 +39,8 @@ class DashboardViewModel(
         private const val TAG = "DashboardViewModel"
     }
 
+    private var hasAutoRefreshed = false
+
     private val _state = MutableStateFlow(DashboardState())
     val state = _state
         .stateIn(
@@ -259,6 +261,16 @@ class DashboardViewModel(
                         isLoading = false,
                         services = services 
                     ) 
+                }
+
+                // Auto-refresh if no data is found locally and we haven't refreshed yet
+                val hasNoServices = services.none { it.isActive }
+                val hasNoProfile = _state.value.profile == null
+                
+                if ((hasNoServices || hasNoProfile) && !hasAutoRefreshed) {
+                    Log.d(TAG, "No local data found. Triggering auto-refresh.")
+                    hasAutoRefreshed = true
+                    refreshDashboard()
                 }
             }
         }

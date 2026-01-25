@@ -109,11 +109,12 @@ fun HomeScreen(
         },
         snackbarHost = { SnackbarHost(snackbarManager.snackbarHostState) },
         floatingActionButton = {
-            ExpandableFab(
-                expanded = state.isFabExpanded,
-                onToggle = { onAction(HomeAction.ToggleFab) },
-                onCreateService = { type -> onAction(HomeAction.CreateService(type)) }
-            )
+            if (state.currentTab == AppTab.DASHBOARD)
+                ExpandableFab(
+                    expanded = state.isFabExpanded,
+                    onToggle = { onAction(HomeAction.ToggleFab) },
+                    onCreateService = { type -> onAction(HomeAction.CreateService(type)) }
+                )
         }
     ) { padding ->
         Box(

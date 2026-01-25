@@ -2,6 +2,7 @@ package org.override.atomo.data.repository
 
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Count.EXACT
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.ProfileDao
@@ -53,5 +54,19 @@ class ProfileRepositoryImpl(
             .delete { filter { eq("id", userId) } }
         
         profileDao.deleteProfileById(userId)
+    }
+
+    override suspend fun checkUsernameAvailability(username: String): Boolean {
+        return try {
+            val count = supabase.from("profiles").select {
+                count(EXACT)
+                filter {
+                    eq("username", username)
+                }
+            }.countOrNull() ?: 0
+            count == 0L
+        } catch (e: Exception) {
+            false // Assume unavailable on error or handle differently if needed
+        }
     }
 }

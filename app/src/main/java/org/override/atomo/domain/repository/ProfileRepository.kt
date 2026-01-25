@@ -10,4 +10,5 @@ interface ProfileRepository {
     suspend fun syncProfile(userId: String): Result<Profile>
     suspend fun updateProfile(profile: Profile): Result<Profile>
     suspend fun deleteProfile(userId: String): Result<Unit>
+    suspend fun checkUsernameAvailability(username: String): Boolean
 }

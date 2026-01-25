@@ -7,7 +7,8 @@ import org.override.atomo.domain.repository.ProfileRepository
 data class ProfileUseCases(
     val getProfile: GetProfileUseCase,
     val syncProfile: SyncProfileUseCase,
-    val updateProfile: UpdateProfileUseCase
+    val updateProfile: UpdateProfileUseCase,
+    val checkUsernameAvailability: CheckUsernameAvailabilityUseCase
 )
 
 class GetProfileUseCase(private val repository: ProfileRepository) {

@@ -111,8 +111,9 @@ class HomeViewModel(
                                 async { portfolioUseCases.syncPortfolios(userId) },
                                 async { cvUseCases.syncCvs(userId) },
                                 async { shopUseCases.syncShops(userId) },
-                                async { invitationUseCases.syncInvitations(userId) }
+                                async { invitationUseCases.syncInvitations(userId) },
                             )
+                            loadSubscriptionData()
                         }
 
                         AppTab.PROFILE -> {

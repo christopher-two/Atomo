@@ -62,8 +62,12 @@ class PayViewModel(
             }
             
             // Sync plans and subscription from server
-            subscriptionUseCases.syncPlans()
-            subscriptionUseCases.syncSubscription(userId!!)
+            subscriptionUseCases.syncPlans().onFailure { e ->
+                _state.update { it.copy(error = "Error al cargar planes: ${e.message}") }
+            }
+            subscriptionUseCases.syncSubscription(userId!!).onFailure { e ->
+                // Log or handle subscription sync error
+            }
             
             // Observe local data
             combine(

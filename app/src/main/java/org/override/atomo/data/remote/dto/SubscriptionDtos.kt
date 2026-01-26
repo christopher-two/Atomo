@@ -2,6 +2,7 @@ package org.override.atomo.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 @Serializable
 data class PlanDto(
@@ -11,7 +12,7 @@ data class PlanDto(
     val price: Double = 0.0,
     val currency: String = "USD",
     val interval: String = "month",
-    val features: String? = null, // JSON string
+    val features: JsonObject? = null,
     @SerialName("is_active") val isActive: Boolean = true,
     @SerialName("created_at") val createdAt: String? = null
 )

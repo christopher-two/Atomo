@@ -8,4 +8,9 @@ sealed interface RouteMain : NavKey {
     object Dashboard : RouteMain
     object Profile : RouteMain
     object Pay : RouteMain
+    object DigitalMenu : RouteMain
+    object Shop : RouteMain
+    object Cv : RouteMain
+    object Portfolio : RouteMain
+    object Invitation : RouteMain
 }

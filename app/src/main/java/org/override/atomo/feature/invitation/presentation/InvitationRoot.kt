@@ -1,5 +1,8 @@
 package org.override.atomo.feature.invitation.presentation
 
+import androidx.compose.foundation.layout.Box
+import org.override.atomo.feature.invitation.presentation.components.InvitationShimmer
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -59,16 +62,22 @@ fun InvitationScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
-        ) {
-            items(state.invitations) { invitation ->
-                InvitationItem(invitation = invitation, onAction = onAction)
+        if (state.isLoading) {
+            Box(modifier = Modifier.padding(paddingValues)) {
+                InvitationShimmer()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(state.invitations) { invitation ->
+                    InvitationItem(invitation = invitation, onAction = onAction)
+                }
             }
         }
     }

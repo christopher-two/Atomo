@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.override.atomo.feature.settings.presentation.components.SettingsDropdown
 import org.override.atomo.feature.settings.presentation.components.SettingsSection
+import org.override.atomo.feature.settings.presentation.components.SettingsShimmer
 import org.override.atomo.feature.settings.presentation.components.SettingsSlider
 import org.override.atomo.feature.settings.presentation.components.SettingsSwitch
 
@@ -51,14 +52,7 @@ fun SettingsRoot(
         }
     ) { padding ->
         if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                ContainedLoadingIndicator()
-            }
+            SettingsShimmer()
         } else {
             Column(
                 modifier = Modifier

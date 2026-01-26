@@ -14,7 +14,12 @@ class HomeNavigation() {
     private val stacks = mapOf(
         AppTab.DASHBOARD to mutableStateListOf<NavKey>(RouteMain.Dashboard),
         AppTab.PROFILE to mutableStateListOf<NavKey>(RouteMain.Profile),
-        AppTab.PAY to mutableStateListOf<NavKey>(RouteMain.Pay)
+        AppTab.PAY to mutableStateListOf<NavKey>(RouteMain.Pay),
+        AppTab.DIGITAL_MENU to mutableStateListOf<NavKey>(RouteMain.DigitalMenu),
+        AppTab.SHOP to mutableStateListOf<NavKey>(RouteMain.Shop),
+        AppTab.CV to mutableStateListOf<NavKey>(RouteMain.Cv),
+        AppTab.PORTFOLIO to mutableStateListOf<NavKey>(RouteMain.Portfolio),
+        AppTab.INVITATION to mutableStateListOf<NavKey>(RouteMain.Invitation)
     )
 
     val currentStack: List<NavKey>

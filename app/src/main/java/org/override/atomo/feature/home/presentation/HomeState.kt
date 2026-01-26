@@ -12,7 +12,8 @@ data class HomeState(
     val existingServices: Map<ServiceType, Boolean> = emptyMap(),
     val showUpgradeDialog: Boolean = false,
     val upgradeDialogMessage: String = "",
-    val isRefreshing: Boolean = false
+    val isRefreshing: Boolean = false,
+    val isMenuSheetOpen: Boolean = false
 ) {
     /**
      * Returns the list of service types that can be created based on:

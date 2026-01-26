@@ -3,6 +3,7 @@ package org.override.atomo.feature.digital_menu.presentation
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -44,6 +45,7 @@ import org.koin.androidx.compose.koinViewModel
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.theme.AtomoTheme
+import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer
 
 @Composable
 fun DigitalMenuRoot(
@@ -161,44 +163,54 @@ fun DigitalMenuScreen(
             }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // General Info Section
-            Text(
-                text = "General Information",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-            )
+        if (state.isLoading) {
+            Box(modifier = Modifier.padding(paddingValues)) {
+                DigitalMenuShimmer()
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // General Info Section
+                Text(
+                    text = "General Information",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+                )
 
-            AtomoTextField(
-                value = state.menuName,
-                onValueChange = { newValue ->
-                    onAction(DigitalMenuAction.UpdateName(newValue))
-                },
-                label = { Text("Menu Name") },
-                modifier = Modifier.fillMaxWidth()
-            )
+                AtomoTextField(
+                    value = state.menuName,
+                    onValueChange = { newValue ->
+                        onAction(DigitalMenuAction.UpdateName(newValue))
+                    },
+                    label = { Text("Menu Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            AtomoTextField(
-                value = state.menuDescription,
-                onValueChange = { newValue ->
-                    onAction(DigitalMenuAction.UpdateDescription(newValue))
-                },
-                label = { Text("Description") },
-                modifier = Modifier.fillMaxWidth(),
-                minLines = 3
-            )
+                AtomoTextField(
+                    value = state.menuDescription,
+                    onValueChange = { newValue ->
+                        onAction(DigitalMenuAction.UpdateDescription(newValue))
+                    },
+                    label = { Text("Description") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
         }
     }
+
+    if (state.isLoading) {
+        DigitalMenuShimmer()
+    } else {   }
 
     // Bottom sheet full-screen preview
     if (showPreviewSheet.value) {

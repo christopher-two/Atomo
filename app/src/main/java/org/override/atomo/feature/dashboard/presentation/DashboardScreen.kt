@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
+import org.override.atomo.feature.dashboard.presentation.components.DashboardShimmer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Scaffold
@@ -49,9 +50,7 @@ fun DashboardScreen(
             exit = fadeOut(),
             modifier = Modifier.align(Alignment.Center)
         ) {
-            ContainedLoadingIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+            DashboardShimmer()
         }
         
         // Operations loading overlay (small indicator)

@@ -5,11 +5,14 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.Color
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
@@ -17,24 +20,23 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.feature.navigation.wrapper.WrapperRootNavigation
+import org.override.atomo.feature.settings.domain.usecase.GetSettingsUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 
 class MainActivity : ComponentActivity() {
     private val sessionRepository: SessionRepository by inject()
-    private val getSettingsUseCase: org.override.atomo.feature.settings.domain.usecase.GetSettingsUseCase by inject()
+    private val getSettingsUseCase: GetSettingsUseCase by inject()
     private val rootNavigation: RootNavigation by inject()
-    // Mantener true mientras hacemos la comprobación inicial; la splash se mantiene mientras esto sea true
     private var isCheckingSession = true
+    private var isSettingsLoaded = false
 
     @OptIn(KoinExperimentalAPI::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Mantener el splash visible mientras se verifica la sesión
-        splashScreen.setKeepOnScreenCondition { isCheckingSession }
+        splashScreen.setKeepOnScreenCondition { isCheckingSession || !isSettingsLoaded }
 
-        // Verificar sesión y navegar según el resultado
         lifecycleScope.launch {
             try {
                 Log.d("MainActivity", "Inicio comprobación de sesión")
@@ -42,19 +44,22 @@ class MainActivity : ComponentActivity() {
                 Log.d("MainActivity", "Resultado comprobación sesión: $isLoggedIn")
                 rootNavigation.setInitialRoute(isLoggedIn)
             } catch (e: Exception) {
-                // Registrar el error y navegar a auth como fallback
                 Log.e("MainActivity", "Error comprobando sesión inicial", e)
                 rootNavigation.setInitialRoute(false)
             } finally {
-                // Siempre liberar la splash para evitar bloqueo indefinido
                 isCheckingSession = false
-                Log.d("MainActivity", "Finalizada comprobación de sesión, splash liberada")
+                Log.d("MainActivity", "Finalizada comprobación de sesión")
             }
         }
 
         enableEdgeToEdge()
         setContent {
             val settingsState by getSettingsUseCase().collectAsState(initial = null)
+
+            if (settingsState != null && !isSettingsLoaded) {
+                isSettingsLoaded = true
+            }
+
             val appearance = settingsState?.appearance
 
             val isDarkTheme = appearance?.let {
@@ -62,11 +67,11 @@ class MainActivity : ComponentActivity() {
             } ?: isSystemInDarkTheme()
 
             val seedColor = when (appearance?.theme) {
-                "pink" -> androidx.compose.ui.graphics.Color(0xFFFFB5E8)
-                "green" -> androidx.compose.ui.graphics.Color(0xFFB5FFD9) 
-                "purple" -> androidx.compose.ui.graphics.Color(0xFFDDB5FF)
-                "blue" -> androidx.compose.ui.graphics.Color(0xFFB5DEFF)
-                else -> androidx.compose.ui.graphics.Color(0xFFDAEDFF) // Default/Auto
+                "pink" -> Color(0xFFFFB5E8)
+                "green" -> Color(0xFFB5FFD9)
+                "purple" -> Color(0xFFDDB5FF)
+                "blue" -> Color(0xFFB5DEFF)
+                else -> Color(0xFFDAEDFF) // Default/Auto
             }
 
             AtomoTheme(
@@ -74,7 +79,11 @@ class MainActivity : ComponentActivity() {
                 useDynamicColor = appearance?.isDynamicColorEnabled ?: false,
                 seedColor = seedColor
             ) {
-                WrapperRootNavigation()
+                SharedTransitionLayout {
+                    CompositionLocalProvider(
+                        content = { WrapperRootNavigation() }
+                    )
+                }
             }
         }
     }

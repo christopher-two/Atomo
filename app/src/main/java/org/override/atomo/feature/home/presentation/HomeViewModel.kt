@@ -123,6 +123,13 @@ class HomeViewModel(
                         AppTab.PAY -> {
                             loadSubscriptionData()
                         }
+                        
+                        AppTab.DIGITAL_MENU -> { menuUseCases.syncMenus(userId) }
+                        AppTab.SHOP -> { shopUseCases.syncShops(userId) }
+                        AppTab.CV -> { cvUseCases.syncCvs(userId) }
+                        AppTab.PORTFOLIO -> { portfolioUseCases.syncPortfolios(userId) }
+                        AppTab.INVITATION -> { invitationUseCases.syncInvitations(userId) }
+                        AppTab.MENU -> { /* No sync needed for menu trigger */ }
                     }
 
                     syncJobs.awaitAll()
@@ -178,6 +185,10 @@ class HomeViewModel(
 
             HomeAction.NavigateToPay -> {
                 homeNavigation.switchTab(AppTab.PAY)
+            }
+
+            HomeAction.ToggleMenu -> {
+                _state.update { it.copy(isMenuSheetOpen = !it.isMenuSheetOpen) }
             }
         }
     }

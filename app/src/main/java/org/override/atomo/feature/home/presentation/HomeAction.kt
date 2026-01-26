@@ -11,6 +11,7 @@ sealed interface HomeAction {
     data class CreateService(val type: ServiceType) : HomeAction
     data object DismissUpgradeDialog : HomeAction
     data object NavigateToPay : HomeAction
+    data object ToggleMenu : HomeAction
 }
 
 enum class ServiceType {

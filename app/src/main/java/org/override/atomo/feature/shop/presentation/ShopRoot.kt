@@ -1,6 +1,7 @@
 package org.override.atomo.feature.shop.presentation
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Shop
+import org.override.atomo.feature.shop.presentation.components.ShopShimmer
 
 @Composable
 fun ShopRoot(
@@ -59,16 +61,22 @@ fun ShopScreen(
             }
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
-        ) {
-            items(state.shops) { shop ->
-                ShopItem(shop = shop, onAction = onAction)
+        if (state.isLoading) {
+            Box(modifier = Modifier.padding(paddingValues)) {
+                ShopShimmer()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(state.shops) { shop ->
+                    ShopItem(shop = shop, onAction = onAction)
+                }
             }
         }
     }

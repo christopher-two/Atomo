@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -35,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.override.atomo.R
 import org.override.atomo.core.ui.theme.AtomoTheme
+import org.override.atomo.feature.auth.presentation.components.AuthShimmer
 import org.override.atomo.feature.auth.presentation.viewmodel.AuthAction
 import org.override.atomo.feature.auth.presentation.viewmodel.AuthState
 import org.override.atomo.feature.auth.presentation.viewmodel.AuthViewModel
@@ -82,9 +82,7 @@ fun AuthScreen(
                 verticalArrangement = Arrangement.Center
             ) {
                 if (isLoading) {
-                    ContainedLoadingIndicator(
-                        modifier = Modifier.size(54.dp)
-                    )
+                    AuthShimmer()
                 } else {
                     Content(onAction)
                 }
@@ -94,7 +92,7 @@ fun AuthScreen(
 }
 
 @Composable
-private fun ColumnScope.Content(onAction: (AuthAction) -> Unit) {
+fun ColumnScope.Content(onAction: (AuthAction) -> Unit) {
     Spacer(modifier = Modifier.weight(1f))
     Text(
         text = stringResource(id = R.string.app_name),

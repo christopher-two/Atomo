@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import org.override.atomo.feature.profile.presentation.components.ProfileDetailView
 import org.override.atomo.feature.profile.presentation.components.ProfileEditView
+import org.override.atomo.feature.profile.presentation.components.ProfileShimmer
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -21,7 +22,7 @@ fun ProfileScreen(
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading && state.profile == null) {
-            ContainedLoadingIndicator(modifier = Modifier.align(Alignment.Center))
+            ProfileShimmer()
         } else if (state.error != null && state.profile == null) {
             Text(
                 text = state.error,

@@ -7,7 +7,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +38,7 @@ import org.override.atomo.feature.home.presentation.HomeAction
 import org.override.atomo.feature.home.presentation.HomeState
 import org.override.atomo.feature.navigation.AppTab
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun HomeScaffold(
     snackbarManager: SnackbarManager,
@@ -54,8 +57,6 @@ fun HomeScaffold(
             currentWindowAdaptiveInfo()
         )
     }
-
-    val isNavigationBar by remember { derivedStateOf { layoutType == NavigationSuiteType.NavigationBar } }
 
     NavigationSuiteScaffold(
         layoutType = layoutType,
@@ -90,11 +91,17 @@ fun HomeScaffold(
                             )
                         },
                         actions = {
-                            IconButton(onClick = { onAction(HomeAction.Refresh) }) {
-                                Icon(
-                                    imageVector = Icons.Default.Sync,
-                                    contentDescription = "Sync"
-                                )
+                            if (layoutType != NavigationSuiteType.NavigationBar) {
+                                IconButton(onClick = { onAction(HomeAction.Refresh) }) {
+                                    if (state.isRefreshing) {
+                                        CircularWavyProgressIndicator()
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.Sync,
+                                            contentDescription = "Refresh"
+                                        )
+                                    }
+                                }
                             }
                             IconButton(onClick = { onAction(HomeAction.NavigateToSettings) }) {
                                 Icon(

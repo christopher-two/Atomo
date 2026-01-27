@@ -11,21 +11,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ContainedLoadingIndicator
-import org.override.atomo.feature.dashboard.presentation.components.DashboardShimmer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.dp
+import org.override.atomo.feature.dashboard.presentation.components.DashboardAd
 import org.override.atomo.feature.dashboard.presentation.components.DashboardHeader
+import org.override.atomo.feature.dashboard.presentation.components.DashboardShimmer
+import org.override.atomo.feature.dashboard.presentation.components.DashboardShortcuts
+import org.override.atomo.feature.dashboard.presentation.components.DashboardStats
 import org.override.atomo.feature.dashboard.presentation.components.base.DashboardDeleteDialog
-import org.override.atomo.feature.dashboard.presentation.components.base.DashboardEmptyState
 import org.override.atomo.feature.dashboard.presentation.components.base.DashboardSheetsHandler
 import org.override.atomo.feature.dashboard.presentation.components.sections.cvSection
 import org.override.atomo.feature.dashboard.presentation.components.sections.invitationSection
@@ -52,7 +51,7 @@ fun DashboardScreen(
         ) {
             DashboardShimmer()
         }
-        
+
         // Operations loading overlay (small indicator)
         AnimatedVisibility(
             visible = state.isOperationLoading,
@@ -66,7 +65,7 @@ fun DashboardScreen(
                 modifier = Modifier.size(24.dp),
             )
         }
-        
+
         // Main content
         AnimatedVisibility(
             visible = !state.isLoading,
@@ -81,7 +80,7 @@ fun DashboardScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // Header with greeting
                     item(key = "header") {
@@ -91,39 +90,71 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Empty state when no services
-                    if (!state.hasAnyServices && !state.isLoading && !state.isRefreshing) {
-                        item(key = "empty") {
-                            DashboardEmptyState(
-                                modifier = Modifier.padding(horizontal = 24.dp)
+                    // Statistics
+                    item(key = "stats") {
+                        DashboardStats(
+                            statistics = state.statistics,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+
+                    // Shortcuts
+                    if (state.shortcuts.isNotEmpty()) {
+                        item(key = "shortcuts") {
+                            DashboardShortcuts(
+                                shortcuts = state.shortcuts,
+                                onAction = onAction,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                     }
-                    
-                    // Sections
-                    state.services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let { 
-                        menuSection(it, onAction) 
+
+                    // Advertisement
+                    item(key = "ad") {
+                        DashboardAd(
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
                     }
-                    
-                    state.services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()?.let { 
-                        portfolioSection(it, onAction) 
+
+                    // Services Title
+                    if (state.hasAnyServices) {
+                        item(key = "services_title") {
+                            androidx.compose.material3.Text(
+                                text = "Tus Servicios",
+                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .padding(bottom = 8.dp)
+                            )
+                        }
                     }
-                    
-                    state.services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let { 
-                        cvSection(it, onAction) 
+
+                    // Sections (active only)
+                    state.services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let {
+                        if (it.isActive) menuSection(it, onAction)
                     }
-                    
-                    state.services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let { 
-                        shopSection(it, onAction) 
+
+                    state.services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let {
+                        if (it.isActive) shopSection(it, onAction)
                     }
-                    
-                    state.services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()?.let { 
-                        invitationSection(it, onAction) 
+
+                    state.services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let {
+                        if (it.isActive) cvSection(it, onAction)
                     }
+
+                    state.services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()
+                        ?.let {
+                            if (it.isActive) portfolioSection(it, onAction)
+                        }
+
+                    state.services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()
+                        ?.let {
+                            if (it.isActive) invitationSection(it, onAction)
+                        }
                 }
             }
         }
-        
+
         // Dialogs
         state.deleteDialog?.let { dialogState ->
             DashboardDeleteDialog(
@@ -131,7 +162,7 @@ fun DashboardScreen(
                 onAction = onAction
             )
         }
-        
+
         // Sheets
         DashboardSheetsHandler(
             state = state,

@@ -12,8 +12,11 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -23,12 +26,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -84,8 +84,8 @@ fun HomeScaffold(
                 listOf(AppTab.DASHBOARD, AppTab.MENU)
             } else {
                 listOf(
-                    AppTab.DASHBOARD, AppTab.PROFILE, AppTab.PAY, 
-                    AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV, 
+                    AppTab.DASHBOARD, AppTab.PROFILE, AppTab.PAY,
+                    AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV,
                     AppTab.PORTFOLIO, AppTab.INVITATION
                 )
             }
@@ -93,7 +93,7 @@ fun HomeScaffold(
             visibleTabs.forEach { tab ->
                 item(
                     selected = state.currentTab == tab,
-                    onClick = { 
+                    onClick = {
                         if (tab == AppTab.MENU) {
                             onAction(HomeAction.ToggleMenu)
                         } else {
@@ -136,7 +136,7 @@ fun HomeScaffold(
                     content()
                 }
             }
-            
+
             // Mobile Menu Bottom Sheet
             if (state.isMenuSheetOpen) {
                 ModalBottomSheet(
@@ -154,22 +154,22 @@ fun HomeScaffold(
                             style = MaterialTheme.typography.titleLarge,
                             modifier = Modifier.padding(16.dp)
                         )
-                        
+
                         val menuItems = listOf(
-                            AppTab.PROFILE, AppTab.PAY, 
-                            AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV, 
+                            AppTab.PROFILE, AppTab.PAY,
+                            AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV,
                             AppTab.PORTFOLIO, AppTab.INVITATION
                         )
-                        
+
                         menuItems.forEach { tab ->
                             ListItem(
                                 headlineContent = { Text(tab.label) },
-                                leadingContent = { 
+                                leadingContent = {
                                     Icon(
-                                        imageVector = tab.icon, 
+                                        imageVector = tab.icon,
                                         contentDescription = tab.label,
                                         tint = if (state.currentTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    ) 
+                                    )
                                 },
                                 modifier = Modifier.clickable {
                                     onAction(HomeAction.SwitchTab(tab))

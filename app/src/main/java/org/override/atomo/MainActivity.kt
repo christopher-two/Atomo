@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.annotation.KoinExperimentalAPI
+import org.override.atomo.core.ui.local.LocalSharedTransitionScope
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.feature.navigation.wrapper.WrapperRootNavigation
@@ -81,6 +82,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 SharedTransitionLayout {
                     CompositionLocalProvider(
+                        value = LocalSharedTransitionScope provides this,
                         content = { WrapperRootNavigation() }
                     )
                 }

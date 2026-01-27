@@ -169,14 +169,15 @@ class HomeViewModel(
                     return
                 }
 
-                val route = when (action.type) {
-                    ServiceType.DIGITAL_MENU -> RouteApp.CreateDigitalMenu
-                    ServiceType.PORTFOLIO -> RouteApp.CreatePortfolio
-                    ServiceType.CV -> RouteApp.CreateCV
-                    ServiceType.SHOP -> RouteApp.CreateShop
-                    ServiceType.INVITATION -> RouteApp.CreateInvitation
+                // Switch to the respective tab
+                when (action.type) {
+                    ServiceType.DIGITAL_MENU -> homeNavigation.switchTab(AppTab.DIGITAL_MENU)
+                    ServiceType.PORTFOLIO -> homeNavigation.switchTab(AppTab.PORTFOLIO)
+                    ServiceType.CV -> homeNavigation.switchTab(AppTab.CV)
+                    ServiceType.SHOP -> homeNavigation.switchTab(AppTab.SHOP)
+                    ServiceType.INVITATION -> homeNavigation.switchTab(AppTab.INVITATION)
                 }
-                rootNavigation.navTo(route)
+                // No need to navTo RouteApp.Create... as the roots are now the tabs.
             }
 
             HomeAction.DismissUpgradeDialog -> {

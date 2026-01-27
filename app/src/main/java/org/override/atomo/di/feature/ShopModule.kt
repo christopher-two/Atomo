@@ -6,6 +6,7 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 import org.override.atomo.core.common.RouteApp
+import org.override.atomo.core.common.RouteMain
 import org.override.atomo.feature.shop.presentation.ShopRoot
 import org.override.atomo.feature.shop.presentation.ShopViewModel
 
@@ -13,7 +14,7 @@ val ShopModule: Module
     get() = module {
         viewModelOf(::ShopViewModel)
 
-        navigation<RouteApp.CreateShop> {
+        navigation<RouteMain.Shop> {
             ShopRoot(
                 viewModel = koinViewModel()
             )

@@ -10,19 +10,42 @@ import org.override.atomo.domain.model.Product
 import org.override.atomo.domain.model.Profile
 import org.override.atomo.domain.model.Shop
 
+data class DashboardStatistics(
+    val activeServices: Int = 0,
+    val totalViews: Int = 0,
+    val totalInteractions: Int = 0
+)
+
 data class DashboardState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
+    val isOperationLoading: Boolean = false,
     val error: String? = null,
     val profile: Profile? = null,
     val services: List<ServiceModule> = emptyList(),
-    val deleteDialog: DeleteDialogState? = null,
     val activeSheet: DashboardSheet? = null,
-    val isOperationLoading: Boolean = false,
-    val isRefreshing: Boolean = false
+    val deleteDialog: DeleteDialogState? = null,
+    val statistics: DashboardStatistics = DashboardStatistics(),
+    val shortcuts: List<DashboardShortcut> = emptyList()
 ) {
     val hasAnyServices: Boolean
-        get() = services.any { it.isActive }
+        get() = services.any {
+            when(it) {
+                is ServiceModule.MenuModule -> it.menus.isNotEmpty()
+                is ServiceModule.PortfolioModule -> it.portfolios.isNotEmpty()
+                is ServiceModule.CvModule -> it.cvs.isNotEmpty()
+                is ServiceModule.ShopModule -> it.shops.isNotEmpty()
+                is ServiceModule.InvitationModule -> it.invitations.isNotEmpty()
+            }
+        }
 }
+
+data class DashboardShortcut(
+    val id: String,
+    val title: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val action: DashboardAction
+)
 
 sealed interface DashboardEvent {
     data class ShowSnackbar(val message: String) : DashboardEvent

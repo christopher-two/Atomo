@@ -1,6 +1,13 @@
 package org.override.atomo.feature.profile.presentation.components
 
 import android.content.Intent
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,27 +32,42 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Matrix
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.graphics.shapes.CornerRounding
+import androidx.graphics.shapes.Morph
+import androidx.graphics.shapes.RoundedPolygon
+import androidx.graphics.shapes.circle
+import androidx.graphics.shapes.star
+import androidx.graphics.shapes.toPath
 import coil3.compose.AsyncImage
+import org.override.atomo.core.ui.components.MorphPolygonShape
 import org.override.atomo.domain.model.Profile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.math.max
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -56,8 +78,46 @@ fun ProfileDetailView(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-
     val profileUrl = "https://www.atomo.click/${profile.username}"
+
+    // 1. Configuración del Morphing
+    val numVertices = 12
+
+    val circlePolygon = remember {
+        RoundedPolygon.circle(
+            numVertices = numVertices,
+            radius = 1f,     // CRÍTICO: Debe ser 1f
+            centerX = 0f,    // CRÍTICO: Debe ser 0f
+            centerY = 0f     // CRÍTICO: Debe ser 0f
+        )
+    }
+
+    val cookiePolygon = remember {
+        RoundedPolygon.star(
+            numVerticesPerRadius = numVertices,
+            innerRadius = 0.5f,
+            rounding = CornerRounding(radius = 0.2f),
+            radius = 1f,     // CRÍTICO: Debe ser 1f
+            centerX = 0f,    // CRÍTICO: Debe ser 0f
+            centerY = 0f     // CRÍTICO: Debe ser 0f
+        )
+    }
+    val morph = remember(circlePolygon, cookiePolygon) {
+        Morph(circlePolygon, cookiePolygon)
+    }
+
+    // 2. Animación Infinita (Loop)
+    val infiniteTransition = rememberInfiniteTransition(label = "morphLoop")
+    // Usamos un tween más largo con una curva suave para que se sienta "expresivo"
+    val progress by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "progress"
+    )
 
     Scaffold(
         floatingActionButton = {
@@ -69,52 +129,54 @@ fun ProfileDetailView(
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .padding(
-                    horizontal = padding.calculateLeftPadding(LocalLayoutDirection.current),
-                )
+                .padding(horizontal = padding.calculateLeftPadding(LocalLayoutDirection.current))
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Avatar Placeholder (Circle)
-            if (profile.avatarUrl != null) {
-                Box(
-                    modifier = Modifier
-                        .size(156.dp)
-                        .background(
-                            MaterialTheme.colorScheme.primaryContainer,
-                            MaterialShapes.Cookie12Sided.toShape()
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
+            // AVATAR CON MORPHING INFINITO
+            Box(
+                modifier = Modifier
+                    .size(200.dp) // Tamaño total del contenedor del avatar
+                    .padding(4.dp), // Un pequeño padding para que la forma no toque los bordes exactos
+                contentAlignment = Alignment.Center
+            ) {
+                // Instanciamos la forma una vez por recomposición basada en el progreso
+                val currentAnimatedShape = MorphPolygonShape(morph, progress)
+
+                profile.avatarUrl?.let {
                     AsyncImage(
                         model = profile.avatarUrl,
                         contentDescription = "Avatar",
                         modifier = Modifier
-                            .size(128.dp)
-                            .clip(MaterialShapes.Cookie9Sided.toShape()),
+                            .fillMaxSize()
+                            // AQUI ESTABA LA CLAVE: Aplicar el clip correctamente calculado
+                            .clip(currentAnimatedShape)
+                            // Añadimos un fondo/borde sutil que también sigue la forma
+                            .background(MaterialTheme.colorScheme.primaryContainer, currentAnimatedShape)
+                            .padding(4.dp) // Padding interno entre el borde y la imagen
+                            .clip(currentAnimatedShape), // Volvemos a recortar la imagen interna
                         contentScale = ContentScale.Crop,
                     )
-                }
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(128.dp)
-                        .clip(MaterialShapes.Cookie12Sided.toShape())
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center,
-                    content = {
+                } ?: run {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(currentAnimatedShape)
+                            .background(MaterialTheme.colorScheme.primaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text(
                             text = profile.displayName?.firstOrNull()?.uppercase() ?: "@",
                             style = MaterialTheme.typography.displayLarge,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
-                )
+                }
             }
 
-            // Info
+            // Info Section (Sin cambios)
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = profile.displayName ?: "@${profile.username}",
@@ -144,7 +206,7 @@ fun ProfileDetailView(
                 )
             }
 
-            // Link Sharing Actions
+            // Link Sharing Actions (Sin cambios)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -157,10 +219,7 @@ fun ProfileDetailView(
                     onClick = {
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "Check out my profile on Atomo: $profileUrl"
-                            )
+                            putExtra(Intent.EXTRA_TEXT, "Check out my profile on Atomo: $profileUrl")
                             type = "text/plain"
                         }
                         val shareIntent = Intent.createChooser(sendIntent, null)
@@ -171,7 +230,7 @@ fun ProfileDetailView(
                 }
             }
 
-            // Social Links
+            // Social Links (Sin cambios)
             if (!profile.socialLinks.isNullOrEmpty()) {
                 Text(
                     text = "Social Links",
@@ -186,9 +245,7 @@ fun ProfileDetailView(
                         colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
                         modifier = Modifier
                             .padding(vertical = 4.dp)
-                            .clip(
-                                MaterialTheme.shapes.extraLarge
-                            ),
+                            .clip(MaterialTheme.shapes.extraLarge),
                     )
                 }
             }

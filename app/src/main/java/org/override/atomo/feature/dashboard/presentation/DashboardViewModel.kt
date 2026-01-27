@@ -22,6 +22,12 @@ import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.libs.session.api.SessionRepository
 import kotlinx.coroutines.channels.Channel
+import org.override.atomo.feature.navigation.HomeNavigation
+import org.override.atomo.feature.navigation.AppTab
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material.icons.filled.ShoppingBag
 import kotlinx.coroutines.flow.receiveAsFlow
 
 class DashboardViewModel(
@@ -32,7 +38,8 @@ class DashboardViewModel(
     private val cvUseCases: CvUseCases,
     private val shopUseCases: ShopUseCases,
     private val invitationUseCases: InvitationUseCases,
-    private val rootNavigation: RootNavigation
+    private val rootNavigation: RootNavigation,
+    private val homeNavigation: HomeNavigation
 ) : ViewModel() {
 
     companion object {
@@ -113,12 +120,12 @@ class DashboardViewModel(
             DashboardAction.DismissDeleteDialog -> _state.update { it.copy(deleteDialog = null) }
             DashboardAction.ConfirmDelete -> deleteService()
             
-            // Create new services
-            DashboardAction.CreateMenu -> rootNavigation.navTo(RouteApp.CreateDigitalMenu)
-            DashboardAction.CreatePortfolio -> rootNavigation.navTo(RouteApp.CreatePortfolio)
-            DashboardAction.CreateCv -> rootNavigation.navTo(RouteApp.CreateCV)
-            DashboardAction.CreateShop -> rootNavigation.navTo(RouteApp.CreateShop)
-            DashboardAction.CreateInvitation -> rootNavigation.navTo(RouteApp.CreateInvitation)
+            // Create new services (Switch to tab)
+            DashboardAction.CreateMenu -> homeNavigation.switchTab(AppTab.DIGITAL_MENU)
+            DashboardAction.CreatePortfolio -> homeNavigation.switchTab(AppTab.PORTFOLIO)
+            DashboardAction.CreateCv -> homeNavigation.switchTab(AppTab.CV)
+            DashboardAction.CreateShop -> homeNavigation.switchTab(AppTab.SHOP)
+            DashboardAction.CreateInvitation -> homeNavigation.switchTab(AppTab.INVITATION)
         }
     }
     
@@ -256,10 +263,42 @@ class DashboardViewModel(
                 
                 services.toList()
             }.collect { services ->
+                val activeServicesCount = services.count { it.isActive }
+                
+                // TODO: Replace with real analytics
+                val stats = DashboardStatistics(
+                    activeServices = activeServicesCount,
+                    totalViews = 0,
+                    totalInteractions = 0
+                )
+                
+                val shortcuts = listOf(
+                    DashboardShortcut(
+                        id = "create_menu",
+                        title = "Crear Menú",
+                        icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
+                        action = DashboardAction.CreateMenu
+                    ),
+                    DashboardShortcut(
+                        id = "create_shop",
+                        title = "Crear Tienda",
+                        icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
+                        action = DashboardAction.CreateShop
+                    ),
+                    DashboardShortcut(
+                        id = "create_cv",
+                        title = "Crear CV",
+                        icon = androidx.compose.material.icons.Icons.Filled.Description,
+                        action = DashboardAction.CreateCv
+                    )
+                )
+
                 _state.update { 
                     it.copy(
                         isLoading = false,
-                        services = services 
+                        services = services,
+                        statistics = stats,
+                        shortcuts = shortcuts
                     ) 
                 }
 

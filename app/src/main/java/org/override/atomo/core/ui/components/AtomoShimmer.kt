@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -29,11 +30,11 @@ fun Modifier.shimmerEffect(
     durationMillis: Int = 1000,
 ): Modifier = composed {
     val shimmerColors = listOf(
-        Color.White.copy(alpha = 0.3f),
-        Color.White.copy(alpha = 0.5f),
-        Color.White.copy(alpha = 1.0f),
-        Color.White.copy(alpha = 0.5f),
-        Color.White.copy(alpha = 0.3f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.3f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
+        colorScheme.surfaceContainerLow.copy(alpha = 1.0f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.3f),
     )
 
     val transition = rememberInfiniteTransition(label = "")
@@ -65,7 +66,7 @@ fun Modifier.shimmerEffect(
 fun ShimmerItem(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(4.dp),
-    color: Color = Color.LightGray.copy(alpha = 0.3f)
+    color: Color = colorScheme.surfaceContainerLowest.copy(alpha = 0.8f)
 ) {
     Box(
         modifier = modifier

@@ -3,6 +3,8 @@ package org.override.atomo.feature.shop.presentation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import org.override.atomo.core.ui.components.UpgradePlanScreen
+import org.override.atomo.feature.shop.presentation.components.ShopShimmer
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -56,8 +58,10 @@ fun ShopScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onAction(ShopAction.CreateShop) }) {
-                Icon(Icons.Default.Add, contentDescription = "Create Shop")
+            if (state.canCreate && !state.limitReached) {
+                FloatingActionButton(onClick = { onAction(ShopAction.CreateShop) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create Shop")
+                }
             }
         }
     ) { paddingValues ->
@@ -66,16 +70,24 @@ fun ShopScreen(
                 ShopShimmer()
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(state.shops) { shop ->
-                    ShopItem(shop = shop, onAction = onAction)
+            if (state.shops.isEmpty() && state.limitReached) {
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    UpgradePlanScreen(
+                        onUpgradeClick = { onAction(ShopAction.UpgradePlan) }
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(state.shops) { shop ->
+                        ShopItem(shop = shop, onAction = onAction)
+                    }
                 }
             }
         }

@@ -10,10 +10,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.domain.model.Shop
 import org.override.atomo.domain.usecase.shop.ShopUseCases
+import org.override.atomo.domain.usecase.subscription.CanCreateResult
+import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
+import org.override.atomo.feature.home.presentation.ServiceType
 import java.util.UUID
 
+
 class ShopViewModel(
-    private val shopUseCases: ShopUseCases
+    private val shopUseCases: ShopUseCases,
+    private val canCreateServiceUseCase: CanCreateServiceUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ShopState())
@@ -30,6 +35,7 @@ class ShopViewModel(
             is ShopAction.CreateShop -> createShop()
             is ShopAction.DeleteShop -> deleteShop(action.id)
             is ShopAction.OpenShop -> { /* Handle navigation */ }
+            is ShopAction.UpgradePlan -> { /* Handle navigation to pay/subscription */ }
         }
     }
 
@@ -37,17 +43,39 @@ class ShopViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val userId = "test_user_id" // TODO
-            shopUseCases.getShops(userId).collect { list ->
-                _state.update { it.copy(isLoading = false, shops = list) }
+            
+            launch {
+                shopUseCases.getShops(userId).collect { list ->
+                    _state.update { it.copy(shops = list) }
+                    checkCreationLimit(userId)
+                }
             }
+        }
+    }
+    
+    private suspend fun checkCreationLimit(userId: String) {
+        val result = canCreateServiceUseCase(userId, ServiceType.SHOP)
+        _state.update { 
+            it.copy(
+                isLoading = false,
+                canCreate = result is CanCreateResult.Success,
+                limitReached = result is CanCreateResult.TotalLimitReached || result is CanCreateResult.ServiceTypeExists
+            )
         }
     }
 
     private fun createShop() {
         viewModelScope.launch {
+            val userId = "test_user_id" // TODO
+            
+            val result = canCreateServiceUseCase(userId, ServiceType.SHOP)
+            if (result !is CanCreateResult.Success) {
+                return@launch
+            }
+            
             val newShop = Shop(
                 id = UUID.randomUUID().toString(),
-                userId = "test_user_id",
+                userId = userId,
                 name = "My Shop",
                 description = "My awesome shop",
                 isActive = true,

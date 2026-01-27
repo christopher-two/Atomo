@@ -4,4 +4,5 @@ sealed interface PortfolioAction {
     data object CreatePortfolio : PortfolioAction
     data class DeletePortfolio(val id: String) : PortfolioAction
     data class OpenPortfolio(val id: String) : PortfolioAction
+    data object UpgradePlan : PortfolioAction
 }

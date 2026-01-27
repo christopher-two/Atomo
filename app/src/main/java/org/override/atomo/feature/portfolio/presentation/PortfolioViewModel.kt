@@ -10,10 +10,15 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
+import org.override.atomo.domain.usecase.subscription.CanCreateResult
+import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
+import org.override.atomo.feature.home.presentation.ServiceType
 import java.util.UUID
 
+
 class PortfolioViewModel(
-    private val portfolioUseCases: PortfolioUseCases
+    private val portfolioUseCases: PortfolioUseCases,
+    private val canCreateServiceUseCase: CanCreateServiceUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PortfolioState())
@@ -30,6 +35,7 @@ class PortfolioViewModel(
             is PortfolioAction.CreatePortfolio -> createPortfolio()
             is PortfolioAction.DeletePortfolio -> deletePortfolio(action.id)
             is PortfolioAction.OpenPortfolio -> { /* Handle navigation */ }
+            is PortfolioAction.UpgradePlan -> { /* Handle navigation to pay/subscription */ }
         }
     }
 
@@ -37,17 +43,39 @@ class PortfolioViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val userId = "test_user_id" // TODO
-            portfolioUseCases.getPortfolios(userId).collect { list ->
-                _state.update { it.copy(isLoading = false, portfolios = list) }
+            
+            launch {
+                portfolioUseCases.getPortfolios(userId).collect { list ->
+                    _state.update { it.copy(portfolios = list) }
+                    checkCreationLimit(userId)
+                }
             }
+        }
+    }
+    
+    private suspend fun checkCreationLimit(userId: String) {
+        val result = canCreateServiceUseCase(userId, ServiceType.PORTFOLIO)
+        _state.update { 
+            it.copy(
+                isLoading = false,
+                canCreate = result is CanCreateResult.Success,
+                limitReached = result is CanCreateResult.TotalLimitReached || result is CanCreateResult.ServiceTypeExists
+            )
         }
     }
 
     private fun createPortfolio() {
         viewModelScope.launch {
+            val userId = "test_user_id" // TODO
+            
+            val result = canCreateServiceUseCase(userId, ServiceType.PORTFOLIO)
+            if (result !is CanCreateResult.Success) {
+                return@launch
+            }
+            
             val newPortfolio = Portfolio(
                 id = UUID.randomUUID().toString(),
-                userId = "test_user_id",
+                userId = userId,
                 title = "My Porfolio",
                 description = "My awesome work",
                 isVisible = true,

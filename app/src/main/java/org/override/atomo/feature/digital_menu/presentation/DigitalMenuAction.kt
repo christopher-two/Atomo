@@ -20,4 +20,5 @@ sealed interface DigitalMenuAction {
     ) : DigitalMenuAction
 
     data class DeleteDish(val dish: Dish) : DigitalMenuAction
+    data object UpgradePlan : DigitalMenuAction
 }

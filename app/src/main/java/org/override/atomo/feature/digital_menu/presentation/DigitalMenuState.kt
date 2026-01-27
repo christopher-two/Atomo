@@ -10,5 +10,7 @@ data class DigitalMenuState(
     val error: String? = null,
     val isSaved: Boolean = false,
     val isDishDialogVisible: Boolean = false,
-    val dishToEdit: Dish? = null
+    val dishToEdit: Dish? = null,
+    val existingMenuId: String? = null,
+    val limitReached: Boolean = false
 )

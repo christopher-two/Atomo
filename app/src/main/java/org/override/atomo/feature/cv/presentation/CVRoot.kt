@@ -1,6 +1,7 @@
 package org.override.atomo.feature.cv.presentation
 
 import androidx.compose.foundation.layout.Box
+import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.feature.cv.presentation.components.CvShimmer
 
 import androidx.compose.foundation.layout.Arrangement
@@ -60,8 +61,10 @@ fun CVScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onAction(CVAction.CreateCv) }) {
-                Icon(Icons.Default.Add, contentDescription = "Create CV")
+            if (state.canCreate && !state.limitReached) {
+                FloatingActionButton(onClick = { onAction(CVAction.CreateCv) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create CV")
+                }
             }
         }
     ) { paddingValues ->
@@ -70,16 +73,24 @@ fun CVScreen(
                 CvShimmer()
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(state.cvs) { cv ->
-                    CvItem(cv = cv, onAction = onAction)
+            if (state.cvs.isEmpty() && state.limitReached) {
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    UpgradePlanScreen(
+                        onUpgradeClick = { onAction(CVAction.UpgradePlan) }
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(state.cvs) { cv ->
+                        CvItem(cv = cv, onAction = onAction)
+                    }
                 }
             }
         }

@@ -5,6 +5,7 @@ import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import org.override.atomo.core.ui.components.UpgradePlanScreen
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -168,42 +169,50 @@ fun DigitalMenuScreen(
                 DigitalMenuShimmer()
             }
         } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // General Info Section
-                Text(
-                    text = "General Information",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-                )
+            if (state.limitReached && state.existingMenuId == null) {
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    UpgradePlanScreen(
+                        onUpgradeClick = { onAction(DigitalMenuAction.UpgradePlan) }
+                    )
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // General Info Section
+                    Text(
+                        text = "General Information",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
+                    )
 
-                AtomoTextField(
-                    value = state.menuName,
-                    onValueChange = { newValue ->
-                        onAction(DigitalMenuAction.UpdateName(newValue))
-                    },
-                    label = { Text("Menu Name") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    AtomoTextField(
+                        value = state.menuName,
+                        onValueChange = { newValue ->
+                            onAction(DigitalMenuAction.UpdateName(newValue))
+                        },
+                        label = { Text("Menu Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                AtomoTextField(
-                    value = state.menuDescription,
-                    onValueChange = { newValue ->
-                        onAction(DigitalMenuAction.UpdateDescription(newValue))
-                    },
-                    label = { Text("Description") },
-                    modifier = Modifier.fillMaxWidth(),
-                    minLines = 3
-                )
+                    AtomoTextField(
+                        value = state.menuDescription,
+                        onValueChange = { newValue ->
+                            onAction(DigitalMenuAction.UpdateDescription(newValue))
+                        },
+                        label = { Text("Description") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 3
+                    )
+                }
             }
         }
     }

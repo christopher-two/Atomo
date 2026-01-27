@@ -1,6 +1,7 @@
 package org.override.atomo.feature.portfolio.presentation
 
 import androidx.compose.foundation.layout.Box
+import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.feature.portfolio.presentation.components.PortfolioShimmer
 
 import androidx.compose.foundation.layout.Arrangement
@@ -57,8 +58,10 @@ fun PortfolioScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onAction(PortfolioAction.CreatePortfolio) }) {
-                Icon(Icons.Default.Add, contentDescription = "Create Portfolio")
+            if (state.canCreate && !state.limitReached) {
+                FloatingActionButton(onClick = { onAction(PortfolioAction.CreatePortfolio) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create Portfolio")
+                }
             }
         }
     ) { paddingValues ->
@@ -67,16 +70,24 @@ fun PortfolioScreen(
                 PortfolioShimmer()
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(state.portfolios) { portfolio ->
-                    PortfolioItem(portfolio = portfolio, onAction = onAction)
+            if (state.portfolios.isEmpty() && state.limitReached) {
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    UpgradePlanScreen(
+                        onUpgradeClick = { onAction(PortfolioAction.UpgradePlan) }
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(state.portfolios) { portfolio ->
+                        PortfolioItem(portfolio = portfolio, onAction = onAction)
+                    }
                 }
             }
         }

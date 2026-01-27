@@ -1,6 +1,7 @@
 package org.override.atomo.feature.invitation.presentation
 
 import androidx.compose.foundation.layout.Box
+import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.feature.invitation.presentation.components.InvitationShimmer
 
 import androidx.compose.foundation.layout.Arrangement
@@ -57,8 +58,10 @@ fun InvitationScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { onAction(InvitationAction.CreateInvitation) }) {
-                Icon(Icons.Default.Add, contentDescription = "Create Invitation")
+            if (state.canCreate && !state.limitReached) {
+                FloatingActionButton(onClick = { onAction(InvitationAction.CreateInvitation) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create Invitation")
+                }
             }
         }
     ) { paddingValues ->
@@ -67,16 +70,24 @@ fun InvitationScreen(
                 InvitationShimmer()
             }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(state.invitations) { invitation ->
-                    InvitationItem(invitation = invitation, onAction = onAction)
+            if (state.invitations.isEmpty() && state.limitReached) {
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    UpgradePlanScreen(
+                        onUpgradeClick = { onAction(InvitationAction.UpgradePlan) }
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(state.invitations) { invitation ->
+                        InvitationItem(invitation = invitation, onAction = onAction)
+                    }
                 }
             }
         }

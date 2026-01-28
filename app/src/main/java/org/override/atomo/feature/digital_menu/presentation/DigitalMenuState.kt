@@ -4,13 +4,17 @@ import org.override.atomo.domain.model.Dish
 
 data class DigitalMenuState(
     val isLoading: Boolean = false,
-    val menuName: String = "",
-    val menuDescription: String = "",
-    val dishes: List<Dish> = emptyList(),
+    val menus: List<org.override.atomo.domain.model.Menu> = emptyList(),
     val error: String? = null,
-    val isSaved: Boolean = false,
+    val canCreate: Boolean = false,
+    val limitReached: Boolean = false,
+
+    // Editor State
+    val isEditing: Boolean = false,
+    val editingMenu: org.override.atomo.domain.model.Menu? = null,
+    val showPreviewSheet: Boolean = false,
+    
+    // Dish Editor State (kept for dialogs)
     val isDishDialogVisible: Boolean = false,
-    val dishToEdit: Dish? = null,
-    val existingMenuId: String? = null,
-    val limitReached: Boolean = false
+    val dishToEdit: Dish? = null
 )

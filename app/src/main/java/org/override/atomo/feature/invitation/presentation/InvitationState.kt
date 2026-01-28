@@ -5,5 +5,10 @@ data class InvitationState(
     val invitations: List<org.override.atomo.domain.model.Invitation> = emptyList(),
     val error: String? = null,
     val canCreate: Boolean = false,
-    val limitReached: Boolean = false
+    val limitReached: Boolean = false,
+    
+    // Editor State
+    val isEditing: Boolean = false,
+    val editingInvitation: org.override.atomo.domain.model.Invitation? = null,
+    val showPreviewSheet: Boolean = false
 )

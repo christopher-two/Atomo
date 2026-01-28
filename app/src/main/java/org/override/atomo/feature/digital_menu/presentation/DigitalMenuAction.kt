@@ -3,12 +3,20 @@ package org.override.atomo.feature.digital_menu.presentation
 import org.override.atomo.domain.model.Dish
 
 sealed interface DigitalMenuAction {
-    data class UpdateName(val name: String) : DigitalMenuAction
-    data class UpdateDescription(val description: String) : DigitalMenuAction
+    data object CreateMenu : DigitalMenuAction
+    data class DeleteMenu(val id: String) : DigitalMenuAction
+    data class OpenMenu(val id: String) : DigitalMenuAction
+    data object UpgradePlan : DigitalMenuAction
+
+    // Editor Actions
+    data object ToggleEditMode : DigitalMenuAction
+    data class UpdateEditingMenu(val menu: org.override.atomo.domain.model.Menu) : DigitalMenuAction
     data object SaveMenu : DigitalMenuAction
+    data object CancelEdit : DigitalMenuAction
+    data class TogglePreviewSheet(val show: Boolean) : DigitalMenuAction
     data object Back : DigitalMenuAction
 
-    // Dish Actions
+    // Dish Actions (Sub-actions for editing menu)
     data object OpenAddDishDialog : DigitalMenuAction
     data class OpenEditDishDialog(val dish: Dish) : DigitalMenuAction
     data object CloseDishDialog : DigitalMenuAction
@@ -18,7 +26,5 @@ sealed interface DigitalMenuAction {
         val price: Double,
         val imageUrl: String?
     ) : DigitalMenuAction
-
     data class DeleteDish(val dish: Dish) : DigitalMenuAction
-    data object UpgradePlan : DigitalMenuAction
 }

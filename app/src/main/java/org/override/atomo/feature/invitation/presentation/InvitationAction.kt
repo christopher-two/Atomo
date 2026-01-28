@@ -5,4 +5,12 @@ sealed interface InvitationAction {
     data class DeleteInvitation(val id: String) : InvitationAction
     data class OpenInvitation(val id: String) : InvitationAction
     data object UpgradePlan : InvitationAction
+    
+    // Editor Actions
+    data object ToggleEditMode : InvitationAction
+    data class UpdateEditingInvitation(val invitation: org.override.atomo.domain.model.Invitation) : InvitationAction
+    data object SaveInvitation : InvitationAction
+    data object CancelEdit : InvitationAction
+    data class TogglePreviewSheet(val show: Boolean) : InvitationAction
+    data object Back : InvitationAction
 }

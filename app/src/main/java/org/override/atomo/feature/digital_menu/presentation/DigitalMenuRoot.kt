@@ -2,40 +2,46 @@ package org.override.atomo.feature.digital_menu.presentation
 
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import org.override.atomo.core.ui.components.UpgradePlanScreen
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FabPosition
-import androidx.compose.material3.HorizontalFloatingToolbar
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -43,9 +49,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
+import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoTextField
+import org.override.atomo.core.ui.components.UpgradePlanScreen
+import org.override.atomo.core.ui.components.service.ColorPickerField
+import org.override.atomo.core.ui.components.service.EditableSection
+import org.override.atomo.core.ui.components.service.FontSelector
+import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
+import org.override.atomo.domain.model.Dish
+import org.override.atomo.domain.model.Menu
 import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer
 
 @Composable
@@ -54,216 +68,302 @@ fun DigitalMenuRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    DigitalMenuScreen(
+    DigitalMenuContent(
         state = state,
         onAction = viewModel::onAction
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DigitalMenuScreen(
+fun DigitalMenuContent(
     state: DigitalMenuState,
     onAction: (DigitalMenuAction) -> Unit,
 ) {
-    // Mantener referencia al WebView y flag de carga en estado Compose (editor)
-    val webViewState = remember { mutableStateOf<WebView?>(null) }
-    val pageLoaded = remember { mutableStateOf(false) }
-    val pendingPreview = remember { mutableStateOf<String?>(null) }
+    BackHandler(enabled = state.editingMenu != null) {
+        onAction(DigitalMenuAction.Back)
+    }
 
-    // Preview bottom sheet states
-    val showPreviewSheet = remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    // Preview Logic
     val previewWebViewState = remember { mutableStateOf<WebView?>(null) }
     val previewPageLoaded = remember { mutableStateOf(false) }
-    val previewPendingPreview = remember { mutableStateOf<String?>(null) }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    // Función auxiliar para construir JSON seguro
-    fun buildPreviewJson(name: String, description: String): String {
+    fun buildPreviewJson(menu: Menu): String {
         return JSONObject().apply {
-            put("name", name)
-            put("description", description)
+            put("name", menu.name)
+            put("description", menu.description)
+            put("primaryColor", menu.primaryColor)
+            put("fontFamily", menu.fontFamily)
         }.toString()
     }
 
-    // Intenta enviar el preview al WebView del editor; si no está cargada, lo deja pendiente
-    fun trySendPreviewToEditor(json: String) {
-        val wv = webViewState.value
-        if (wv != null && pageLoaded.value) {
-            wv.post {
-                wv.evaluateJavascript("updatePreview($json)", null)
-            }
-            pendingPreview.value = null
-        } else {
-            pendingPreview.value = json
-        }
-    }
-
-    // Intenta enviar el preview al WebView del preview sheet; si no está cargada, lo deja pendiente
-    fun trySendPreviewToSheet(json: String) {
+    fun updatePreview(json: String) {
         val wv = previewWebViewState.value
         if (wv != null && previewPageLoaded.value) {
-            wv.post {
-                wv.evaluateJavascript("updatePreview($json)", null)
-            }
-            previewPendingPreview.value = null
-        } else {
-            previewPendingPreview.value = json
+            wv.post { wv.evaluateJavascript("updatePreview($json)", null) }
         }
     }
 
-    // Envía a ambos (editor + sheet)
-    fun trySendPreviewToAll(json: String) {
-        trySendPreviewToEditor(json)
-        trySendPreviewToSheet(json)
+    LaunchedEffect(state.editingMenu) {
+        state.editingMenu?.let {
+            delay(300)
+            updatePreview(buildPreviewJson(it))
+        }
     }
 
-    AtomoScaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Create Menu") },
-                navigationIcon = {
-                    IconButton(onClick = { onAction(DigitalMenuAction.Back) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+    if (state.editingMenu == null) {
+        DigitalMenuListScreen(state, onAction)
+    } else {
+        val menu = state.editingMenu!!
+        
+        AtomoScaffold(
+            topBar = {
+                 TopAppBar(title = { Text(if (state.isEditing) "Edit Menu" else menu.name) })
+            },
+            floatingActionButton = {
+                 ServiceToolbar(
+                     isEditing = state.isEditing,
+                     onBack = { onAction(DigitalMenuAction.Back) },
+                     onEditVerify = { 
+                         if (state.isEditing) onAction(DigitalMenuAction.SaveMenu) 
+                         else onAction(DigitalMenuAction.ToggleEditMode) 
+                     },
+                     onPreview = { onAction(DigitalMenuAction.TogglePreviewSheet(true)) },
+                 )
+            }
+        ) { paddingValues ->
+             Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                 // General Info
+                EditableSection(title = "General Information", isEditing = state.isEditing) {
+                    if (state.isEditing) {
+                        AtomoTextField(
+                            value = menu.name,
+                            onValueChange = { onAction(DigitalMenuAction.UpdateEditingMenu(menu.copy(name = it))) },
+                            label = { Text("Menu Name") },
+                            modifier = Modifier.fillMaxWidth()
                         )
+                        AtomoTextField(
+                            value = menu.description ?: "",
+                            onValueChange = { onAction(DigitalMenuAction.UpdateEditingMenu(menu.copy(description = it))) },
+                            label = { Text("Description") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3
+                        )
+                    } else {
+                        Text(menu.name, style = MaterialTheme.typography.headlineSmall)
+                        Text(menu.description ?: "No description", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+                
+                // Appearance
+                EditableSection(title = "Appearance", isEditing = state.isEditing) {
+                    if (state.isEditing) {
+                         ColorPickerField(
+                             selectedColor = menu.primaryColor,
+                             onColorSelected = { onAction(DigitalMenuAction.UpdateEditingMenu(menu.copy(primaryColor = it))) }
+                         )
+                         FontSelector(
+                             selectedFont = menu.fontFamily,
+                             onFontSelected = { onAction(DigitalMenuAction.UpdateEditingMenu(menu.copy(fontFamily = it))) },
+                             modifier = Modifier.padding(top = 16.dp)
+                         )
+                    } else {
+                        Text("Primary Color: ${menu.primaryColor}")
+                        Text("Font: ${menu.fontFamily}")
+                    }
+                }
+                
+                // Menu Items (Dishes)
+                EditableSection(title = "Menu Items", isEditing = state.isEditing) {
+                    if (menu.dishes.isEmpty()) {
+                        Text("No items yet.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            menu.dishes.forEach { dish ->
+                                AtomoCard(modifier = Modifier.fillMaxWidth()) {
+                                    Row(
+                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(dish.name, fontWeight = FontWeight.Bold)
+                                            Text("${dish.price}", style = MaterialTheme.typography.bodyMedium)
+                                        }
+                                        if (state.isEditing) {
+                                            Row {
+                                                IconButton(onClick = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) }) {
+                                                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                                                }
+                                                IconButton(onClick = { onAction(DigitalMenuAction.DeleteDish(dish)) }) {
+                                                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (state.isEditing) {
+                        Button(
+                            onClick = { onAction(DigitalMenuAction.OpenAddDishDialog) },
+                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                            Text("Add Dish")
+                        }
+                    }
+                }
+                
+                 Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.2f))
+            }
+        }
+    }
+    
+    // Dish Dialog
+    if (state.isDishDialogVisible) {
+        DishDialog(
+            dish = state.dishToEdit,
+            onDismiss = { onAction(DigitalMenuAction.CloseDishDialog) },
+            onSave = { name, desc, price, img ->
+                onAction(DigitalMenuAction.SaveDish(name, desc, price, img))
+            }
+        )
+    }
+
+    if (state.showPreviewSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { onAction(DigitalMenuAction.TogglePreviewSheet(false)) },
+            sheetState = sheetState
+        ) {
+            AndroidView(
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                super.onPageFinished(view, url)
+                                previewPageLoaded.value = true
+                                state.editingMenu?.let { updatePreview(buildPreviewJson(it)) }
+                            }
+                        }
+                        loadUrl("https://atomo.click/preview/elegance") // Or menu specific
+                        previewWebViewState.value = this
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground
-                )
+                modifier = Modifier.fillMaxSize()
             )
+        }
+    }
+}
+
+@Composable
+fun DishDialog(
+    dish: Dish?,
+    onDismiss: () -> Unit,
+    onSave: (String, String, Double, String?) -> Unit
+) {
+    var name by remember { mutableStateOf(dish?.name ?: "") }
+    var description by remember { mutableStateOf(dish?.description ?: "") }
+    var price by remember { mutableStateOf(dish?.price?.toString() ?: "") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (dish == null) "Add Dish" else "Edit Dish") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                AtomoTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
+                AtomoTextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
+                AtomoTextField(value = price, onValueChange = { price = it }, label = { Text("Price") })
+            }
         },
-        floatingActionButtonPosition = FabPosition.Center,
+        confirmButton = {
+            Button(onClick = {
+                val priceVal = price.toDoubleOrNull() ?: 0.0
+                onSave(name, description, priceVal, null)
+            }) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+fun DigitalMenuListScreen(state: DigitalMenuState, onAction: (DigitalMenuAction) -> Unit) {
+    AtomoScaffold(
         floatingActionButton = {
-            HorizontalFloatingToolbar(
-                expanded = true,
-                modifier = Modifier.padding(16.dp),
-            ) {
-                IconButton(
-                    onClick = { onAction(DigitalMenuAction.Back) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Back"
-                    )
-                }
-                IconButton(
-                    onClick = { onAction(DigitalMenuAction.SaveMenu) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = "Back"
-                    )
-                }
-                IconButton(onClick = { showPreviewSheet.value = true }) {
-                    Icon(imageVector = Icons.Default.Visibility, contentDescription = "Preview")
+            if (state.canCreate && !state.limitReached) {
+                FloatingActionButton(onClick = { onAction(DigitalMenuAction.CreateMenu) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Create Menu")
                 }
             }
         }
     ) { paddingValues ->
-        if (state.isLoading) {
+        if (state.isLoading && state.menus.isEmpty()) {
             Box(modifier = Modifier.padding(paddingValues)) {
                 DigitalMenuShimmer()
             }
         } else {
-            if (state.limitReached && state.existingMenuId == null) {
+            if (state.menus.isEmpty() && state.limitReached) {
                 Box(modifier = Modifier.padding(paddingValues)) {
                     UpgradePlanScreen(
                         onUpgradeClick = { onAction(DigitalMenuAction.UpgradePlan) }
                     )
                 }
             } else {
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .padding(horizontal = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
-                    // General Info Section
-                    Text(
-                        text = "General Information",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)
-                    )
-
-                    AtomoTextField(
-                        value = state.menuName,
-                        onValueChange = { newValue ->
-                            onAction(DigitalMenuAction.UpdateName(newValue))
-                        },
-                        label = { Text("Menu Name") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    AtomoTextField(
-                        value = state.menuDescription,
-                        onValueChange = { newValue ->
-                            onAction(DigitalMenuAction.UpdateDescription(newValue))
-                        },
-                        label = { Text("Description") },
-                        modifier = Modifier.fillMaxWidth(),
-                        minLines = 3
-                    )
+                    items(state.menus) { menu ->
+                        DigitalMenuItem(menu = menu, onAction = onAction)
+                    }
                 }
             }
         }
     }
+}
 
-    if (state.isLoading) {
-        DigitalMenuShimmer()
-    } else {   }
-
-    // Bottom sheet full-screen preview
-    if (showPreviewSheet.value) {
-        ModalBottomSheet(
-            onDismissRequest = { showPreviewSheet.value = false },
-            sheetState = sheetState
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                AndroidView(
-                    factory = { context ->
-                        WebView(context).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            webViewClient = object : WebViewClient() {
-                                override fun onPageFinished(view: WebView?, url: String?) {
-                                    super.onPageFinished(view, url)
-                                    previewPageLoaded.value = true
-                                    // Si hay preview pendiente, enviarlo ahora
-                                    previewPendingPreview.value?.let { trySendPreviewToSheet(it) }
-                                }
-                            }
-                            loadUrl("https://atomo.click/preview/elegance")
-                            previewWebViewState.value = this
-                        }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight()
-                )
-            }
+@Composable
+fun DigitalMenuItem(
+    menu: Menu,
+    onAction: (DigitalMenuAction) -> Unit
+) {
+    AtomoCard(
+        onClick = { onAction(DigitalMenuAction.OpenMenu(menu.id)) },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = menu.name,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = if (menu.isActive) "Active" else "Inactive",
+                style = MaterialTheme.typography.bodyMedium
+            )
+             // Add delete if needed, but not in original? Added for consistency
+             IconButton(onClick = { onAction(DigitalMenuAction.DeleteMenu(menu.id)) }) {
+                 Icon(Icons.Default.Delete, contentDescription = "Delete Menu")
+             }
         }
-    }
-
-    // Observa los cambios en el estado y envía actualizaciones con debounce
-    LaunchedEffect(state.menuName, state.menuDescription) {
-        // Debounce corto para agrupar cambios rápidos
-        delay(300)
-        val json = buildPreviewJson(state.menuName, state.menuDescription)
-        trySendPreviewToAll(json)
     }
 }
 
@@ -271,7 +371,7 @@ fun DigitalMenuScreen(
 @Composable
 private fun Preview() {
     AtomoTheme {
-        DigitalMenuScreen(
+        DigitalMenuContent(
             state = DigitalMenuState(),
             onAction = {}
         )

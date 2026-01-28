@@ -9,6 +9,7 @@ import org.override.atomo.domain.usecase.portfolio.*
 import org.override.atomo.domain.usecase.profile.*
 import org.override.atomo.domain.usecase.shop.*
 import org.override.atomo.domain.usecase.subscription.*
+import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 
 val UseCaseModule = module {
     // Profile
@@ -91,4 +92,8 @@ val UseCaseModule = module {
     singleOf(::GetServiceLimitsUseCase)
     singleOf(::CanCreateServiceUseCase)
     singleOf(::GetExistingServicesUseCase)
+    
+    // Sync
+    // Sync
+    singleOf(::SyncAllServicesUseCase)
 }

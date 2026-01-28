@@ -27,7 +27,7 @@ class AuthViewModel : ViewModel() {
 
     fun onAction(action: AuthAction) {
         when (action) {
-            else -> TODO("Handle actions")
+            else -> println("AuthViewModel: Unhandled action $action")
         }
     }
 

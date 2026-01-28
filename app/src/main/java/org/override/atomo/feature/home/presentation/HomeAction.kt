@@ -1,6 +1,7 @@
 package org.override.atomo.feature.home.presentation
 
 import org.override.atomo.feature.navigation.AppTab
+import org.override.atomo.domain.model.ServiceType
 
 sealed interface HomeAction {
     data object ToggleFab : HomeAction
@@ -12,12 +13,4 @@ sealed interface HomeAction {
     data object DismissUpgradeDialog : HomeAction
     data object NavigateToPay : HomeAction
     data object ToggleMenu : HomeAction
-}
-
-enum class ServiceType {
-    DIGITAL_MENU,
-    PORTFOLIO,
-    CV,
-    SHOP,
-    INVITATION
 }

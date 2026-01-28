@@ -12,13 +12,16 @@ import org.override.atomo.domain.model.Invitation
 import org.override.atomo.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.libs.session.api.SessionRepository
+import kotlinx.coroutines.flow.first
 import java.util.UUID
 
 
 class InvitationViewModel(
     private val invitationUseCases: InvitationUseCases,
-    private val canCreateServiceUseCase: CanCreateServiceUseCase
+    private val canCreateServiceUseCase: CanCreateServiceUseCase,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(InvitationState())
@@ -42,10 +45,16 @@ class InvitationViewModel(
     private fun loadInvitations() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val userId = "test_user_id" // TODO: Get actual userId from session/auth
+            val userId = sessionRepository.getCurrentUserId().first()
+            
+            if (userId == null) {
+                // Handle not logged in or return
+                _state.update { it.copy(isLoading = false) }
+                return@launch
+            }
             
             launch {
-                invitationUseCases.getInvitations(userId).collect { list ->
+                 invitationUseCases.getInvitations(userId).collect { list ->
                     _state.update { it.copy(invitations = list) }
                     checkCreationLimit(userId)
                 }
@@ -66,7 +75,7 @@ class InvitationViewModel(
 
     private fun createInvitation() {
         viewModelScope.launch {
-            val userId = "test_user_id" // TODO
+            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
             
             // Re-check just in case
             val result = canCreateServiceUseCase(userId, ServiceType.INVITATION)

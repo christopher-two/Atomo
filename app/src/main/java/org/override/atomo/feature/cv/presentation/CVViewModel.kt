@@ -12,13 +12,16 @@ import org.override.atomo.domain.model.Cv
 import org.override.atomo.domain.usecase.cv.CvUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.libs.session.api.SessionRepository
+import kotlinx.coroutines.flow.first
 import java.util.UUID
 
 
 class CVViewModel(
     private val cvUseCases: CvUseCases,
-    private val canCreateServiceUseCase: CanCreateServiceUseCase
+    private val canCreateServiceUseCase: CanCreateServiceUseCase,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CVState())
@@ -45,7 +48,12 @@ class CVViewModel(
     private fun loadData() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val userId = "test_user_id" // TODO: Get actual userId from session/auth
+            val userId = sessionRepository.getCurrentUserId().first() 
+
+            if (userId == null) {
+                 _state.update { it.copy(isLoading = false) }
+                 return@launch
+            }
 
             // Load CVs
             launch {
@@ -70,7 +78,7 @@ class CVViewModel(
 
     private fun createCv() {
         viewModelScope.launch {
-            val userId = "test_user_id" // TODO: Real user
+            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
 
             // Re-check just in case
             val result = canCreateServiceUseCase(userId, ServiceType.CV)

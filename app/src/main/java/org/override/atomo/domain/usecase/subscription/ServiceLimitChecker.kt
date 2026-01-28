@@ -8,7 +8,7 @@ import org.override.atomo.domain.repository.MenuRepository
 import org.override.atomo.domain.repository.PortfolioRepository
 import org.override.atomo.domain.repository.ShopRepository
 import org.override.atomo.domain.repository.SubscriptionRepository
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
 
 /**
  * Data class representing service limits based on subscription plan.

@@ -31,7 +31,7 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

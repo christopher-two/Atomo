@@ -12,13 +12,15 @@ import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.libs.session.api.SessionRepository
+import kotlinx.coroutines.flow.first
 import java.util.UUID
-
 
 class PortfolioViewModel(
     private val portfolioUseCases: PortfolioUseCases,
-    private val canCreateServiceUseCase: CanCreateServiceUseCase
+    private val canCreateServiceUseCase: CanCreateServiceUseCase,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PortfolioState())
@@ -42,7 +44,13 @@ class PortfolioViewModel(
     private fun loadPortfolios() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val userId = "test_user_id" // TODO
+            val userId = sessionRepository.getCurrentUserId().first()
+            
+            if (userId == null) {
+                // Handle not logged in or return
+                _state.update { it.copy(isLoading = false) }
+                return@launch
+            }
             
             launch {
                 portfolioUseCases.getPortfolios(userId).collect { list ->
@@ -66,7 +74,7 @@ class PortfolioViewModel(
 
     private fun createPortfolio() {
         viewModelScope.launch {
-            val userId = "test_user_id" // TODO
+            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
             
             val result = canCreateServiceUseCase(userId, ServiceType.PORTFOLIO)
             if (result !is CanCreateResult.Success) {

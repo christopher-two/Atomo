@@ -2,6 +2,7 @@ package org.override.atomo.feature.home.presentation
 
 import org.override.atomo.domain.model.Plan
 import org.override.atomo.domain.model.Subscription
+import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.navigation.AppTab
 
 data class HomeState(

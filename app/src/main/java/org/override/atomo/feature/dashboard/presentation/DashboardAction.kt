@@ -60,4 +60,9 @@ sealed interface DashboardAction {
     // Dialog dismiss
     data object DismissDeleteDialog : DashboardAction
     data object ConfirmDelete : DashboardAction
+    
+    // Generic Service Actions (Card Actions)
+    data class PreviewService(val type: String, val id: String) : DashboardAction // type: "menu", "cv", etc.
+    data class ShowQR(val type: String, val id: String) : DashboardAction
+    data class ShareService(val type: String, val id: String) : DashboardAction
 }

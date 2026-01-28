@@ -38,6 +38,7 @@ class DashboardViewModel(
     private val cvUseCases: CvUseCases,
     private val shopUseCases: ShopUseCases,
     private val invitationUseCases: InvitationUseCases,
+    private val syncAllServices: org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase,
     private val rootNavigation: RootNavigation,
     private val homeNavigation: HomeNavigation
 ) : ViewModel() {
@@ -120,6 +121,11 @@ class DashboardViewModel(
             DashboardAction.DismissDeleteDialog -> _state.update { it.copy(deleteDialog = null) }
             DashboardAction.ConfirmDelete -> deleteService()
             
+            // New Service Card Actions
+            is DashboardAction.PreviewService -> { /* TODO: Open Preview */ }
+            is DashboardAction.ShowQR -> { /* TODO: Show QR Dialog */ }
+            is DashboardAction.ShareService -> { /* TODO: Share Link */ }
+            
             // Create new services (Switch to tab)
             DashboardAction.CreateMenu -> homeNavigation.switchTab(AppTab.DIGITAL_MENU)
             DashboardAction.CreatePortfolio -> homeNavigation.switchTab(AppTab.PORTFOLIO)
@@ -137,12 +143,103 @@ class DashboardViewModel(
             result.onSuccess {
                 _state.update { it.copy(activeSheet = null, isOperationLoading = false) }
                 _events.send(DashboardEvent.ShowSnackbar("Cambios guardados correctamente"))
-                // No need to reload, flow updates automatically
             }.onFailure { error ->
-                _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
-                _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
+                    _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
+                    _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
+                }
+        }
+    }
+    
+    private fun generateShortcuts(services: List<ServiceModule>): List<DashboardShortcut> {
+        val shortcuts = mutableListOf<DashboardShortcut>()
+        
+        // Only add shortcuts for ACTIVE services
+        
+        // MENUS
+        services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let { module ->
+            if (module.isActive) {
+                // If it has a menu, allow adding dishes or editing
+                val menuId = module.menus.first().id
+                shortcuts.add(
+                    DashboardShortcut(
+                        id = "add_dish",
+                        title = "Agregar Platillo",
+                        icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
+                        action = DashboardAction.AddDish(menuId)
+                    )
+                )
+                shortcuts.add(
+                    DashboardShortcut(
+                        id = "edit_menu",
+                        title = "Editar Menú",
+                        icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
+                        action = DashboardAction.EditMenu(menuId)
+                    )
+                )
             }
         }
+        
+        // SHOPS
+        services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let { module ->
+             if (module.isActive) {
+                 val shopId = module.shops.first().id
+                 shortcuts.add(
+                    DashboardShortcut(
+                        id = "edit_shop",
+                        title = "Editar Tienda",
+                        icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
+                        action = DashboardAction.EditShop(shopId)
+                    )
+                )
+             }
+        }
+        
+        // CVS
+        services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let { module ->
+             if (module.isActive) {
+                 val cvId = module.cvs.first().id
+                 shortcuts.add(
+                    DashboardShortcut(
+                        id = "edit_cv",
+                        title = "Actualizar CV",
+                        icon = androidx.compose.material.icons.Icons.Filled.Description,
+                        action = DashboardAction.EditCv(cvId)
+                    )
+                )
+             }
+        }
+        
+        // PORTFOLIO
+        services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()?.let { module ->
+             if (module.isActive) {
+                 val pId = module.portfolios.first().id
+                 shortcuts.add(
+                    DashboardShortcut(
+                        id = "edit_portfolio",
+                        title = "Editar Portafolio",
+                        icon = androidx.compose.material.icons.Icons.Filled.Description,
+                        action = DashboardAction.EditPortfolio(pId)
+                    )
+                )
+             }
+        }
+        
+        // INVITATION
+         services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()?.let { module ->
+             if (module.isActive) {
+                 val iId = module.invitations.first().id
+                 shortcuts.add(
+                    DashboardShortcut(
+                        id = "edit_invitation",
+                        title = "Editar Invitación",
+                        icon = androidx.compose.material.icons.Icons.Filled.Description,
+                        action = DashboardAction.EditInvitation(iId)
+                    )
+                )
+             }
+        }
+        
+        return shortcuts
     }
 
     private fun deleteService() {
@@ -272,26 +369,9 @@ class DashboardViewModel(
                     totalInteractions = 0
                 )
                 
-                val shortcuts = listOf(
-                    DashboardShortcut(
-                        id = "create_menu",
-                        title = "Crear Menú",
-                        icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
-                        action = DashboardAction.CreateMenu
-                    ),
-                    DashboardShortcut(
-                        id = "create_shop",
-                        title = "Crear Tienda",
-                        icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
-                        action = DashboardAction.CreateShop
-                    ),
-                    DashboardShortcut(
-                        id = "create_cv",
-                        title = "Crear CV",
-                        icon = androidx.compose.material.icons.Icons.Filled.Description,
-                        action = DashboardAction.CreateCv
-                    )
-                )
+                // Stats are already calculated above
+                
+                val shortcuts = generateShortcuts(services)
 
                 _state.update { 
                     it.copy(
@@ -324,21 +404,8 @@ class DashboardViewModel(
             
             val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
             
-            // Sync Profile
-            profileUseCases.syncProfile(userId)
-                .onSuccess { profile -> _state.update { it.copy(profile = profile) } }
-                .onFailure { Log.e(TAG, "Sync profile failed: ${it.message}") }
-            
-            // Sync Services
-            val syncJobs = listOf(
-                async { menuUseCases.syncMenus(userId) },
-                async { portfolioUseCases.syncPortfolios(userId) },
-                async { cvUseCases.syncCvs(userId) },
-                async { shopUseCases.syncShops(userId) },
-                async { invitationUseCases.syncInvitations(userId) }
-            )
-            
-            syncJobs.awaitAll()
+            syncAllServices(userId)
+                .onFailure { Log.e(TAG, "Sync failed: ${it.message}") }
             
             Log.d(TAG, "Refresh completed")
             _state.update { it.copy(isRefreshing = false) }

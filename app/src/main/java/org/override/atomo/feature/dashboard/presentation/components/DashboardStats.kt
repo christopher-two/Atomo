@@ -2,13 +2,17 @@ package org.override.atomo.feature.dashboard.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Icon
@@ -28,23 +32,35 @@ fun DashboardStats(
     statistics: DashboardStatistics,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    LazyRow(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        contentPadding = PaddingValues(horizontal = 4.dp) // Slight padding for elevation
     ) {
-        StatCard(
-            title = "Servicios Activos",
-            value = statistics.activeServices.toString(),
-            icon = Icons.Default.Widgets,
-            modifier = Modifier.weight(1f)
-        )
-        
-        StatCard(
-            title = "Vistas Totales",
-            value = statistics.totalViews.toString(),
-            icon = Icons.Default.Visibility,
-            modifier = Modifier.weight(1f)
-        )
+        item {
+            StatCard(
+                title = "Servicios Activos",
+                value = statistics.activeServices.toString(),
+                icon = Icons.Default.Widgets,
+                modifier = Modifier.width(160.dp).height(120.dp)
+            )
+        }
+        item {
+            StatCard(
+                title = "Vistas Totales",
+                value = statistics.totalViews.toString(),
+                icon = Icons.Default.Visibility,
+                modifier = Modifier.width(160.dp).height(120.dp)
+            )
+        }
+        item {
+             StatCard(
+                title = "Interacciones",
+                value = statistics.totalInteractions.toString(),
+                icon = Icons.Default.ThumbUp, // Using a fallback icon if ThumbUp doesn't exist directly or similar
+                modifier = Modifier.width(160.dp).height(120.dp)
+            )
+        }
     }
 }
 
@@ -59,8 +75,10 @@ private fun StatCard(
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -70,7 +88,7 @@ private fun StatCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(24.dp)
                 )
                 Text(
                     text = title,
@@ -78,10 +96,10 @@ private fun StatCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.displaySmall, // Larger font
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )

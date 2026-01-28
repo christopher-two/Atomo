@@ -13,7 +13,7 @@ import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.usecase.menu.MenuUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID

@@ -12,13 +12,16 @@ import org.override.atomo.domain.model.Shop
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.feature.home.presentation.ServiceType
+import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.libs.session.api.SessionRepository
+import kotlinx.coroutines.flow.first
 import java.util.UUID
 
 
 class ShopViewModel(
     private val shopUseCases: ShopUseCases,
-    private val canCreateServiceUseCase: CanCreateServiceUseCase
+    private val canCreateServiceUseCase: CanCreateServiceUseCase,
+    private val sessionRepository: SessionRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ShopState())
@@ -42,7 +45,13 @@ class ShopViewModel(
     private fun loadShops() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
-            val userId = "test_user_id" // TODO
+            val userId = sessionRepository.getCurrentUserId().first()
+            
+             if (userId == null) {
+                // Handle not logged in or return
+                _state.update { it.copy(isLoading = false) }
+                return@launch
+            }
             
             launch {
                 shopUseCases.getShops(userId).collect { list ->
@@ -66,7 +75,7 @@ class ShopViewModel(
 
     private fun createShop() {
         viewModelScope.launch {
-            val userId = "test_user_id" // TODO
+            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
             
             val result = canCreateServiceUseCase(userId, ServiceType.SHOP)
             if (result !is CanCreateResult.Success) {

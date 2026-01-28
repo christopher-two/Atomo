@@ -13,18 +13,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
-import org.override.atomo.domain.usecase.cv.CvUseCases
-import org.override.atomo.domain.usecase.invitation.InvitationUseCases
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
-import org.override.atomo.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.subscription.GetExistingServicesUseCase
 import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
+import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.domain.model.ServiceType
 import kotlin.io.path.Path
 
 class HomeViewModel(
@@ -33,12 +29,7 @@ class HomeViewModel(
     private val sessionRepository: SessionRepository,
     private val subscriptionUseCases: SubscriptionUseCases,
     private val getExistingServices: GetExistingServicesUseCase,
-    private val profileUseCases: ProfileUseCases,
-    private val menuUseCases: MenuUseCases,
-    private val portfolioUseCases: PortfolioUseCases,
-    private val cvUseCases: CvUseCases,
-    private val shopUseCases: ShopUseCases,
-    private val invitationUseCases: InvitationUseCases
+    private val syncAllServices: SyncAllServicesUseCase
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -101,38 +92,11 @@ class HomeViewModel(
                     _state.update { it.copy(isRefreshing = true) }
                     val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
 
-                    // Sync Services
-                    var syncJobs: List<Deferred<Result<List<Any>>>> = emptyList()
-
-                    when (_state.value.currentTab) {
-                        AppTab.DASHBOARD -> {
-                            syncJobs = listOf(
-                                async { menuUseCases.syncMenus(userId) },
-                                async { portfolioUseCases.syncPortfolios(userId) },
-                                async { cvUseCases.syncCvs(userId) },
-                                async { shopUseCases.syncShops(userId) },
-                                async { invitationUseCases.syncInvitations(userId) },
-                            )
-                            loadSubscriptionData()
-                        }
-
-                        AppTab.PROFILE -> {
-                            profileUseCases.syncProfile(userId)
-                        }
-
-                        AppTab.PAY -> {
-                            loadSubscriptionData()
-                        }
-                        
-                        AppTab.DIGITAL_MENU -> { menuUseCases.syncMenus(userId) }
-                        AppTab.SHOP -> { shopUseCases.syncShops(userId) }
-                        AppTab.CV -> { cvUseCases.syncCvs(userId) }
-                        AppTab.PORTFOLIO -> { portfolioUseCases.syncPortfolios(userId) }
-                        AppTab.INVITATION -> { invitationUseCases.syncInvitations(userId) }
-                        AppTab.MENU -> { /* No sync needed for menu trigger */ }
-                    }
-
-                    syncJobs.awaitAll()
+                    // Sync All Services
+                    syncAllServices(userId)
+                    
+                    // Also reload subscription data
+                    loadSubscriptionData()
 
                     Log.d("HomeViewModel", "Refresh completed")
                     _state.update { it.copy(isRefreshing = false) }

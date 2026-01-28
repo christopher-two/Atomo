@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.portfolio.presentation
 
 import android.webkit.WebView
@@ -55,6 +64,10 @@ import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.feature.portfolio.presentation.components.PortfolioShimmer
 
+/**
+ * Root composable for the Portfolio feature.
+ * Collects state from [PortfolioViewModel] and passes it to the content.
+ */
 @Composable
 fun PortfolioRoot(
     viewModel: PortfolioViewModel = koinViewModel()
@@ -67,6 +80,13 @@ fun PortfolioRoot(
     )
 }
 
+/**
+ * Main content composable for Portfolio screen.
+ * Handles switching between List view and Edit/Detail view.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PortfolioContent(
@@ -209,6 +229,12 @@ fun PortfolioContent(
     }
 }
 
+/**
+ * Composable that displays the list of user's Portfolios.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @Composable
 fun PortfolioListScreen(state: PortfolioState, onAction: (PortfolioAction) -> Unit) {
     AtomoScaffold(

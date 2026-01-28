@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.cv.presentation
 
 import android.webkit.WebView
@@ -53,6 +62,10 @@ import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Cv
 // CvItem import removed
 
+/**
+ * Root composable for the CV feature.
+ * Collects state from [CVViewModel] and passes it to the content.
+ */
 @Composable
 fun CVRoot(
     viewModel: CVViewModel = koinViewModel()
@@ -62,6 +75,13 @@ fun CVRoot(
     CVContent(state = state, onAction = viewModel::onAction)
 }
 
+/**
+ * Main content composable for CV screen.
+ * Handles switching between List view and Edit/Detail view.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CVContent(
@@ -195,6 +215,12 @@ fun CVContent(
     }
 }
 
+/**
+ * Composable that displays the list of user's CVs.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @Composable
 fun CVListScreen(state: CVState, onAction: (CVAction) -> Unit) {
     AtomoScaffold(

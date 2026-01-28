@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.mapper
 
 import org.override.atomo.data.local.entity.CvEducationEntity
@@ -14,6 +23,8 @@ import org.override.atomo.domain.model.CvExperience
 import org.override.atomo.domain.model.CvSkill
 
 // CV mappers
+
+/** Maps CvEntity to Cv domain model. */
 fun CvEntity.toDomain(): Cv = Cv(
     id = id,
     userId = userId,
@@ -26,6 +37,7 @@ fun CvEntity.toDomain(): Cv = Cv(
     createdAt = createdAt
 )
 
+/** Maps Cv domain model to CvEntity. */
 fun Cv.toEntity(): CvEntity = CvEntity(
     id = id,
     userId = userId,
@@ -38,6 +50,7 @@ fun Cv.toEntity(): CvEntity = CvEntity(
     createdAt = createdAt
 )
 
+/** Maps CvDto to CvEntity. */
 fun CvDto.toEntity(): CvEntity = CvEntity(
     id = id,
     userId = userId,
@@ -50,6 +63,7 @@ fun CvDto.toEntity(): CvEntity = CvEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Cv domain model to CvDto. */
 fun Cv.toDto(): CvDto = CvDto(
     id = id,
     userId = userId,
@@ -62,6 +76,8 @@ fun Cv.toDto(): CvDto = CvDto(
 )
 
 // Education mappers
+
+/** Maps CvEducationEntity to CvEducation domain model. */
 fun CvEducationEntity.toDomain(): CvEducation = CvEducation(
     id = id,
     cvId = cvId,
@@ -75,6 +91,7 @@ fun CvEducationEntity.toDomain(): CvEducation = CvEducation(
     createdAt = createdAt
 )
 
+/** Maps CvEducation domain model to CvEducationEntity. */
 fun CvEducation.toEntity(): CvEducationEntity = CvEducationEntity(
     id = id,
     cvId = cvId,
@@ -88,6 +105,7 @@ fun CvEducation.toEntity(): CvEducationEntity = CvEducationEntity(
     createdAt = createdAt
 )
 
+/** Maps CvEducationDto to CvEducationEntity. */
 fun CvEducationDto.toEntity(): CvEducationEntity = CvEducationEntity(
     id = id,
     cvId = cvId,
@@ -102,6 +120,8 @@ fun CvEducationDto.toEntity(): CvEducationEntity = CvEducationEntity(
 )
 
 // Experience mappers
+
+/** Maps CvExperienceEntity to CvExperience domain model. */
 fun CvExperienceEntity.toDomain(): CvExperience = CvExperience(
     id = id,
     cvId = cvId,
@@ -115,6 +135,7 @@ fun CvExperienceEntity.toDomain(): CvExperience = CvExperience(
     createdAt = createdAt
 )
 
+/** Maps CvExperience domain model to CvExperienceEntity. */
 fun CvExperience.toEntity(): CvExperienceEntity = CvExperienceEntity(
     id = id,
     cvId = cvId,
@@ -128,6 +149,7 @@ fun CvExperience.toEntity(): CvExperienceEntity = CvExperienceEntity(
     createdAt = createdAt
 )
 
+/** Maps CvExperienceDto to CvExperienceEntity. */
 fun CvExperienceDto.toEntity(): CvExperienceEntity = CvExperienceEntity(
     id = id,
     cvId = cvId,
@@ -142,6 +164,8 @@ fun CvExperienceDto.toEntity(): CvExperienceEntity = CvExperienceEntity(
 )
 
 // Skill mappers
+
+/** Maps CvSkillEntity to CvSkill domain model. */
 fun CvSkillEntity.toDomain(): CvSkill = CvSkill(
     id = id,
     cvId = cvId,
@@ -151,6 +175,7 @@ fun CvSkillEntity.toDomain(): CvSkill = CvSkill(
     createdAt = createdAt
 )
 
+/** Maps CvSkill domain model to CvSkillEntity. */
 fun CvSkill.toEntity(): CvSkillEntity = CvSkillEntity(
     id = id,
     cvId = cvId,
@@ -160,6 +185,7 @@ fun CvSkill.toEntity(): CvSkillEntity = CvSkillEntity(
     createdAt = createdAt
 )
 
+/** Maps CvSkillDto to CvSkillEntity. */
 fun CvSkillDto.toEntity(): CvSkillEntity = CvSkillEntity(
     id = id,
     cvId = cvId,

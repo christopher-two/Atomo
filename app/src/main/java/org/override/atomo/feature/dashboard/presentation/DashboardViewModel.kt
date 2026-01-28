@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.dashboard.presentation
 
 import android.util.Log
@@ -66,25 +75,31 @@ class DashboardViewModel(
         observeLocalData()
     }
 
+    /**
+     * Handles user actions from the UI.
+     * Use this method to process intents such as refreshing data, editing services, or deleting items.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: DashboardAction) {
         when (action) {
             DashboardAction.Refresh -> refreshDashboard()
-            
-            // Edit actions - open bottom sheet
+
+            /* Edit actions - open bottom sheet */
             is DashboardAction.EditMenu -> _state.update { it.copy(activeSheet = DashboardSheet.EditMenu(action.menuId)) }
             is DashboardAction.EditPortfolio -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolio(action.portfolioId)) }
             is DashboardAction.EditCv -> _state.update { it.copy(activeSheet = DashboardSheet.EditCv(action.cvId)) }
             is DashboardAction.EditShop -> _state.update { it.copy(activeSheet = DashboardSheet.EditShop(action.shopId)) }
             is DashboardAction.EditInvitation -> _state.update { it.copy(activeSheet = DashboardSheet.EditInvitation(action.invitationId)) }
-            
-            // Update actions - save from sheet
+
+            /* Update actions - save from sheet */
             is DashboardAction.UpdateMenu -> updateService { menuUseCases.updateMenu(action.menu).map { } }
             is DashboardAction.UpdatePortfolio -> updateService { portfolioUseCases.updatePortfolio(action.portfolio).map { } }
             is DashboardAction.UpdateCv -> updateService { cvUseCases.updateCv(action.cv).map { } }
             is DashboardAction.UpdateShop -> updateService { shopUseCases.updateShop(action.shop).map { } }
             is DashboardAction.UpdateInvitation -> updateService { invitationUseCases.updateInvitation(action.invitation).map { } }
-            
-            // Sub-item actions
+
+            /* Sub-item actions */
             is DashboardAction.AddDish -> _state.update { it.copy(activeSheet = DashboardSheet.EditDish(null, action.menuId)) }
             is DashboardAction.EditDish -> _state.update { it.copy(activeSheet = DashboardSheet.EditDish(action.dish, action.dish.menuId)) }
             is DashboardAction.UpdateDish -> {
@@ -98,37 +113,37 @@ class DashboardViewModel(
                     }
                 }
             }
-            
+
             is DashboardAction.AddPortfolioItem -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolioItem(null, action.portfolioId)) }
             is DashboardAction.EditPortfolioItem -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolioItem(action.item, action.item.portfolioId)) }
-            
-            // Sheet actions
+
+            /* Sheet actions */
             DashboardAction.DismissSheet -> _state.update { it.copy(activeSheet = null) }
-            
-            // Delete confirmation
+
+            /* Delete confirmation */
             is DashboardAction.ConfirmDeleteMenu -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteMenu(action.menu)) }
             is DashboardAction.ConfirmDeletePortfolio -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeletePortfolio(action.portfolio)) }
             is DashboardAction.ConfirmDeleteCv -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteCv(action.cv)) }
             is DashboardAction.ConfirmDeleteShop -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteShop(action.shop)) }
             is DashboardAction.ConfirmDeleteInvitation -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteInvitation(action.invitation)) }
-            
-            // Share actions - TODO: implement share
+
+            /* Share actions - TODO: implement share */
             is DashboardAction.ShareMenu -> { /* TODO: share menu link */ }
             is DashboardAction.SharePortfolio -> { /* TODO: share portfolio link */ }
             is DashboardAction.ShareCv -> { /* TODO: share CV link */ }
             is DashboardAction.ShareShop -> { /* TODO: share shop link */ }
             is DashboardAction.ShareInvitation -> { /* TODO: share invitation link */ }
-            
-            // Dialog actions
+
+            /* Dialog actions */
             DashboardAction.DismissDeleteDialog -> _state.update { it.copy(deleteDialog = null) }
             DashboardAction.ConfirmDelete -> deleteService()
-            
-            // New Service Card Actions
+
+            /* New Service Card Actions */
             is DashboardAction.PreviewService -> { /* TODO: Open Preview */ }
             is DashboardAction.ShowQR -> { /* TODO: Show QR Dialog */ }
             is DashboardAction.ShareService -> { /* TODO: Share Link */ }
-            
-            // Create new services (Switch to tab)
+
+            /* Create new services (Switch to tab) */
             DashboardAction.CreateMenu -> homeNavigation.switchTab(AppTab.DIGITAL_MENU)
             DashboardAction.CreatePortfolio -> homeNavigation.switchTab(AppTab.PORTFOLIO)
             DashboardAction.CreateCv -> homeNavigation.switchTab(AppTab.CV)
@@ -184,8 +199,8 @@ class DashboardViewModel(
     }
 
     /**
-     * Optimizado: Carga solo datos locales.
-     * Observa la DB y actualiza la UI. No hace peticiones de red.
+     * Optimized: Loads only local data.
+     * Observes the Room DB and updates the UI. Does not perform network requests.
      */
     private fun observeLocalData() {
         viewModelScope.launch {
@@ -199,12 +214,12 @@ class DashboardViewModel(
                 return@launch
             }
             
-            // Get local profile if available
+            /* Get local profile if available */
             profileUseCases.getProfile(userId).firstOrNull()?.let { profile ->
                 _state.update { it.copy(profile = profile) }
             }
             
-            // Combine flows from Room DB
+            /* Combine flows from Room DB */
             combine(
                 menuUseCases.getMenus(userId),
                 portfolioUseCases.getPortfolios(userId),
@@ -216,7 +231,7 @@ class DashboardViewModel(
                 
                  val services = mutableListOf<ServiceModule>()
                 
-                // Menu Module
+                /* Menu Module */
                 val allDishes = menus.flatMap { it.dishes }
                 services.add(
                     ServiceModule.MenuModule(
@@ -226,7 +241,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // Portfolio Module
+                /* Portfolio Module */
                 val allItems = portfolios.flatMap { it.items }
                 services.add(
                     ServiceModule.PortfolioModule(
@@ -236,7 +251,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // CV Module
+                /* CV Module */
                 val totalSkills = cvs.sumOf { it.skills.size }
                 val totalExperiences = cvs.sumOf { it.experience.size }
                 services.add(
@@ -247,7 +262,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // Shop Module
+                /* Shop Module */
                 val allProducts = shops.flatMap { it.products }
                 services.add(
                     ServiceModule.ShopModule(
@@ -257,7 +272,7 @@ class DashboardViewModel(
                     )
                 )
                 
-                // Invitation Module
+                /* Invitation Module */
                 val activeInvitations = invitations.filter { it.isActive }
                 val upcomingEvent = invitations
                     .filter { it.eventDate != null && it.eventDate > System.currentTimeMillis() }
@@ -274,14 +289,14 @@ class DashboardViewModel(
             }.collect { services ->
                 val activeServicesCount = services.count { it.isActive }
                 
-                // TODO: Replace with real analytics
+                /* TODO: Replace with real analytics */
                 val stats = DashboardStatistics(
                     activeServices = activeServicesCount,
                     totalViews = 0,
                     totalInteractions = 0
                 )
                 
-                // Stats are already calculated above
+                /* Stats are already calculated above */
                 
                 val shortcuts = DashboardHelpers.generateShortcuts(services)
 
@@ -308,7 +323,7 @@ class DashboardViewModel(
     }
 
     /**
-     * Optimizado: Sincroniza con el backend solo cuando es solicitado (Swipe Refresh).
+     * Optimized: Synchronizes with the backend only when requested (Swipe Refresh).
      */
     private fun refreshDashboard() {
         viewModelScope.launch {

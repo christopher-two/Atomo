@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.repository
 
 import io.github.jan.supabase.SupabaseClient
@@ -13,6 +22,9 @@ import org.override.atomo.domain.model.Plan
 import org.override.atomo.domain.model.Subscription
 import org.override.atomo.domain.repository.SubscriptionRepository
 
+/**
+ * Implementation of [SubscriptionRepository] using [SubscriptionDao] and [SupabaseClient].
+ */
 class SubscriptionRepositoryImpl(
     private val subscriptionDao: SubscriptionDao,
     private val supabase: SupabaseClient

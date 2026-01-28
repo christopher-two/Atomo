@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.local.entity
 
 import androidx.room.Entity
@@ -5,6 +14,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+/**
+ * Room Entity for CV.
+ */
 @Entity(
     tableName = "cvs",
     foreignKeys = [
@@ -30,6 +42,9 @@ data class CvEntity(
     val createdAt: Long
 )
 
+/**
+ * Room Entity for CV Education.
+ */
 @Entity(
     tableName = "cv_education",
     foreignKeys = [
@@ -56,6 +71,9 @@ data class CvEducationEntity(
     val createdAt: Long
 )
 
+/**
+ * Room Entity for CV Experience.
+ */
 @Entity(
     tableName = "cv_experience",
     foreignKeys = [
@@ -82,6 +100,9 @@ data class CvExperienceEntity(
     val createdAt: Long
 )
 
+/**
+ * Room Entity for CV Skill.
+ */
 @Entity(
     tableName = "cv_skills",
     foreignKeys = [

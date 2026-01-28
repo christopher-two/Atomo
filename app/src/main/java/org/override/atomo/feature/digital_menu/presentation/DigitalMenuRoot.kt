@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.digital_menu.presentation
 
 import android.webkit.WebView
@@ -101,7 +110,7 @@ fun DigitalMenuContent(
         onAction(DigitalMenuAction.Back)
     }
 
-    // Preview Logic
+    /** Preview Logic */
     val previewWebViewState = remember { mutableStateOf<WebView?>(null) }
     val previewPageLoaded = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -158,7 +167,7 @@ fun DigitalMenuContent(
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                 // General Info
+                 /** General Info */
                 EditableSection(title = "General Information", isEditing = state.isEditing) {
                     if (state.isEditing) {
                         AtomoTextField(
@@ -185,7 +194,7 @@ fun DigitalMenuContent(
                 
 
                 
-                // Menu Items (Dishes)
+                /** Menu Items (Dishes) */
                 EditableSection(
                     title = "Menu Items", 
                     isEditing = state.isEditing,
@@ -224,7 +233,7 @@ fun DigitalMenuContent(
         }
     }
     
-    // Dish Dialog & Preview Sheet (Same as before)
+    /** Dish Dialog & Preview Sheet (Same as before) */
     if (state.isDishDialogVisible) {
         DishDialog(
             dish = state.dishToEdit,

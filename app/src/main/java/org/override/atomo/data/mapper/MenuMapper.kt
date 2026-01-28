@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.mapper
 
 import org.override.atomo.data.local.entity.DishEntity
@@ -11,6 +20,8 @@ import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.model.MenuCategory
 
 // Menu mappers
+
+/** Maps MenuEntity to Menu domain model. */
 fun MenuEntity.toDomain(): Menu = Menu(
     id = id,
     userId = userId,
@@ -24,6 +35,7 @@ fun MenuEntity.toDomain(): Menu = Menu(
     createdAt = createdAt
 )
 
+/** Maps Menu domain model to MenuEntity. */
 fun Menu.toEntity(): MenuEntity = MenuEntity(
     id = id,
     userId = userId,
@@ -37,6 +49,7 @@ fun Menu.toEntity(): MenuEntity = MenuEntity(
     createdAt = createdAt
 )
 
+/** Maps MenuDto to MenuEntity. */
 fun MenuDto.toEntity(): MenuEntity = MenuEntity(
     id = id,
     userId = userId,
@@ -50,6 +63,7 @@ fun MenuDto.toEntity(): MenuEntity = MenuEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Menu domain model to MenuDto. */
 fun Menu.toDto(): MenuDto = MenuDto(
     id = id,
     userId = userId,
@@ -63,6 +77,8 @@ fun Menu.toDto(): MenuDto = MenuDto(
 )
 
 // Category mappers
+
+/** Maps MenuCategoryEntity to MenuCategory domain model. */
 fun MenuCategoryEntity.toDomain(): MenuCategory = MenuCategory(
     id = id,
     menuId = menuId,
@@ -71,6 +87,7 @@ fun MenuCategoryEntity.toDomain(): MenuCategory = MenuCategory(
     createdAt = createdAt
 )
 
+/** Maps MenuCategory domain model to MenuCategoryEntity. */
 fun MenuCategory.toEntity(): MenuCategoryEntity = MenuCategoryEntity(
     id = id,
     menuId = menuId,
@@ -79,6 +96,7 @@ fun MenuCategory.toEntity(): MenuCategoryEntity = MenuCategoryEntity(
     createdAt = createdAt
 )
 
+/** Maps MenuCategoryDto to MenuCategoryEntity. */
 fun MenuCategoryDto.toEntity(): MenuCategoryEntity = MenuCategoryEntity(
     id = id,
     menuId = menuId,
@@ -87,6 +105,7 @@ fun MenuCategoryDto.toEntity(): MenuCategoryEntity = MenuCategoryEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps MenuCategory domain model to MenuCategoryDto. */
 fun MenuCategory.toDto(): MenuCategoryDto = MenuCategoryDto(
     id = id,
     menuId = menuId,
@@ -95,6 +114,8 @@ fun MenuCategory.toDto(): MenuCategoryDto = MenuCategoryDto(
 )
 
 // Dish mappers
+
+/** Maps DishEntity to Dish domain model. */
 fun DishEntity.toDomain(): Dish = Dish(
     id = id,
     menuId = menuId,
@@ -108,6 +129,7 @@ fun DishEntity.toDomain(): Dish = Dish(
     createdAt = createdAt
 )
 
+/** Maps Dish domain model to DishEntity. */
 fun Dish.toEntity(): DishEntity = DishEntity(
     id = id,
     menuId = menuId,
@@ -121,6 +143,7 @@ fun Dish.toEntity(): DishEntity = DishEntity(
     createdAt = createdAt
 )
 
+/** Maps DishDto to DishEntity. */
 fun DishDto.toEntity(): DishEntity = DishEntity(
     id = id,
     menuId = menuId,
@@ -134,6 +157,7 @@ fun DishDto.toEntity(): DishEntity = DishEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Dish domain model to DishDto. */
 fun Dish.toDto(): DishDto = DishDto(
     id = id,
     menuId = menuId,

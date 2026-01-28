@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.profile.presentation
 
 import androidx.lifecycle.ViewModel
@@ -15,6 +24,10 @@ import org.override.atomo.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.feature.profile.domain.ProfileValidator
 import org.override.atomo.libs.session.api.SessionRepository
 
+/**
+ * ViewModel for managing Profile feature state and business logic.
+ * Handles profile loading, editing, validation (username check), and saving.
+ */
 class ProfileViewModel(
     private val useCases: ProfileUseCases,
     private val sessionRepository: SessionRepository
@@ -31,6 +44,11 @@ class ProfileViewModel(
 
     private var checkUsernameJob: Job? = null
 
+    /**
+     * Processes user intents/actions.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: ProfileAction) {
         when (action) {
             ProfileAction.Refresh -> forceRefreshProfile()

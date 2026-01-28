@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.core.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +30,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.theme.AtomoTheme
 
+/**
+ * A screen component displayed when the user reaches a service limit.
+ * Prompts the user to upgrade their plan.
+ *
+ * @param message The message explaining why the upgrade is needed.
+ * @param onUpgradeClick Callback when the upgrade button is clicked.
+ */
 @Composable
 fun UpgradePlanScreen(
     message: String = "You have reached the limit of services you can create with your current plan.",

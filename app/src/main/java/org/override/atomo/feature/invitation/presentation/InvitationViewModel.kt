@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.invitation.presentation
 
 import androidx.lifecycle.ViewModel
@@ -17,6 +26,10 @@ import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
+/**
+ * ViewModel for managing Invitation feature state and business logic.
+ * Handles CRUD operations, state management, and navigation logic for Invitations.
+ */
 class InvitationViewModel(
     private val invitationUseCases: InvitationUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
@@ -32,6 +45,11 @@ class InvitationViewModel(
             initialValue = InvitationState(),
         )
 
+    /**
+     * Processes user intents/actions.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: InvitationAction) {
         when (action) {
             is InvitationAction.CreateInvitation -> createInvitation()

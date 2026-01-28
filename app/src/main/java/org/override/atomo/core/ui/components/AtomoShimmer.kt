@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.core.ui.components
 
 import androidx.compose.animation.core.LinearEasing
@@ -24,6 +33,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 // Define the shimmer effect extension
+/**
+ * Applies a shimmering effect to the modifier.
+ * Useful for loading states.
+ *
+ * @param widthOfShadowBrush Width of the shimmer brush.
+ * @param angleOfAxisY Angle of the shimmer movement.
+ * @param durationMillis Duration of one full shimmer cycle.
+ */
 fun Modifier.shimmerEffect(
     widthOfShadowBrush: Int = 500,
     angleOfAxisY: Float = 270f,
@@ -62,6 +79,13 @@ fun Modifier.shimmerEffect(
 }
 
 
+/**
+ * A basic box container with shimmer effect.
+ *
+ * @param modifier Styling modifier.
+ * @param shape Shape of the box.
+ * @param color Background color before/under shimmer.
+ */
 @Composable
 fun ShimmerItem(
     modifier: Modifier = Modifier,
@@ -76,6 +100,13 @@ fun ShimmerItem(
     )
 }
 
+/**
+ * A rectangular line with shimmer effect, suitable for text placeholders.
+ *
+ * @param modifier Styling modifier.
+ * @param height Height of the line.
+ * @param shape Shape of the line.
+ */
 @Composable
 fun ShimmerLine(
     modifier: Modifier = Modifier,
@@ -88,6 +119,12 @@ fun ShimmerLine(
     )
 }
 
+/**
+ * A circular item with shimmer effect, suitable for avatar placeholders.
+ *
+ * @param modifier Styling modifier.
+ * @param size Size (diameter) of the circle.
+ */
 @Composable
 fun ShimmerCircle(
     modifier: Modifier = Modifier,

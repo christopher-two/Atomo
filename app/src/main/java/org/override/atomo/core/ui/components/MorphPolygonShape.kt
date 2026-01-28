@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.core.ui.components
 
 import androidx.compose.ui.geometry.Size
@@ -9,6 +18,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.toPath
 
+/**
+ * A custom [Shape] that draws a morphed polygon based on a [Morph] object.
+ * Used for dynamic shape animations.
+ *
+ * @property morph The morph object defining the shape transition.
+ * @property percentage The current progress of the morph (0.0 to 1.0).
+ */
 class MorphPolygonShape(
     private val morph: Morph,
     private val percentage: Float

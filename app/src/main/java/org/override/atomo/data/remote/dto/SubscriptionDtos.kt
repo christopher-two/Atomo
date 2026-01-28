@@ -1,9 +1,21 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
+/**
+ * Data Transfer Object for Subscription Plan.
+ */
 @Serializable
 data class PlanDto(
     val id: String,
@@ -17,6 +29,9 @@ data class PlanDto(
     @SerialName("created_at") val createdAt: String? = null
 )
 
+/**
+ * Data Transfer Object for User Subscription.
+ */
 @Serializable
 data class SubscriptionDto(
     val id: String,

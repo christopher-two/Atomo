@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+  ~ Override. Todos los derechos reservados.
+  ~ Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+  ~ Queda estrictamente prohibida la reproducción, distribución o modificación
+  ~ total o parcial de este material sin el consentimiento previo por escrito.
+  ~ Uruapan, Michoacán, México. | atomo.click
+  -->
+
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/logo_app_background"/>
     <foreground android:drawable="@drawable/logo_app_foreground"/>

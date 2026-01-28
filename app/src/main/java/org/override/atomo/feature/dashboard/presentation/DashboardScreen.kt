@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.dashboard.presentation
 
 import androidx.compose.animation.AnimatedVisibility
@@ -45,7 +54,7 @@ fun DashboardScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Loading overlay
+        /* Loading overlay */
         AnimatedVisibility(
             visible = state.isLoading,
             enter = fadeIn(),
@@ -55,7 +64,7 @@ fun DashboardScreen(
             DashboardShimmer()
         }
 
-        // Operations loading overlay (small indicator)
+        /* Operations loading overlay (small indicator) */
         AnimatedVisibility(
             visible = state.isOperationLoading,
             enter = fadeIn(),
@@ -85,7 +94,7 @@ fun DashboardScreen(
                     contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Header with greeting
+                    /* Header with greeting */
                     item(key = "header") {
                         DashboardHeader(
                             displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
@@ -93,7 +102,7 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Statistics
+                    /* Statistics */
                     item(key = "stats") {
                         DashboardStats(
                             statistics = state.statistics,
@@ -101,7 +110,7 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Shortcuts
+                    /* Shortcuts */
                     if (state.shortcuts.isNotEmpty()) {
                         item(key = "shortcuts") {
                             DashboardShortcuts(
@@ -112,14 +121,14 @@ fun DashboardScreen(
                         }
                     }
 
-                    // Advertisement
+                    /* Advertisement */
                     item(key = "ad") {
                         DashboardAd(
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
 
-                    // Services Title
+                    /* Services Title */
                     if (state.hasAnyServices) {
                         item(key = "services_title") {
                             Text(
@@ -133,7 +142,7 @@ fun DashboardScreen(
                     }
 
 
-                    // Render Service Cards dynamically
+                    /* Render Service Cards dynamically */
                     items(state.services) { module ->
                          if (module.isActive) {
                              when (module) {
@@ -209,7 +218,7 @@ fun DashboardScreen(
             }
         }
 
-        // Dialogs
+        /* Dialogs */
         state.deleteDialog?.let { dialogState ->
             DashboardDeleteDialog(
                 dialogState = dialogState,
@@ -217,7 +226,7 @@ fun DashboardScreen(
             )
         }
 
-        // Sheets
+        /* Sheets */
         DashboardSheetsHandler(
             state = state,
             onAction = onAction

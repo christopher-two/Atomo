@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.home.presentation.components
 
 import androidx.compose.animation.AnimatedContent
@@ -114,7 +123,6 @@ fun HomeScaffold(
             Scaffold(
                 modifier = Modifier.fillMaxSize(),
                 topBar = {
-                    // M3 Expressive Motion Implementation
                     TopBar(state, layoutType, onAction)
                 },
                 snackbarHost = { SnackbarHost(snackbarManager.snackbarHostState) },
@@ -131,57 +139,65 @@ fun HomeScaffold(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(padding)
-                ) {
-                    content()
-                }
+                        .padding(padding),
+                    content = { content() }
+                )
             }
 
             // Mobile Menu Bottom Sheet
-            if (state.isMenuSheetOpen) {
-                ModalBottomSheet(
-                    onDismissRequest = { onAction(HomeAction.ToggleMenu) },
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 32.dp)
-                    ) {
-                        Text(
-                            text = "Menú Principal",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(16.dp)
-                        )
+            BottomMenu(state, onAction)
+        }
+    )
+}
 
-                        val menuItems = listOf(
-                            AppTab.PROFILE, AppTab.PAY,
-                            AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV,
-                            AppTab.PORTFOLIO, AppTab.INVITATION
-                        )
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun BottomMenu(
+    state: HomeState,
+    onAction: (HomeAction) -> Unit
+) {
+    if (state.isMenuSheetOpen) {
+        ModalBottomSheet(
+            onDismissRequest = { onAction(HomeAction.ToggleMenu) },
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp)
+            ) {
+                Text(
+                    text = "Menú Principal",
+                    style = typography.titleLarge,
+                    modifier = Modifier.padding(16.dp)
+                )
 
-                        menuItems.forEach { tab ->
-                            ListItem(
-                                headlineContent = { Text(tab.label) },
-                                leadingContent = {
-                                    Icon(
-                                        imageVector = tab.icon,
-                                        contentDescription = tab.label,
-                                        tint = if (state.currentTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                },
-                                modifier = Modifier.clickable {
-                                    onAction(HomeAction.SwitchTab(tab))
-                                    onAction(HomeAction.ToggleMenu)
-                                }
+                val menuItems = listOf(
+                    AppTab.PROFILE, AppTab.PAY,
+                    AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV,
+                    AppTab.PORTFOLIO, AppTab.INVITATION
+                )
+
+                menuItems.forEach { tab ->
+                    ListItem(
+                        headlineContent = { Text(tab.label) },
+                        leadingContent = {
+                            Icon(
+                                imageVector = tab.icon,
+                                contentDescription = tab.label,
+                                tint = if (state.currentTab == tab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
+                        },
+                        modifier = Modifier.clickable {
+                            onAction(HomeAction.SwitchTab(tab))
+                            onAction(HomeAction.ToggleMenu)
                         }
-                    }
+                    )
                 }
             }
         }
-    )
+    }
 }
 
 @Composable

@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.repository
 
 import io.github.jan.supabase.SupabaseClient
@@ -19,6 +28,9 @@ import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.model.MenuCategory
 import org.override.atomo.domain.repository.MenuRepository
 
+/**
+ * Implementation of [MenuRepository] using [MenuDao] and [SupabaseClient].
+ */
 class MenuRepositoryImpl(
     private val menuDao: MenuDao,
     private val supabase: SupabaseClient

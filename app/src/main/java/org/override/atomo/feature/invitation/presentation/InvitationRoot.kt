@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.invitation.presentation
 
 import android.webkit.WebView
@@ -53,6 +62,10 @@ import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Invitation
 import org.override.atomo.feature.invitation.presentation.components.InvitationShimmer
 
+/**
+ * Root composable for the Invitation feature.
+ * Collects state from [InvitationViewModel] and passes it to the content.
+ */
 @Composable
 fun InvitationRoot(
     viewModel: InvitationViewModel = koinViewModel()
@@ -65,6 +78,13 @@ fun InvitationRoot(
     )
 }
 
+/**
+ * Main content composable for Invitation screen.
+ * Handles switching between List view and Edit/Detail view.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InvitationContent(
@@ -217,6 +237,12 @@ fun InvitationContent(
     }
 }
 
+/**
+ * Composable that displays the list of user's Invitations.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @Composable
 fun InvitationListScreen(state: InvitationState, onAction: (InvitationAction) -> Unit) {
     AtomoScaffold(

@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.mapper
 
 import kotlinx.serialization.json.Json
@@ -11,6 +20,7 @@ import org.override.atomo.domain.model.SubscriptionStatus
 
 private val json = Json { ignoreUnknownKeys = true }
 
+/** Maps PlanEntity to Plan domain model. */
 fun PlanEntity.toDomain(): Plan = Plan(
     id = id,
     name = name,
@@ -25,6 +35,7 @@ fun PlanEntity.toDomain(): Plan = Plan(
     createdAt = createdAt
 )
 
+/** Maps Plan domain model to PlanEntity. */
 fun Plan.toEntity(): PlanEntity = PlanEntity(
     id = id,
     name = name,
@@ -37,6 +48,7 @@ fun Plan.toEntity(): PlanEntity = PlanEntity(
     createdAt = createdAt
 )
 
+/** Maps PlanDto to PlanEntity. */
 fun PlanDto.toEntity(): PlanEntity = PlanEntity(
     id = id,
     name = name,
@@ -82,6 +94,7 @@ private fun formatFeature(key: String, value: String): String {
     }
 }
 
+/** Maps SubscriptionEntity to Subscription domain model. */
 fun SubscriptionEntity.toDomain(): Subscription = Subscription(
     id = id,
     userId = userId,
@@ -94,6 +107,7 @@ fun SubscriptionEntity.toDomain(): Subscription = Subscription(
     updatedAt = updatedAt
 )
 
+/** Maps Subscription domain model to SubscriptionEntity. */
 fun Subscription.toEntity(): SubscriptionEntity = SubscriptionEntity(
     id = id,
     userId = userId,
@@ -106,6 +120,7 @@ fun Subscription.toEntity(): SubscriptionEntity = SubscriptionEntity(
     updatedAt = updatedAt
 )
 
+/** Maps SubscriptionDto to SubscriptionEntity. */
 fun SubscriptionDto.toEntity(): SubscriptionEntity = SubscriptionEntity(
     id = id,
     userId = userId,

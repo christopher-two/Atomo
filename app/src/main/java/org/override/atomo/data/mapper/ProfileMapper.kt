@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.mapper
 
 import kotlinx.serialization.json.Json
@@ -11,6 +20,7 @@ import java.time.Instant
 
 private val json = Json { ignoreUnknownKeys = true }
 
+/** Maps ProfileEntity to Profile domain model. */
 fun ProfileEntity.toDomain(): Profile = Profile(
     id = id,
     username = username,
@@ -23,6 +33,7 @@ fun ProfileEntity.toDomain(): Profile = Profile(
     updatedAt = updatedAt
 )
 
+/** Maps Profile domain model to ProfileEntity. */
 fun Profile.toEntity(): ProfileEntity = ProfileEntity(
     id = id,
     username = username,
@@ -33,6 +44,7 @@ fun Profile.toEntity(): ProfileEntity = ProfileEntity(
     updatedAt = updatedAt
 )
 
+/** Maps ProfileDto to ProfileEntity. */
 fun ProfileDto.toEntity(): ProfileEntity = ProfileEntity(
     id = id,
     username = username,
@@ -43,6 +55,7 @@ fun ProfileDto.toEntity(): ProfileEntity = ProfileEntity(
     updatedAt = updatedAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Profile domain model to ProfileDto. */
 fun Profile.toDto(): ProfileDto = ProfileDto(
     id = id,
     username = username,

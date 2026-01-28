@@ -1,0 +1,7 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="allowReplaceRegexp" value=".*Override.*" />
+    <option name="notice" value="Copyright (c) &amp;#36;originalComment.match(&quot;Copyright &amp;#36;c&amp;#36; (\d+)&quot;, 1, &quot;-&quot;, &quot;&amp;#36;today.year&quot;)&amp;#36;today.year Christopher Alejandro Maldonado Chávez.&#10;Override. Todos los derechos reservados.&#10;Este código fuente y sus archivos relacionados son propiedad intelectual de Override.&#10;Queda estrictamente prohibida la reproducción, distribución o modificación&#10;total o parcial de este material sin el consentimiento previo por escrito.&#10;Uruapan, Michoacán, México. | atomo.click" />
+    <option name="myName" value="Atomo" />
+  </copyright>
+</component>

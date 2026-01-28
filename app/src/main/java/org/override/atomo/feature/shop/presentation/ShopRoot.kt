@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.shop.presentation
 
 import android.webkit.WebView
@@ -53,6 +62,10 @@ import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Shop
 import org.override.atomo.feature.shop.presentation.components.ShopShimmer
 
+/**
+ * Root composable for the Shop feature.
+ * Collects state from [ShopViewModel] and passes it to the content.
+ */
 @Composable
 fun ShopRoot(
     viewModel: ShopViewModel = koinViewModel()
@@ -65,6 +78,13 @@ fun ShopRoot(
     )
 }
 
+/**
+ * Main content composable for Shop screen.
+ * Handles switching between List view and Edit/Detail view.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ShopContent(
@@ -195,6 +215,12 @@ fun ShopContent(
     }
 }
 
+/**
+ * Composable that displays the list of user's Shops.
+ *
+ * @param state Current UI state.
+ * @param onAction Callback for user actions.
+ */
 @Composable
 fun ShopListScreen(state: ShopState, onAction: (ShopAction) -> Unit) {
     AtomoScaffold(

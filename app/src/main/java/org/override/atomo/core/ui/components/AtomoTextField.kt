@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.core.ui.components
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +25,34 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 
+/**
+ * A custom text field component for the Atomo design system.
+ * Wraps [OutlinedTextField] with default styling and behaviors.
+ *
+ * @param value Current value of the text field.
+ * @param onValueChange Callback when value changes.
+ * @param modifier Modifier for styling.
+ * @param enabled Whether the text field is enabled.
+ * @param readOnly Whether the text field is read-only.
+ * @param textStyle Style for the text.
+ * @param label Optional label composable.
+ * @param placeholder Optional placeholder composable.
+ * @param leadingIcon Optional leading icon composable.
+ * @param trailingIcon Optional trailing icon composable.
+ * @param prefix Optional prefix composable.
+ * @param suffix Optional suffix composable.
+ * @param supportingText Optional supporting text composable.
+ * @param isError Whether the text field is in an error state.
+ * @param visualTransformation Visual transformation for text input (e.g., password).
+ * @param keyboardOptions Keyboard options.
+ * @param keyboardActions Keyboard actions.
+ * @param singleLine Whether the text field is single line.
+ * @param maxLines Maximum number of lines.
+ * @param minLines Minimum number of lines.
+ * @param interactionSource Interaction source.
+ * @param shape Shape of the text field.
+ * @param colors Colors for the text field.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AtomoTextField(

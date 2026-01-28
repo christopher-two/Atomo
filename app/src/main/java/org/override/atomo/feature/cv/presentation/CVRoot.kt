@@ -129,17 +129,15 @@ fun CVContent(
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                 // General Info
-                EditableSection(title = "General Information", isEditing = state.isEditing) {
-                    if (state.isEditing) {
+                 // General Info - Only visible in Edit mode since Title is in TopBar
+                if (state.isEditing) {
+                    EditableSection(title = "General Information", isEditing = true) {
                         AtomoTextField(
                             value = cv.title,
                             onValueChange = { onAction(CVAction.UpdateEditingCv(cv.copy(title = it))) },
                             label = { Text("Title") },
                             modifier = Modifier.fillMaxWidth()
                         )
-                    } else {
-                        Text(cv.title, style = MaterialTheme.typography.headlineSmall)
                     }
                 }
                 
@@ -158,23 +156,7 @@ fun CVContent(
                     }
                 }
                 
-                // Appearance
-                EditableSection(title = "Appearance", isEditing = state.isEditing) {
-                    if (state.isEditing) {
-                         ColorPickerField(
-                             selectedColor = cv.primaryColor ?: "#000000",
-                             onColorSelected = { onAction(CVAction.UpdateEditingCv(cv.copy(primaryColor = it))) }
-                         )
-                         FontSelector(
-                             selectedFont = cv.fontFamily ?: "Inter",
-                             onFontSelected = { onAction(CVAction.UpdateEditingCv(cv.copy(fontFamily = it))) },
-                             modifier = Modifier.padding(top = 16.dp)
-                         )
-                    } else {
-                        Text("Primary Color: ${cv.primaryColor}")
-                        Text("Font: ${cv.fontFamily}")
-                    }
-                }
+
                 
                 // Sections Placeholder
                 EditableSection(title = "Experience & Education", isEditing = state.isEditing) {

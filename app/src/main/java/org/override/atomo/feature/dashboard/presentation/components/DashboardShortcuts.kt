@@ -21,11 +21,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.feature.dashboard.presentation.DashboardShortcut
+import org.override.atomo.feature.dashboard.presentation.DashboardAction
 
 @Composable
 fun DashboardShortcuts(
     shortcuts: List<DashboardShortcut>,
-    onAction: (org.override.atomo.feature.dashboard.presentation.DashboardAction) -> Unit,
+    onAction: (DashboardAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {

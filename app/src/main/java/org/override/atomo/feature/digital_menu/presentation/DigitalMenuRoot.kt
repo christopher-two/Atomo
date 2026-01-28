@@ -3,32 +3,39 @@ package org.override.atomo.feature.digital_menu.presentation
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -41,11 +48,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
@@ -54,13 +64,20 @@ import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.core.ui.components.service.ColorPickerField
+import org.override.atomo.core.ui.components.service.ColorPreview
 import org.override.atomo.core.ui.components.service.EditableSection
+import org.override.atomo.core.ui.components.service.FontPreview
 import org.override.atomo.core.ui.components.service.FontSelector
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Dish
 import org.override.atomo.domain.model.Menu
 import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer
+import java.text.NumberFormat
+import java.util.Locale
+import org.override.atomo.feature.digital_menu.presentation.components.DishDialog
+import org.override.atomo.feature.digital_menu.presentation.components.DishItemRow
+import org.override.atomo.feature.digital_menu.presentation.screens.DigitalMenuListScreen
 
 @Composable
 fun DigitalMenuRoot(
@@ -115,7 +132,8 @@ fun DigitalMenuContent(
     if (state.editingMenu == null) {
         DigitalMenuListScreen(state, onAction)
     } else {
-        val menu = state.editingMenu!!
+        val menu = state.editingMenu
+
         
         AtomoScaffold(
             topBar = {
@@ -157,69 +175,46 @@ fun DigitalMenuContent(
                             minLines = 3
                         )
                     } else {
-                        Text(menu.name, style = MaterialTheme.typography.headlineSmall)
-                        Text(menu.description ?: "No description", style = MaterialTheme.typography.bodyMedium)
+                        if (!menu.description.isNullOrEmpty()) {
+                             Text(menu.description, style = MaterialTheme.typography.bodyMedium)
+                        } else {
+                            Text("No description provided.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                        }
                     }
                 }
                 
-                // Appearance
-                EditableSection(title = "Appearance", isEditing = state.isEditing) {
-                    if (state.isEditing) {
-                         ColorPickerField(
-                             selectedColor = menu.primaryColor,
-                             onColorSelected = { onAction(DigitalMenuAction.UpdateEditingMenu(menu.copy(primaryColor = it))) }
-                         )
-                         FontSelector(
-                             selectedFont = menu.fontFamily,
-                             onFontSelected = { onAction(DigitalMenuAction.UpdateEditingMenu(menu.copy(fontFamily = it))) },
-                             modifier = Modifier.padding(top = 16.dp)
-                         )
-                    } else {
-                        Text("Primary Color: ${menu.primaryColor}")
-                        Text("Font: ${menu.fontFamily}")
-                    }
-                }
+
                 
                 // Menu Items (Dishes)
-                EditableSection(title = "Menu Items", isEditing = state.isEditing) {
+                EditableSection(
+                    title = "Menu Items", 
+                    isEditing = state.isEditing,
+                    headerAction = {
+                         if (state.isEditing) {
+                             Button(
+                                 onClick = { onAction(DigitalMenuAction.OpenAddDishDialog) },
+                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                                 modifier = Modifier.height(32.dp)
+                             ) {
+                                 Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                 Spacer(modifier = Modifier.width(4.dp))
+                                 Text("Add Dish", style = MaterialTheme.typography.labelMedium)
+                             }
+                         }
+                    }
+                ) {
                     if (menu.dishes.isEmpty()) {
                         Text("No items yet.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
                     } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             menu.dishes.forEach { dish ->
-                                AtomoCard(modifier = Modifier.fillMaxWidth()) {
-                                    Row(
-                                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(dish.name, fontWeight = FontWeight.Bold)
-                                            Text("${dish.price}", style = MaterialTheme.typography.bodyMedium)
-                                        }
-                                        if (state.isEditing) {
-                                            Row {
-                                                IconButton(onClick = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) }) {
-                                                    Icon(Icons.Default.Edit, contentDescription = "Edit")
-                                                }
-                                                IconButton(onClick = { onAction(DigitalMenuAction.DeleteDish(dish)) }) {
-                                                    Icon(Icons.Default.Delete, contentDescription = "Delete")
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                DishItemRow(
+                                    dish = dish, 
+                                    isEditing = state.isEditing,
+                                    onEdit = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) },
+                                    onDelete = { onAction(DigitalMenuAction.DeleteDish(dish)) }
+                                )
                             }
-                        }
-                    }
-                    
-                    if (state.isEditing) {
-                        Button(
-                            onClick = { onAction(DigitalMenuAction.OpenAddDishDialog) },
-                            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                        ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
-                            Text("Add Dish")
                         }
                     }
                 }
@@ -229,7 +224,7 @@ fun DigitalMenuContent(
         }
     }
     
-    // Dish Dialog
+    // Dish Dialog & Preview Sheet (Same as before)
     if (state.isDishDialogVisible) {
         DishDialog(
             dish = state.dishToEdit,
@@ -257,7 +252,7 @@ fun DigitalMenuContent(
                                 state.editingMenu?.let { updatePreview(buildPreviewJson(it)) }
                             }
                         }
-                        loadUrl("https://atomo.click/preview/elegance") // Or menu specific
+                        loadUrl("https://atomo.click/preview/elegance")
                         previewWebViewState.value = this
                     }
                 },
@@ -267,105 +262,7 @@ fun DigitalMenuContent(
     }
 }
 
-@Composable
-fun DishDialog(
-    dish: Dish?,
-    onDismiss: () -> Unit,
-    onSave: (String, String, Double, String?) -> Unit
-) {
-    var name by remember { mutableStateOf(dish?.name ?: "") }
-    var description by remember { mutableStateOf(dish?.description ?: "") }
-    var price by remember { mutableStateOf(dish?.price?.toString() ?: "") }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(if (dish == null) "Add Dish" else "Edit Dish") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AtomoTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
-                AtomoTextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
-                AtomoTextField(value = price, onValueChange = { price = it }, label = { Text("Price") })
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                val priceVal = price.toDoubleOrNull() ?: 0.0
-                onSave(name, description, priceVal, null)
-            }) {
-                Text("Save")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
-        }
-    )
-}
 
-@Composable
-fun DigitalMenuListScreen(state: DigitalMenuState, onAction: (DigitalMenuAction) -> Unit) {
-    AtomoScaffold(
-        floatingActionButton = {
-            if (state.canCreate && !state.limitReached) {
-                FloatingActionButton(onClick = { onAction(DigitalMenuAction.CreateMenu) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Create Menu")
-                }
-            }
-        }
-    ) { paddingValues ->
-        if (state.isLoading && state.menus.isEmpty()) {
-            Box(modifier = Modifier.padding(paddingValues)) {
-                DigitalMenuShimmer()
-            }
-        } else {
-            if (state.menus.isEmpty() && state.limitReached) {
-                Box(modifier = Modifier.padding(paddingValues)) {
-                    UpgradePlanScreen(
-                        onUpgradeClick = { onAction(DigitalMenuAction.UpgradePlan) }
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)
-                ) {
-                    items(state.menus) { menu ->
-                        DigitalMenuItem(menu = menu, onAction = onAction)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DigitalMenuItem(
-    menu: Menu,
-    onAction: (DigitalMenuAction) -> Unit
-) {
-    AtomoCard(
-        onClick = { onAction(DigitalMenuAction.OpenMenu(menu.id)) },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = menu.name,
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(
-                text = if (menu.isActive) "Active" else "Inactive",
-                style = MaterialTheme.typography.bodyMedium
-            )
-             // Add delete if needed, but not in original? Added for consistency
-             IconButton(onClick = { onAction(DigitalMenuAction.DeleteMenu(menu.id)) }) {
-                 Icon(Icons.Default.Delete, contentDescription = "Delete Menu")
-             }
-        }
-    }
-}
 
 @Preview
 @Composable

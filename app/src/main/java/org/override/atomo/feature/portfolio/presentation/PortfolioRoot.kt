@@ -159,28 +159,15 @@ fun PortfolioContent(
                             minLines = 3
                         )
                     } else {
-                        Text(portfolio.title, style = MaterialTheme.typography.headlineSmall)
-                        Text(portfolio.description ?: "No description", style = MaterialTheme.typography.bodyMedium)
+                        if (!portfolio.description.isNullOrEmpty()) {
+                            Text(portfolio.description, style = MaterialTheme.typography.bodyMedium)
+                        } else {
+                            Text("No description provided.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                        }
                     }
                 }
                 
-                // Appearance
-                EditableSection(title = "Appearance", isEditing = state.isEditing) {
-                    if (state.isEditing) {
-                         ColorPickerField(
-                             selectedColor = portfolio.primaryColor ?: "#000000",
-                             onColorSelected = { onAction(PortfolioAction.UpdateEditingPortfolio(portfolio.copy(primaryColor = it))) }
-                         )
-                         FontSelector(
-                             selectedFont = portfolio.fontFamily ?: "Inter",
-                             onFontSelected = { onAction(PortfolioAction.UpdateEditingPortfolio(portfolio.copy(fontFamily = it))) },
-                             modifier = Modifier.padding(top = 16.dp)
-                         )
-                    } else {
-                        Text("Primary Color: ${portfolio.primaryColor}")
-                        Text("Font: ${portfolio.fontFamily}")
-                    }
-                }
+
                 
                 // Items Placeholder
                 EditableSection(title = "Items", isEditing = state.isEditing) {

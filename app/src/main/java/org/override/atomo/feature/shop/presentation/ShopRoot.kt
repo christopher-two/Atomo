@@ -148,28 +148,15 @@ fun ShopContent(
                             minLines = 3
                         )
                     } else {
-                        Text(shop.name, style = MaterialTheme.typography.headlineSmall)
-                        Text(shop.description ?: "No description", style = MaterialTheme.typography.bodyMedium)
+                        if (!shop.description.isNullOrEmpty()) {
+                            Text(shop.description, style = MaterialTheme.typography.bodyMedium)
+                        } else {
+                             Text("No description provided.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                        }
                     }
                 }
                 
-                // Appearance
-                EditableSection(title = "Appearance", isEditing = state.isEditing) {
-                    if (state.isEditing) {
-                         ColorPickerField(
-                             selectedColor = shop.primaryColor ?: "#000000",
-                             onColorSelected = { onAction(ShopAction.UpdateEditingShop(shop.copy(primaryColor = it))) }
-                         )
-                         FontSelector(
-                             selectedFont = shop.fontFamily ?: "Inter",
-                             onFontSelected = { onAction(ShopAction.UpdateEditingShop(shop.copy(fontFamily = it))) },
-                             modifier = Modifier.padding(top = 16.dp)
-                         )
-                    } else {
-                        Text("Primary Color: ${shop.primaryColor}")
-                        Text("Font: ${shop.fontFamily}")
-                    }
-                }
+
                 
                 // Products Placeholder
                 EditableSection(title = "Products", isEditing = state.isEditing) {

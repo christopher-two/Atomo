@@ -1,6 +1,7 @@
 package org.override.atomo.feature.digital_menu.presentation
 
 import org.override.atomo.domain.model.Dish
+import org.override.atomo.domain.model.Menu
 
 sealed interface DigitalMenuAction {
     data object CreateMenu : DigitalMenuAction
@@ -10,7 +11,7 @@ sealed interface DigitalMenuAction {
 
     // Editor Actions
     data object ToggleEditMode : DigitalMenuAction
-    data class UpdateEditingMenu(val menu: org.override.atomo.domain.model.Menu) : DigitalMenuAction
+    data class UpdateEditingMenu(val menu: Menu) : DigitalMenuAction
     data object SaveMenu : DigitalMenuAction
     data object CancelEdit : DigitalMenuAction
     data class TogglePreviewSheet(val show: Boolean) : DigitalMenuAction

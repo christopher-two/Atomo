@@ -36,6 +36,34 @@ import coil3.compose.AsyncImage
 // FileKit imports removed
 
 @Composable
+fun ColorPreview(colorHex: String) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(try { Color(android.graphics.Color.parseColor(colorHex)) } catch (e: Exception) { Color.Black })
+                .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(text = colorHex, style = MaterialTheme.typography.bodyMedium)
+    }
+}
+
+@Composable
+fun FontPreview(fontFamily: String) {
+     // Placeholder for font application. In real app, we'd apply the FontFamily object.
+     // For now, we simulate by distinct style if possible or just text.
+     // Since loading dynamic fonts is complex, we just display the name cleanly for now, 
+     // but ideally we'd use `FontFamily(Font(resId))` if we had them.
+    Text(
+        text = fontFamily,
+        style = MaterialTheme.typography.bodyMedium, // TODO: Apply actual font here
+        modifier = Modifier.padding(vertical = 4.dp)
+    )
+}
+
+@Composable
 fun ColorPickerField(
     selectedColor: String,
     onColorSelected: (String) -> Unit,

@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.override.atomo.feature.dashboard.presentation.components.ServiceCard
 import org.override.atomo.feature.dashboard.presentation.components.DashboardAd
 import org.override.atomo.feature.dashboard.presentation.components.DashboardHeader
 import org.override.atomo.feature.dashboard.presentation.components.DashboardShimmer
@@ -131,13 +132,14 @@ fun DashboardScreen(
                         }
                     }
 
+
                     // Render Service Cards dynamically
                     items(state.services) { module ->
                          if (module.isActive) {
                              when (module) {
                                  is ServiceModule.MenuModule -> {
                                      val menu = module.menus.first()
-                                     org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                     ServiceCard(
                                          title = menu.name,
                                          subtitle = "${module.totalDishes} Platillos",
                                          icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
@@ -150,7 +152,7 @@ fun DashboardScreen(
                                  
                                  is ServiceModule.ShopModule -> {
                                      val shop = module.shops.first()
-                                      org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                      ServiceCard(
                                          title = shop.name,
                                          subtitle = "${module.totalProducts} Productos",
                                          icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
@@ -163,7 +165,7 @@ fun DashboardScreen(
                                  
                                  is ServiceModule.CvModule -> {
                                      val cv = module.cvs.first()
-                                      org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                      ServiceCard(
                                          title = cv.title,
                                          subtitle = "${module.totalSkills} Habilidades, ${module.totalExperiences} Exp.",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
@@ -176,7 +178,7 @@ fun DashboardScreen(
                                  
                                  is ServiceModule.PortfolioModule -> {
                                      val portfolio = module.portfolios.first()
-                                      org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                      ServiceCard(
                                          title = portfolio.title,
                                          subtitle = "${module.totalItems} Proyectos",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
@@ -189,7 +191,7 @@ fun DashboardScreen(
                                  
                                  is ServiceModule.InvitationModule -> {
                                      val invitation = module.invitations.first()
-                                     org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                     ServiceCard(
                                          title = invitation.eventName,
                                          subtitle = invitation.description ?: "Sin descripción",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,

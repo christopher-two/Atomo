@@ -157,10 +157,14 @@ fun InvitationContent(
                             enabled = false // Disable manual edit of timestamp for now
                         )
                     } else {
-                        Text(invitation.eventName, style = MaterialTheme.typography.headlineSmall)
-                        Text("Location: ${invitation.location ?: "TBD"}", style = MaterialTheme.typography.bodyMedium)
-                         // Format date here
-                        Text("Date: ${invitation.eventDate ?: "TBD"}", style = MaterialTheme.typography.bodyMedium)
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                             if (!invitation.location.isNullOrEmpty()) {
+                                 Text("Location: ${invitation.location}", style = MaterialTheme.typography.bodyMedium)
+                             }
+                             if (invitation.eventDate != null) {
+                                 Text("Date: ${invitation.eventDate}", style = MaterialTheme.typography.bodyMedium)
+                             }
+                        }
                     }
                 }
                 
@@ -179,23 +183,7 @@ fun InvitationContent(
                     }
                 }
                 
-                // Appearance
-                EditableSection(title = "Appearance", isEditing = state.isEditing) {
-                    if (state.isEditing) {
-                         ColorPickerField(
-                             selectedColor = invitation.primaryColor ?: "#000000",
-                             onColorSelected = { onAction(InvitationAction.UpdateEditingInvitation(invitation.copy(primaryColor = it))) }
-                         )
-                         FontSelector(
-                             selectedFont = invitation.fontFamily ?: "Inter",
-                             onFontSelected = { onAction(InvitationAction.UpdateEditingInvitation(invitation.copy(fontFamily = it))) },
-                             modifier = Modifier.padding(top = 16.dp)
-                         )
-                    } else {
-                        Text("Primary Color: ${invitation.primaryColor}")
-                        Text("Font: ${invitation.fontFamily}")
-                    }
-                }
+
                 
                  Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.2f))
             }

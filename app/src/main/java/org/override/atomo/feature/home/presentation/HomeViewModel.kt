@@ -54,16 +54,17 @@ class HomeViewModel(
 
             // Sync subscription data from server
             subscriptionUseCases.syncPlans()
-            subscriptionUseCases.syncSubscription(userId!!)
+            val safeUserId = userId ?: return@launch
+            subscriptionUseCases.syncSubscription(safeUserId)
 
             // Load subscription
-            val subscription = subscriptionUseCases.getSubscription(userId!!).firstOrNull()
+            val subscription = subscriptionUseCases.getSubscription(safeUserId).firstOrNull()
             val plan = subscription?.planId?.let {
                 subscriptionUseCases.getPlans().firstOrNull()?.find { it.id == subscription.planId }
             }
 
             // Load existing services
-            val existingServices = getExistingServices(userId!!)
+            val existingServices = getExistingServices(safeUserId)
 
             _state.update {
                 it.copy(

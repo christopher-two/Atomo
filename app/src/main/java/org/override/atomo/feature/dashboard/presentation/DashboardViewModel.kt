@@ -30,6 +30,8 @@ import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.filled.ShoppingBag
 import kotlinx.coroutines.flow.receiveAsFlow
 
+import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
+
 class DashboardViewModel(
     private val sessionRepository: SessionRepository,
     private val profileUseCases: ProfileUseCases,
@@ -38,7 +40,7 @@ class DashboardViewModel(
     private val cvUseCases: CvUseCases,
     private val shopUseCases: ShopUseCases,
     private val invitationUseCases: InvitationUseCases,
-    private val syncAllServices: org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase,
+    private val syncAllServices: SyncAllServicesUseCase,
     private val rootNavigation: RootNavigation,
     private val homeNavigation: HomeNavigation
 ) : ViewModel() {
@@ -150,97 +152,7 @@ class DashboardViewModel(
         }
     }
     
-    private fun generateShortcuts(services: List<ServiceModule>): List<DashboardShortcut> {
-        val shortcuts = mutableListOf<DashboardShortcut>()
-        
-        // Only add shortcuts for ACTIVE services
-        
-        // MENUS
-        services.filterIsInstance<ServiceModule.MenuModule>().firstOrNull()?.let { module ->
-            if (module.isActive) {
-                // If it has a menu, allow adding dishes or editing
-                val menuId = module.menus.first().id
-                shortcuts.add(
-                    DashboardShortcut(
-                        id = "add_dish",
-                        title = "Agregar Platillo",
-                        icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
-                        action = DashboardAction.AddDish(menuId)
-                    )
-                )
-                shortcuts.add(
-                    DashboardShortcut(
-                        id = "edit_menu",
-                        title = "Editar Menú",
-                        icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
-                        action = DashboardAction.EditMenu(menuId)
-                    )
-                )
-            }
-        }
-        
-        // SHOPS
-        services.filterIsInstance<ServiceModule.ShopModule>().firstOrNull()?.let { module ->
-             if (module.isActive) {
-                 val shopId = module.shops.first().id
-                 shortcuts.add(
-                    DashboardShortcut(
-                        id = "edit_shop",
-                        title = "Editar Tienda",
-                        icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
-                        action = DashboardAction.EditShop(shopId)
-                    )
-                )
-             }
-        }
-        
-        // CVS
-        services.filterIsInstance<ServiceModule.CvModule>().firstOrNull()?.let { module ->
-             if (module.isActive) {
-                 val cvId = module.cvs.first().id
-                 shortcuts.add(
-                    DashboardShortcut(
-                        id = "edit_cv",
-                        title = "Actualizar CV",
-                        icon = androidx.compose.material.icons.Icons.Filled.Description,
-                        action = DashboardAction.EditCv(cvId)
-                    )
-                )
-             }
-        }
-        
-        // PORTFOLIO
-        services.filterIsInstance<ServiceModule.PortfolioModule>().firstOrNull()?.let { module ->
-             if (module.isActive) {
-                 val pId = module.portfolios.first().id
-                 shortcuts.add(
-                    DashboardShortcut(
-                        id = "edit_portfolio",
-                        title = "Editar Portafolio",
-                        icon = androidx.compose.material.icons.Icons.Filled.Description,
-                        action = DashboardAction.EditPortfolio(pId)
-                    )
-                )
-             }
-        }
-        
-        // INVITATION
-         services.filterIsInstance<ServiceModule.InvitationModule>().firstOrNull()?.let { module ->
-             if (module.isActive) {
-                 val iId = module.invitations.first().id
-                 shortcuts.add(
-                    DashboardShortcut(
-                        id = "edit_invitation",
-                        title = "Editar Invitación",
-                        icon = androidx.compose.material.icons.Icons.Filled.Description,
-                        action = DashboardAction.EditInvitation(iId)
-                    )
-                )
-             }
-        }
-        
-        return shortcuts
-    }
+
 
     private fun deleteService() {
         val currentState = _state.value
@@ -371,7 +283,7 @@ class DashboardViewModel(
                 
                 // Stats are already calculated above
                 
-                val shortcuts = generateShortcuts(services)
+                val shortcuts = DashboardHelpers.generateShortcuts(services)
 
                 _state.update { 
                     it.copy(

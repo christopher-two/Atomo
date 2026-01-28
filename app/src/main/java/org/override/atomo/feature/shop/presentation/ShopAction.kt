@@ -1,5 +1,7 @@
 package org.override.atomo.feature.shop.presentation
 
+import org.override.atomo.domain.model.Shop
+
 sealed interface ShopAction {
     data object CreateShop : ShopAction
     data class DeleteShop(val id: String) : ShopAction
@@ -8,7 +10,7 @@ sealed interface ShopAction {
     
     // Editor Actions
     data object ToggleEditMode : ShopAction
-    data class UpdateEditingShop(val shop: org.override.atomo.domain.model.Shop) : ShopAction
+    data class UpdateEditingShop(val shop: Shop) : ShopAction
     data object SaveShop : ShopAction
     data object CancelEdit : ShopAction
     data class TogglePreviewSheet(val show: Boolean) : ShopAction

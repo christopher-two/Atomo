@@ -1,5 +1,7 @@
 package org.override.atomo.feature.portfolio.presentation
 
+import org.override.atomo.domain.model.Portfolio
+
 sealed interface PortfolioAction {
     data object CreatePortfolio : PortfolioAction
     data class DeletePortfolio(val id: String) : PortfolioAction
@@ -8,7 +10,7 @@ sealed interface PortfolioAction {
     
     // Editor Actions
     data object ToggleEditMode : PortfolioAction
-    data class UpdateEditingPortfolio(val portfolio: org.override.atomo.domain.model.Portfolio) : PortfolioAction
+    data class UpdateEditingPortfolio(val portfolio: Portfolio) : PortfolioAction
     data object SavePortfolio : PortfolioAction
     data object CancelEdit : PortfolioAction
     data class TogglePreviewSheet(val show: Boolean) : PortfolioAction

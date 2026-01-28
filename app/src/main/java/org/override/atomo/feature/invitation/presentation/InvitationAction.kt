@@ -1,5 +1,7 @@
 package org.override.atomo.feature.invitation.presentation
 
+import org.override.atomo.domain.model.Invitation
+
 sealed interface InvitationAction {
     data object CreateInvitation : InvitationAction
     data class DeleteInvitation(val id: String) : InvitationAction
@@ -8,7 +10,7 @@ sealed interface InvitationAction {
     
     // Editor Actions
     data object ToggleEditMode : InvitationAction
-    data class UpdateEditingInvitation(val invitation: org.override.atomo.domain.model.Invitation) : InvitationAction
+    data class UpdateEditingInvitation(val invitation: Invitation) : InvitationAction
     data object SaveInvitation : InvitationAction
     data object CancelEdit : InvitationAction
     data class TogglePreviewSheet(val show: Boolean) : InvitationAction

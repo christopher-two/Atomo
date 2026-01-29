@@ -19,6 +19,8 @@ import org.override.atomo.domain.usecase.profile.*
 import org.override.atomo.domain.usecase.shop.*
 import org.override.atomo.domain.usecase.subscription.*
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
+import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
+import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
 
 import org.override.atomo.domain.usecase.session.CheckSessionUseCase
 
@@ -45,6 +47,10 @@ val UseCaseModule = module {
     singleOf(::UpsertDishUseCase)
     singleOf(::UpdateDishUseCase)
     singleOf(::DeleteDishUseCase)
+    
+    // Storage
+    singleOf(::UploadDishImageUseCase)
+    singleOf(::DeleteDishImageUseCase)
     singleOf(::MenuUseCases)
     
     // Portfolio

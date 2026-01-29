@@ -24,6 +24,34 @@ import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.domain.model.Dish
 
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+
 @Composable
 fun DishDialog(
     dish: Dish?,
@@ -33,21 +61,91 @@ fun DishDialog(
     var name by remember { mutableStateOf(dish?.name ?: "") }
     var description by remember { mutableStateOf(dish?.description ?: "") }
     var price by remember { mutableStateOf(dish?.price?.toString() ?: "") }
+    var imageUrl by remember { mutableStateOf(dish?.imageUrl) }
+    
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            imageUrl = uri.toString()
+        }
+    }
     
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (dish == null) "Add Dish" else "Edit Dish") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                AtomoTextField(value = name, onValueChange = { name = it }, label = { Text("Name") })
-                AtomoTextField(value = description, onValueChange = { description = it }, label = { Text("Description") })
-                AtomoTextField(value = price, onValueChange = { price = it }, label = { Text("Price") })
+                // Image Picker
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { launcher.launch("image/*") }
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (imageUrl != null) {
+                         AsyncImage(
+                             model = imageUrl,
+                             contentDescription = "Selected Image",
+                             modifier = Modifier.fillMaxSize(),
+                             contentScale = ContentScale.Crop
+                         )
+                    } else {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text("Tap to add image", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+                
+                AtomoTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Name") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    )
+                )
+                AtomoTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") },
+                    maxLines = 3,
+                    keyboardOptions = KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        imeAction = ImeAction.Next
+                    )
+                )
+                AtomoTextField(
+                    value = price,
+                    onValueChange = { input ->
+                        if (input.all { it.isDigit() || it == '.' }) {
+                             price = input
+                        }
+                    },
+                    label = { Text("Price") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done
+                    ),
+                    prefix = { Text("$") }
+                )
             }
         },
         confirmButton = {
             Button(onClick = {
+                val cleanName = name.trim()
+                val cleanDesc = description.trim()
                 val priceVal = price.toDoubleOrNull() ?: 0.0
-                onSave(name, description, priceVal, null)
+                if (cleanName.isNotEmpty()) {
+                    onSave(cleanName, cleanDesc, priceVal, imageUrl)
+                }
             }) {
                 Text("Save")
             }

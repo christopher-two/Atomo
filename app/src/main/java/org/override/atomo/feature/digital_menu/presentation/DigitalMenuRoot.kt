@@ -151,9 +151,9 @@ fun DigitalMenuContent(
                     .padding(horizontal = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                /** General Info */
-                EditableSection(title = "General Information", isEditing = state.isEditing) {
-                    if (state.isEditing) {
+                if (state.isEditing) {
+                    /** General Info (Editing) */
+                    EditableSection(title = "General Information", isEditing = true) {
                         AtomoTextField(
                             value = menu.name,
                             onValueChange = {
@@ -165,7 +165,7 @@ fun DigitalMenuContent(
                                     )
                                 )
                             },
-                            label = { Text("Menu Name") },
+                            label = { Text("Menu Title") },
                             modifier = Modifier.fillMaxWidth()
                         )
                         AtomoTextField(
@@ -183,25 +183,13 @@ fun DigitalMenuContent(
                             modifier = Modifier.fillMaxWidth(),
                             minLines = 3
                         )
-                    } else {
-                        if (!menu.description.isNullOrEmpty()) {
-                            Text(menu.description, style = MaterialTheme.typography.bodyMedium)
-                        } else {
-                            Text(
-                                "No description provided.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
-                        }
                     }
-                }
 
-                /** Menu Items (Dishes) */
-                EditableSection(
-                    title = "Menu Items",
-                    isEditing = state.isEditing,
-                    headerAction = {
-                        if (state.isEditing) {
+                    /** Menu Items (Editing) */
+                    EditableSection(
+                        title = "Menu Items",
+                        isEditing = true,
+                        headerAction = {
                             Button(
                                 onClick = { onAction(DigitalMenuAction.OpenAddDishDialog) },
                                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
@@ -216,10 +204,58 @@ fun DigitalMenuContent(
                                 Text("Add Dish", style = MaterialTheme.typography.labelMedium)
                             }
                         }
+                    ) {
+                        if (menu.dishes.isEmpty()) {
+                            Text(
+                                "No items yet.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.secondary
+                            )
+                        } else {
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                menu.dishes.forEach { dish ->
+                                    DishItemRow(
+                                        dish = dish,
+                                        isEditing = true,
+                                        onEdit = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) },
+                                        onDelete = { onAction(DigitalMenuAction.DeleteDish(dish)) }
+                                    )
+                                }
+                            }
+                        }
                     }
-                ) {
-                    if (menu.dishes.isEmpty()) {
+
+                } else {
+                    /** View Mode */
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    Text(
+                        text = menu.name,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    
+                    if (!menu.description.isNullOrEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
+                            text = menu.description,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Text(
+                        text = "Menu Items",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    if (menu.dishes.isEmpty()) {
+                         Text(
                             "No items yet.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.secondary
@@ -229,16 +265,16 @@ fun DigitalMenuContent(
                             menu.dishes.forEach { dish ->
                                 DishItemRow(
                                     dish = dish,
-                                    isEditing = state.isEditing,
-                                    onEdit = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) },
-                                    onDelete = { onAction(DigitalMenuAction.DeleteDish(dish)) }
+                                    isEditing = false,
+                                    onEdit = {},
+                                    onDelete = {}
                                 )
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(80.dp)) // Bottom spacer for FAB/Toolbar
             }
         }
     }

@@ -75,6 +75,15 @@ class DashboardViewModel(
 
     init {
         observeLocalData()
+        triggerSync()
+    }
+
+    private fun triggerSync() {
+        viewModelScope.launch {
+            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+            syncAllServices(userId)
+                .onFailure { Log.e(TAG, "Sync failed: ${it.message}") }
+        }
     }
 
     /**

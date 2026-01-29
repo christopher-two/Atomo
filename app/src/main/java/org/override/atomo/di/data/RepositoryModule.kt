@@ -19,12 +19,14 @@ import org.override.atomo.data.repository.PortfolioRepositoryImpl
 import org.override.atomo.data.repository.ProfileRepositoryImpl
 import org.override.atomo.data.repository.ShopRepositoryImpl
 import org.override.atomo.data.repository.SubscriptionRepositoryImpl
+import org.override.atomo.data.repository.StorageRepositoryImpl
 import org.override.atomo.domain.repository.CvRepository
 import org.override.atomo.domain.repository.InvitationRepository
 import org.override.atomo.domain.repository.MenuRepository
 import org.override.atomo.domain.repository.PortfolioRepository
 import org.override.atomo.domain.repository.ProfileRepository
 import org.override.atomo.domain.repository.ShopRepository
+import org.override.atomo.domain.repository.StorageRepository
 import org.override.atomo.domain.repository.SubscriptionRepository
 
 val RepositoryModule = module {
@@ -35,4 +37,5 @@ val RepositoryModule = module {
     singleOf(::ShopRepositoryImpl) bind ShopRepository::class
     singleOf(::InvitationRepositoryImpl) bind InvitationRepository::class
     singleOf(::SubscriptionRepositoryImpl) bind SubscriptionRepository::class
+    singleOf(::StorageRepositoryImpl) bind StorageRepository::class
 }

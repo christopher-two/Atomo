@@ -27,11 +27,24 @@ import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
+import android.content.Context
+import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
+import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
+import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
+import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
+
 class DigitalMenuViewModel(
+    private val sessionRepository: SessionRepository,
     private val menuUseCases: MenuUseCases,
+    private val getServiceLimitsUseCase: GetServiceLimitsUseCase,
+    private val subscriptionUseCases: SubscriptionUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
-    private val sessionRepository: SessionRepository
+    private val uploadDishImage: UploadDishImageUseCase,
+    private val deleteDishImage: DeleteDishImageUseCase,
+    private val context: Context
 ) : ViewModel() {
+
+    private val contentResolver = context.contentResolver
 
     private val _state = MutableStateFlow(DigitalMenuState())
     val state = _state
@@ -135,37 +148,64 @@ class DigitalMenuViewModel(
         val currentDishes = menu.dishes.toMutableList()
         val editingDish = _state.value.dishToEdit
 
-        if (editingDish != null) {
-            // Edit existing
-            val updatedDish = editingDish.copy(
-                name = action.name,
-                description = action.description,
-                price = action.price,
-                imageUrl = action.imageUrl
-            )
-             val index = currentDishes.indexOfFirst { it.id == editingDish.id }
-            if (index != -1) {
-                currentDishes[index] = updatedDish
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            
+            // Handle Image Upload if needed
+            val imageUrlResult = if (action.imageUrl != null && action.imageUrl.startsWith("content://")) {
+                val bytes = readBytesFromUri(action.imageUrl)
+                if (bytes != null) {
+                    val dishId = editingDish?.id ?: UUID.randomUUID().toString()
+                    uploadDishImage(dishId, bytes).getOrNull()
+                } else {
+                    action.imageUrl // Fallback or null
+                }
+            } else {
+                action.imageUrl
             }
-        } else {
-            // Add new
-             val newDish = Dish(
-                id = UUID.randomUUID().toString(),
-                menuId = menu.id,
-                categoryId = null,
-                name = action.name,
-                description = action.description,
-                price = action.price,
-                imageUrl = action.imageUrl,
-                isVisible = true,
-                sortOrder = currentDishes.size,
-                createdAt = System.currentTimeMillis()
-            )
-            currentDishes.add(newDish)
+
+            if (editingDish != null) {
+                // Edit existing
+                val updatedDish = editingDish.copy(
+                    name = action.name,
+                    description = action.description,
+                    price = action.price,
+                    imageUrl = imageUrlResult
+                )
+                 val index = currentDishes.indexOfFirst { it.id == editingDish.id }
+                if (index != -1) {
+                    currentDishes[index] = updatedDish
+                }
+            } else {
+                // Add new
+                 val newDish = Dish(
+                    id = UUID.randomUUID().toString(),
+                    menuId = menu.id,
+                    categoryId = null,
+                    name = action.name,
+                    description = action.description,
+                    price = action.price,
+                    imageUrl = imageUrlResult,
+                    isVisible = true,
+                    sortOrder = currentDishes.size,
+                    createdAt = System.currentTimeMillis()
+                )
+                currentDishes.add(newDish)
+            }
+            
+            val updatedMenu = menu.copy(dishes = currentDishes)
+            _state.update { it.copy(editingMenu = updatedMenu, isDishDialogVisible = false, dishToEdit = null, isLoading = false) }
         }
-        
-        val updatedMenu = menu.copy(dishes = currentDishes)
-        _state.update { it.copy(editingMenu = updatedMenu, isDishDialogVisible = false, dishToEdit = null) }
+    }
+    
+    private fun readBytesFromUri(uriString: String): ByteArray? {
+        return try {
+             val uri = android.net.Uri.parse(uriString)
+             contentResolver.openInputStream(uri)?.use { it.readBytes() }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 
     private fun deleteDish(dish: Dish) {
@@ -175,13 +215,12 @@ class DigitalMenuViewModel(
         val updatedMenu = menu.copy(dishes = currentDishes)
         _state.update { it.copy(editingMenu = updatedMenu) }
         
-        // Also delete from repo if it was already persisted? 
-        // Logic: If we are in edit mode, maybe we only delete from local state and commit on SaveMenu?
-        // But if `createMenu` upserts, it won't delete orphans unless Room is configured to Cascade Delete or we explicitly delete.
-        // It's safer to delete from DB immediately if we want to ensure it's gone, OR track deletions.
-        // For simplicity, we delete from DB if it exists (simplest path).
         viewModelScope.launch {
-             menuUseCases.deleteDish(dish.id)
+            // Delete image if exists
+            if (dish.imageUrl != null) {
+                deleteDishImage(dish.imageUrl)
+            }
+            menuUseCases.deleteDish(dish.id)
         }
     }
 

@@ -112,6 +112,7 @@ val UseCaseModule = module {
     // Service Limits
     singleOf(::GetServiceLimitsUseCase)
     singleOf(::CanCreateServiceUseCase)
+    singleOf(::CanAddDishUseCase)
     singleOf(::GetExistingServicesUseCase)
     
     // Sync

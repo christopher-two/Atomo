@@ -9,11 +9,15 @@ class StorageRepositoryImpl(
     private val supabase: SupabaseClient
 ) : StorageRepository {
 
-    override suspend fun uploadDishImage(dishId: String, byteArray: ByteArray): Result<String> = runCatching {
-        val bucket = supabase.storage.from("dish-images")
-        val path = "$dishId.jpg"
+    override suspend fun uploadImage(
+        userId: String,
+        service: String,
+        fileName: String,
+        byteArray: ByteArray
+    ): Result<String> = runCatching {
+        val bucket = supabase.storage.from("atomo")
+        val path = "$userId/$service/$fileName"
         
-        // Correct way to upsert in newer Supabase Storage KT versions or handle overwrite
         bucket.upload(path, byteArray) {
             upsert = true
         }
@@ -21,12 +25,11 @@ class StorageRepositoryImpl(
         bucket.publicUrl(path)
     }
 
-    override suspend fun deleteDishImage(imageUrl: String): Result<Unit> = runCatching {
-        // Simple extraction logic, assuming standard Supabase URL format
-        // This is a naive implementation, robust logic would parse the URL properly
-        // Expected URL: https://.../storage/v1/object/public/dish-images/dishId.jpg
-        val fileName = imageUrl.substringAfterLast("/")
-        val bucket = supabase.storage.from("dish-images")
-        bucket.delete(listOf(fileName))
+    override suspend fun deleteImage(imageUrl: String): Result<Unit> = runCatching {
+        // Extract path after bucket name "atomo"
+        // Standard URL: https://.../storage/v1/object/public/atomo/userId/service/fileName.jpg
+        val path = imageUrl.substringAfter("/atomo/")
+        val bucket = supabase.storage.from("atomo")
+        bucket.delete(listOf(path))
     }
 }

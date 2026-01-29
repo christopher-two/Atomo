@@ -30,18 +30,10 @@ object DashboardHelpers {
                 val menuId = module.menus.first().id
                 shortcuts.add(
                     DashboardShortcut(
-                        id = "add_dish",
-                        title = "Agregar Platillo",
+                        id = "manage_menu",
+                        title = "Gestionar Menú",
                         icon = Icons.Filled.RestaurantMenu,
-                        action = DashboardAction.AddDish(menuId)
-                    )
-                )
-                shortcuts.add(
-                    DashboardShortcut(
-                        id = "edit_menu",
-                        title = "Editar Menú",
-                        icon = Icons.Filled.RestaurantMenu,
-                        action = DashboardAction.EditMenu(menuId)
+                        action = DashboardAction.CreateMenu // Reusing CreateMenu action which switches tab to DIGITAL_MENU
                     )
                 )
             }

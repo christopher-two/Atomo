@@ -14,6 +14,7 @@ import org.override.atomo.domain.model.Dish
 import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.model.MenuCategory
 import org.override.atomo.domain.repository.MenuRepository
+import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
 
 /**
  * Wrapper for all Menu-related use cases.
@@ -68,9 +69,24 @@ class UpdateMenuUseCase(private val repository: MenuRepository) {
     suspend operator fun invoke(menu: Menu): Result<Menu> = repository.updateMenu(menu)
 }
 
-/** Deletes a menu by ID. */
-class DeleteMenuUseCase(private val repository: MenuRepository) {
-    suspend operator fun invoke(menuId: String): Result<Unit> = repository.deleteMenu(menuId)
+/** Deletes a menu by ID, cleaning up associated resources like dish images. */
+class DeleteMenuUseCase(
+    private val repository: MenuRepository,
+    private val deleteDishImageUseCase: DeleteDishImageUseCase
+) {
+    suspend operator fun invoke(menuId: String): Result<Unit> {
+        // Fetch menu to get dishes
+        val menu = repository.getMenu(menuId)
+        
+        // Delete images for each dish
+        menu?.dishes?.forEach { dish ->
+            if (dish.imageUrl != null) {
+                deleteDishImageUseCase(dish.imageUrl)
+            }
+        }
+        
+        return repository.deleteMenu(menuId)
+    }
 }
 
 /** Creates a new category within a menu. */

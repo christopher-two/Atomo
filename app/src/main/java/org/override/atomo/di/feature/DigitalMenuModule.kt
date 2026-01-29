@@ -31,6 +31,7 @@ val DigitalMenuModule: Module
                 get(),
                 get(),
                 get(),
+                get(),
                 androidContext()
             )
         }

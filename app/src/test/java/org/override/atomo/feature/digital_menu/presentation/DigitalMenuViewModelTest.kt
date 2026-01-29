@@ -11,6 +11,7 @@ package org.override.atomo.feature.digital_menu.presentation
 
 import app.cash.turbine.test
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -26,6 +27,14 @@ import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.util.MainDispatcherRule
 
+import android.content.Context
+import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
+import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
+import org.override.atomo.domain.usecase.subscription.CanAddItemResult
+import org.override.atomo.domain.usecase.subscription.CanAddDishUseCase
+import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
+import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
+
 class DigitalMenuViewModelTest {
 
     @get:Rule
@@ -35,6 +44,12 @@ class DigitalMenuViewModelTest {
     private val menuUseCases: MenuUseCases = mockk()
     private val canCreateServiceUseCase: CanCreateServiceUseCase = mockk()
     private val sessionRepository: SessionRepository = mockk()
+    private val canAddDishUseCase: CanAddDishUseCase = mockk()
+    private val uploadDishImageUseCase: UploadDishImageUseCase = mockk()
+    private val deleteDishImageUseCase: DeleteDishImageUseCase = mockk()
+    private val getServiceLimitsUseCase: GetServiceLimitsUseCase = mockk()
+    private val subscriptionUseCases: SubscriptionUseCases = mockk()
+    private val context: Context = mockk(relaxed = true)
 
     private val testMenu = Menu(
         id = "menu123",
@@ -56,15 +71,48 @@ class DigitalMenuViewModelTest {
         coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(testMenu))
         coEvery { canCreateServiceUseCase("user123", ServiceType.DIGITAL_MENU) } returns CanCreateResult.Success
         
-        viewModel = DigitalMenuViewModel(menuUseCases, canCreateServiceUseCase, sessionRepository)
+        viewModel = DigitalMenuViewModel(
+            sessionRepository,
+            menuUseCases,
+            getServiceLimitsUseCase,
+            subscriptionUseCases,
+            canCreateServiceUseCase,
+            canAddDishUseCase,
+            uploadDishImageUseCase,
+            deleteDishImageUseCase,
+            context
+        )
     }
 
     @Test
-    fun `initial load should fetch menus`() = runTest {
+    fun `initial load should fetch menus and auto-select first one`() = runTest {
+        // The viewModel init already triggers loadMenus
         viewModel.state.test {
             val state = awaitItem()
             assertEquals(1, state.menus.size)
-            assertEquals(testMenu, state.menus.first())
+            assertEquals(testMenu.id, state.editingMenu?.id)
+        }
+    }
+
+    @Test
+    fun `save new dish should check limits and update state`() = runTest {
+        // Arrange
+        coEvery { canAddDishUseCase("user123", testMenu.id) } returns CanAddItemResult.Success
+        
+        viewModel.state.test {
+            awaitItem() // Initial load
+            
+            // Act
+            viewModel.onAction(DigitalMenuAction.SaveDish("Pizza", "Good", 10.0, null))
+            
+            // Skip loading state and get updated state
+            val state = awaitItem()
+            
+            // Assert
+            val addedDish = state.editingMenu?.dishes?.find { it.name == "Pizza" }
+            assert(addedDish != null)
+            assertEquals("Good", addedDish?.description)
+            assertEquals(10.0, addedDish?.price ?: 0.0, 0.0)
         }
     }
 }

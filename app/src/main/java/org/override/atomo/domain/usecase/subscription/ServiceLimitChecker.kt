@@ -31,9 +31,11 @@ import org.override.atomo.domain.model.ServiceType
  */
 data class ServiceLimits(
     val maxPerType: Int = 1, // Always 1 - user can only have one of each type
-    val maxTotalServices: Int // FREE=1, CORE=2, QUANTUM=unlimited (-1)
+    val maxTotalServices: Int, // FREE=1, CORE=2, QUANTUM=unlimited (-1)
+    val maxDishesPerMenu: Int // FREE=10, CORE=30, QUANTUM=unlimited (-1)
 ) {
     val isUnlimited: Boolean get() = maxTotalServices == -1
+    val isUnlimitedDishes: Boolean get() = maxDishesPerMenu == -1
 }
 
 /**
@@ -47,17 +49,61 @@ sealed interface CanCreateResult {
 }
 
 /**
+ * Result of checking if a user can add an item (like a dish).
+ */
+sealed interface CanAddItemResult {
+    data object Success : CanAddItemResult
+    data class LimitReached(val currentCount: Int, val limit: Int) : CanAddItemResult
+    data class Error(val message: String) : CanAddItemResult
+}
+
+/**
  * Gets the service limits for a given plan.
  */
 class GetServiceLimitsUseCase {
     operator fun invoke(plan: Plan?): ServiceLimits {
         val planName = plan?.name?.lowercase() ?: "free"
-        val maxTotal = when {
-            planName.contains("quantum") -> -1 // Unlimited
-            planName.contains("core") -> 2
-            else -> 1 // Free plan
+        
+        val (maxTotal, maxDishes) = when {
+            planName.contains("quantum") -> -1 to -1 // Unlimited services and dishes
+            planName.contains("core") -> 2 to 30 // 2 services, 30 dishes
+            else -> 1 to 10 // Free plan: 1 service, 10 dishes
         }
-        return ServiceLimits(maxTotalServices = maxTotal)
+        
+        return ServiceLimits(
+            maxTotalServices = maxTotal,
+            maxDishesPerMenu = maxDishes
+        )
+    }
+}
+
+/**
+ * Checks if a user can add a dish to a menu.
+ */
+class CanAddDishUseCase(
+    private val subscriptionRepository: SubscriptionRepository,
+    private val menuRepository: MenuRepository,
+    private val getServiceLimits: GetServiceLimitsUseCase
+) {
+    suspend operator fun invoke(userId: String, menuId: String): CanAddItemResult {
+        // Get limits
+        val subscription = subscriptionRepository.getSubscription(userId)
+        val plan = subscription?.planId?.let { subscriptionRepository.getPlan(it) }
+        val limits = getServiceLimits(plan)
+
+        if (limits.isUnlimitedDishes) return CanAddItemResult.Success
+
+        // Get current count
+        // Optimally we would have a count query, but fetching the menu works for now
+        val menu = menuRepository.getMenu(menuId) ?: return CanAddItemResult.Error("Menu not found")
+        
+        val currentCount = menu.dishes.size
+        
+        if (currentCount >= limits.maxDishesPerMenu) {
+            return CanAddItemResult.LimitReached(currentCount, limits.maxDishesPerMenu)
+        }
+        
+        return CanAddItemResult.Success
     }
 }
 

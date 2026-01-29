@@ -43,6 +43,8 @@ val UseCaseModule = module {
     singleOf(::UpdateMenuUseCase)
     singleOf(::DeleteMenuUseCase)
     singleOf(::CreateCategoryUseCase)
+    singleOf(::UpdateCategoryUseCase)
+    singleOf(::DeleteCategoryUseCase)
     singleOf(::CreateDishUseCase)
     singleOf(::UpsertDishUseCase)
     singleOf(::UpdateDishUseCase)

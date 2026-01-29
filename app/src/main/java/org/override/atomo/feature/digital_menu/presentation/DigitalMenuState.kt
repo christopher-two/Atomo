@@ -27,6 +27,10 @@ data class DigitalMenuState(
     // Dish Editor State (kept for dialogs)
     val isDishDialogVisible: Boolean = false,
     val dishToEdit: Dish? = null,
+
+    // Category Editor State
+    val isCategoryDialogVisible: Boolean = false,
+    val categoryToEdit: org.override.atomo.domain.model.MenuCategory? = null,
     
     // Delete Confirmation
     val isDeleteDialogVisible: Boolean = false

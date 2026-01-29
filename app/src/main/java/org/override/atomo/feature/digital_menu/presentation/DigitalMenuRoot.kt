@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,6 +58,7 @@ import org.override.atomo.core.ui.components.service.EditableSection
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Menu
+import org.override.atomo.feature.digital_menu.presentation.components.CategoryDialog
 import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer
 import org.override.atomo.feature.digital_menu.presentation.components.DishDialog
 import org.override.atomo.feature.digital_menu.presentation.components.DishItemRow
@@ -112,7 +114,7 @@ fun DigitalMenuContent(
     }
 
     if (state.editingMenu == null) {
-        // Empty State / Create Screen (Replaces List Screen)
+        // ... (Empty State)
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             if (state.isLoading) {
                 DigitalMenuShimmer()
@@ -132,6 +134,15 @@ fun DigitalMenuContent(
         }
     } else {
         val menu = state.editingMenu
+        
+        // Group dishes by category
+        val dishesByCategory = remember(menu.dishes, menu.categories) {
+            val grouped = menu.dishes.groupBy { it.categoryId }
+            menu.categories.map { category ->
+                category to (grouped[category.id] ?: emptyList())
+            } + (null to (grouped[null] ?: emptyList()))
+        }
+
         AtomoScaffold(
             floatingActionButton = {
                 ServiceToolbar(
@@ -185,6 +196,43 @@ fun DigitalMenuContent(
                         )
                     }
 
+                    /** Categories (Editing) */
+                    EditableSection(
+                        title = "Categories",
+                        isEditing = true,
+                        headerAction = {
+                            TextButton(onClick = { onAction(DigitalMenuAction.OpenAddCategoryDialog) }) {
+                                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Add Category")
+                            }
+                        }
+                    ) {
+                        if (menu.categories.isEmpty()) {
+                            Text("No categories yet.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.secondary)
+                        } else {
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                menu.categories.forEach { category ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(category.name, style = MaterialTheme.typography.bodyLarge)
+                                        Row {
+                                            TextButton(onClick = { onAction(DigitalMenuAction.OpenEditCategoryDialog(category)) }) {
+                                                Text("Edit")
+                                            }
+                                            TextButton(onClick = { onAction(DigitalMenuAction.DeleteCategory(category)) }) {
+                                                Text("Delete", color = MaterialTheme.colorScheme.error)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     /** Menu Items (Editing) */
                     EditableSection(
                         title = "Menu Items",
@@ -212,14 +260,25 @@ fun DigitalMenuContent(
                                 color = MaterialTheme.colorScheme.secondary
                             )
                         } else {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                menu.dishes.forEach { dish ->
-                                    DishItemRow(
-                                        dish = dish,
-                                        isEditing = true,
-                                        onEdit = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) },
-                                        onDelete = { onAction(DigitalMenuAction.DeleteDish(dish)) }
+                            dishesByCategory.forEach { (category, dishes) ->
+                                if (dishes.isNotEmpty()) {
+                                    Text(
+                                        text = category?.name ?: "Uncategorized",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(vertical = 8.dp)
                                     )
+                                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        dishes.forEach { dish ->
+                                            DishItemRow(
+                                                dish = dish,
+                                                isEditing = true,
+                                                onEdit = { onAction(DigitalMenuAction.OpenEditDishDialog(dish)) },
+                                                onDelete = { onAction(DigitalMenuAction.DeleteDish(dish)) }
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
                                 }
                             }
                         }
@@ -246,30 +305,25 @@ fun DigitalMenuContent(
 
                     Spacer(modifier = Modifier.height(32.dp))
                     
-                    Text(
-                        text = "Menu Items",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    if (menu.dishes.isEmpty()) {
-                         Text(
-                            "No items yet.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    } else {
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            menu.dishes.forEach { dish ->
-                                DishItemRow(
-                                    dish = dish,
-                                    isEditing = false,
-                                    onEdit = {},
-                                    onDelete = {}
-                                )
+                    dishesByCategory.forEach { (category, dishes) ->
+                        if (dishes.isNotEmpty()) {
+                            Text(
+                                text = category?.name ?: "Other Items",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                dishes.forEach { dish ->
+                                    DishItemRow(
+                                        dish = dish,
+                                        isEditing = false,
+                                        onEdit = {},
+                                        onDelete = {}
+                                    )
+                                }
                             }
+                            Spacer(modifier = Modifier.height(32.dp))
                         }
                     }
                 }
@@ -279,18 +333,28 @@ fun DigitalMenuContent(
         }
     }
 
-    /** Dish Dialog & Preview Sheet (Same as before) */
+    /** Dialogs */
     if (state.isDishDialogVisible) {
         DishDialog(
             dish = state.dishToEdit,
+            categories = state.editingMenu?.categories ?: emptyList(),
             onDismiss = { onAction(DigitalMenuAction.CloseDishDialog) },
-            onSave = { name, desc, price, img ->
-                onAction(DigitalMenuAction.SaveDish(name, desc, price, img))
+            onSave = { name, desc, price, img, catId ->
+                onAction(DigitalMenuAction.SaveDish(name, desc, price, img, catId))
             }
         )
     }
 
+    if (state.isCategoryDialogVisible) {
+        CategoryDialog(
+            category = state.categoryToEdit,
+            onDismiss = { onAction(DigitalMenuAction.CloseCategoryDialog) },
+            onSave = { name -> onAction(DigitalMenuAction.SaveCategory(name)) }
+        )
+    }
+
     if (state.showPreviewSheet) {
+        // ... (Preview Sheet)
         ModalBottomSheet(
             onDismissRequest = { onAction(DigitalMenuAction.TogglePreviewSheet(false)) },
             sheetState = sheetState
@@ -317,6 +381,7 @@ fun DigitalMenuContent(
     }
 
     if (state.isDeleteDialogVisible) {
+        // ... (Delete Confirmation)
         AlertDialog(
             onDismissRequest = { onAction(DigitalMenuAction.HideDeleteConfirmation) },
             title = { Text("Delete Menu") },

@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.override.atomo.domain.model.Dish
 import org.override.atomo.domain.model.Menu
+import org.override.atomo.domain.model.MenuCategory
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.menu.MenuUseCases
 import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
@@ -124,6 +125,82 @@ class DigitalMenuViewModel(
             }
 
             DigitalMenuAction.ConfirmDelete -> confirmDeleteMenu()
+
+            // Category Actions
+            DigitalMenuAction.OpenAddCategoryDialog -> _state.update {
+                it.copy(
+                    isCategoryDialogVisible = true,
+                    categoryToEdit = null
+                )
+            }
+
+            is DigitalMenuAction.OpenEditCategoryDialog -> _state.update {
+                it.copy(
+                    isCategoryDialogVisible = true,
+                    categoryToEdit = action.category
+                )
+            }
+
+            DigitalMenuAction.CloseCategoryDialog -> _state.update {
+                it.copy(
+                    isCategoryDialogVisible = false,
+                    categoryToEdit = null
+                )
+            }
+
+            is DigitalMenuAction.SaveCategory -> saveCategory(action.name)
+            is DigitalMenuAction.DeleteCategory -> deleteCategory(action.category)
+        }
+    }
+
+    private fun saveCategory(name: String) {
+        val menu = _state.value.editingMenu ?: return
+        val currentCategories = menu.categories.toMutableList()
+        val editingCategory = _state.value.categoryToEdit
+
+        if (editingCategory != null) {
+            val index = currentCategories.indexOfFirst { it.id == editingCategory.id }
+            if (index != -1) {
+                currentCategories[index] = editingCategory.copy(name = name)
+            }
+        } else {
+            val newCategory = MenuCategory(
+                id = UUID.randomUUID().toString(),
+                menuId = menu.id,
+                name = name,
+                sortOrder = currentCategories.size,
+                createdAt = System.currentTimeMillis()
+            )
+            currentCategories.add(newCategory)
+        }
+
+        val updatedMenu = menu.copy(categories = currentCategories)
+        _state.update {
+            it.copy(
+                editingMenu = updatedMenu,
+                isCategoryDialogVisible = false,
+                categoryToEdit = null
+            )
+        }
+    }
+
+    private fun deleteCategory(category: MenuCategory) {
+        val menu = _state.value.editingMenu ?: return
+        val currentCategories = menu.categories.toMutableList()
+        currentCategories.remove(category)
+        
+        // Also unassign dishes from this category or delete them?
+        // Usually, unassigning is safer, but user might expect deletion.
+        // Let's just unassign for now.
+        val currentDishes = menu.dishes.map { 
+            if (it.categoryId == category.id) it.copy(categoryId = null) else it
+        }
+
+        val updatedMenu = menu.copy(categories = currentCategories, dishes = currentDishes)
+        _state.update { it.copy(editingMenu = updatedMenu) }
+        
+        viewModelScope.launch {
+            menuUseCases.deleteCategory(category.id)
         }
     }
 
@@ -169,6 +246,10 @@ class DigitalMenuViewModel(
             _state.update { it.copy(isLoading = true) }
 
             menuUseCases.updateMenu(menu).onSuccess {
+                // Save categories first (as dishes depend on them)
+                menu.categories.forEach { category ->
+                    menuUseCases.updateCategory(category)
+                }
                 menu.dishes.forEach { dish ->
                     menuUseCases.upsertDish(dish)
                 }
@@ -252,7 +333,8 @@ class DigitalMenuViewModel(
                     name = action.name,
                     description = action.description,
                     price = action.price,
-                    imageUrl = imageUrlResult
+                    imageUrl = imageUrlResult,
+                    categoryId = action.categoryId
                 )
                 val index = currentDishes.indexOfFirst { it.id == editingDish.id }
                 if (index != -1) {
@@ -263,7 +345,7 @@ class DigitalMenuViewModel(
                 val newDish = Dish(
                     id = UUID.randomUUID().toString(),
                     menuId = menu.id,
-                    categoryId = null,
+                    categoryId = action.categoryId,
                     name = action.name,
                     description = action.description,
                     price = action.price,

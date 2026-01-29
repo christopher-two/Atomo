@@ -52,16 +52,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedTextField
+import org.override.atomo.domain.model.MenuCategory
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun DishDialog(
     dish: Dish?,
+    categories: List<MenuCategory>,
     onDismiss: () -> Unit,
-    onSave: (String, String, Double, String?) -> Unit
+    onSave: (String, String, Double, String?, String?) -> Unit
 ) {
     var name by remember { mutableStateOf(dish?.name ?: "") }
     var description by remember { mutableStateOf(dish?.description ?: "") }
     var price by remember { mutableStateOf(dish?.price?.toString() ?: "") }
     var imageUrl by remember { mutableStateOf(dish?.imageUrl) }
+    var categoryId by remember { mutableStateOf(dish?.categoryId) }
+    
+    var expanded by remember { mutableStateOf(false) }
+    val selectedCategoryName = categories.find { it.id == categoryId }?.name ?: "No Category"
     
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -80,7 +93,7 @@ fun DishDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(150.dp)
+                        .height(120.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .clickable { launcher.launch("image/*") }
                         .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -95,8 +108,46 @@ fun DishDialog(
                          )
                     } else {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Icon(Icons.Default.Image, contentDescription = null, modifier = Modifier.size(32.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text("Tap to add image", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+
+                // Category Selector
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    OutlinedTextField(
+                        value = selectedCategoryName,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Category") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                        modifier = Modifier.menuAnchor(MenuAnchorType.PrimaryEditable, true).fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("No Category") },
+                            onClick = {
+                                categoryId = null
+                                expanded = false
+                            }
+                        )
+                        categories.forEach { category ->
+                            DropdownMenuItem(
+                                text = { Text(category.name) },
+                                onClick = {
+                                    categoryId = category.id
+                                    expanded = false
+                                }
+                            )
                         }
                     }
                 }
@@ -144,7 +195,7 @@ fun DishDialog(
                 val cleanDesc = description.trim()
                 val priceVal = price.toDoubleOrNull() ?: 0.0
                 if (cleanName.isNotEmpty()) {
-                    onSave(cleanName, cleanDesc, priceVal, imageUrl)
+                    onSave(cleanName, cleanDesc, priceVal, imageUrl, categoryId)
                 }
             }) {
                 Text("Save")

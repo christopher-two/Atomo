@@ -33,5 +33,6 @@ data class PortfolioState(
     // Editor State
     val isEditing: Boolean = false,
     val editingPortfolio: Portfolio? = null,
+    val hasChanges: Boolean = false,
     val showPreviewSheet: Boolean = false
 )

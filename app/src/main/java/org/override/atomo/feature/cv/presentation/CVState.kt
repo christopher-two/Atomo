@@ -33,5 +33,6 @@ data class CVState(
     // Editor State
     val isEditing: Boolean = false,
     val editingCv: Cv? = null,
+    val hasChanges: Boolean = false,
     val showPreviewSheet: Boolean = false
 )

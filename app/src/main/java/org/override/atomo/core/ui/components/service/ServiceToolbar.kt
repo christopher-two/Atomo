@@ -11,7 +11,6 @@ package org.override.atomo.core.ui.components.service
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -21,7 +20,6 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.VerticalFloatingToolbar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,16 +30,31 @@ fun ServiceToolbar(
     expanded: Boolean = true,
     isEditing: Boolean,
     onEditVerify: () -> Unit, // Callback to switch to edit or save
+    onCancel: (() -> Unit)? = null,
     onPreview: () -> Unit,
     onDelete: (() -> Unit)? = null,
+    saveEnabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     HorizontalFloatingToolbar(
         expanded = expanded,
         modifier = modifier.padding(16.dp),
     ) {
+        // Cancel Button (Only in edit mode)
+        if (isEditing && onCancel != null) {
+            IconButton(onClick = onCancel) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Cancel"
+                )
+            }
+        }
+
         // Edit / Save Toggle
-        IconButton(onClick = onEditVerify) {
+        IconButton(
+            onClick = onEditVerify,
+            enabled = !isEditing || saveEnabled
+        ) {
             Icon(
                 imageVector = if (isEditing) Icons.Default.Save else Icons.Default.Edit,
                 contentDescription = if (isEditing) "Save" else "Edit"

@@ -89,11 +89,13 @@ class ShopViewModel(
     }
 
     private fun toggleEditMode() {
-        _state.update { state -> state.copy(isEditing = !state.isEditing) }
+        _state.update { state -> state.copy(isEditing = !state.isEditing, hasChanges = false) }
     }
 
     private fun updateEditingShop(shop: Shop) {
-        _state.update { it.copy(editingShop = shop) }
+        val original = _state.value.shops.find { it.id == shop.id }
+        val hasChanges = shop != original
+        _state.update { it.copy(editingShop = shop, hasChanges = hasChanges) }
     }
 
     private fun saveShop() {
@@ -102,7 +104,7 @@ class ShopViewModel(
             _state.update { it.copy(isLoading = true) }
             
             shopUseCases.updateShop(shop).onSuccess {
-                _state.update { it.copy(isLoading = false, isEditing = false) }
+                _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
             }
@@ -112,7 +114,7 @@ class ShopViewModel(
     private fun cancelEdit() {
         val currentId = _state.value.editingShop?.id ?: return
         val original = _state.value.shops.find { it.id == currentId }
-        _state.update { it.copy(isEditing = false, editingShop = original) }
+        _state.update { it.copy(isEditing = false, editingShop = original, hasChanges = false) }
     }
 
     private fun loadShops() {

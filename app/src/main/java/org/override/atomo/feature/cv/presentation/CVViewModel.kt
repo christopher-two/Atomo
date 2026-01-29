@@ -91,11 +91,13 @@ class CVViewModel(
     }
 
     private fun toggleEditMode() {
-        _state.update { state -> state.copy(isEditing = !state.isEditing) }
+        _state.update { state -> state.copy(isEditing = !state.isEditing, hasChanges = false) }
     }
 
     private fun updateEditingCv(cv: Cv) {
-        _state.update { it.copy(editingCv = cv) }
+        val original = _state.value.cvs.find { it.id == cv.id }
+        val hasChanges = cv != original
+        _state.update { it.copy(editingCv = cv, hasChanges = hasChanges) }
     }
 
     private fun saveCv() {
@@ -104,7 +106,7 @@ class CVViewModel(
             _state.update { it.copy(isLoading = true) }
             
             cvUseCases.updateCv(cv).onSuccess {
-                _state.update { it.copy(isLoading = false, isEditing = false) }
+                _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
             }
@@ -114,7 +116,7 @@ class CVViewModel(
     private fun cancelEdit() {
         val currentId = _state.value.editingCv?.id ?: return
         val original = _state.value.cvs.find { it.id == currentId }
-        _state.update { it.copy(isEditing = false, editingCv = original) }
+        _state.update { it.copy(isEditing = false, editingCv = original, hasChanges = false) }
     }
 
     private fun loadData() {

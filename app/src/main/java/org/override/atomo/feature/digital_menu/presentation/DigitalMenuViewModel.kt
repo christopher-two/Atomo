@@ -54,6 +54,8 @@ class DigitalMenuViewModel(
     private val imageManager: ImageManager
 ) : ViewModel() {
 
+    private var menuBeforeEdit: Menu? = null
+
     private val _state = MutableStateFlow(DigitalMenuState())
     val state = _state
         .onStart { loadMenus() }
@@ -77,9 +79,9 @@ class DigitalMenuViewModel(
             is DigitalMenuAction.OpenMenu -> openMenu(action.id)
             is DigitalMenuAction.UpgradePlan -> {}
             DigitalMenuAction.ToggleEditMode -> toggleEditMode()
-            is DigitalMenuAction.UpdateEditingMenu -> _state.update { it.copy(editingMenu = action.menu) }
+            is DigitalMenuAction.UpdateEditingMenu -> updateEditingMenu(action.menu)
             DigitalMenuAction.SaveMenu -> saveMenu()
-            DigitalMenuAction.CancelEdit -> cancelEdit()
+            DigitalMenuAction.CancelEdit -> handleCancelEdit()
             is DigitalMenuAction.TogglePreviewSheet -> _state.update { it.copy(showPreviewSheet = action.show) }
             DigitalMenuAction.Back -> handleBack()
 
@@ -101,7 +103,41 @@ class DigitalMenuViewModel(
             DigitalMenuAction.ShowDeleteConfirmation -> _state.update { it.copy(isDeleteDialogVisible = true) }
             DigitalMenuAction.HideDeleteConfirmation -> _state.update { it.copy(isDeleteDialogVisible = false) }
             DigitalMenuAction.ConfirmDelete -> confirmDeleteMenu()
+
+            // Discard Changes Confirmation
+            DigitalMenuAction.ShowDiscardConfirmation -> _state.update { it.copy(isDiscardDialogVisible = true) }
+            DigitalMenuAction.HideDiscardConfirmation -> _state.update { it.copy(isDiscardDialogVisible = false) }
+            DigitalMenuAction.ConfirmDiscard -> confirmDiscard()
         }
+    }
+
+    private fun updateEditingMenu(menu: Menu) {
+        _state.update { 
+            it.copy(
+                editingMenu = menu,
+                hasUnsavedChanges = menu != menuBeforeEdit
+            )
+        }
+    }
+
+    private fun handleCancelEdit() {
+        if (_state.value.hasUnsavedChanges) {
+            _state.update { it.copy(isDiscardDialogVisible = true) }
+        } else {
+            confirmDiscard()
+        }
+    }
+
+    private fun confirmDiscard() {
+        _state.update { 
+            it.copy(
+                isEditing = false,
+                editingMenu = menuBeforeEdit,
+                hasUnsavedChanges = false,
+                isDiscardDialogVisible = false
+            )
+        }
+        menuBeforeEdit = null
     }
 
     private suspend fun sendEvent(event: DigitalMenuEvent) {
@@ -147,7 +183,7 @@ class DigitalMenuViewModel(
             menuUseCases.updateMenu(menu).onSuccess {
                 menu.categories.forEach { menuUseCases.updateCategory(it) }
                 menu.dishes.forEach { menuUseCases.upsertDish(it) }
-                _state.update { it.copy(isLoading = false, isEditing = false) }
+                _state.update { it.copy(isLoading = false, isEditing = false, hasUnsavedChanges = false) }
                 sendEvent(DigitalMenuEvent.MenuSaved)
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
@@ -273,7 +309,8 @@ class DigitalMenuViewModel(
     }
 
     private fun toggleEditMode() {
-        _state.update { it.copy(isEditing = !it.isEditing) }
+        menuBeforeEdit = _state.value.editingMenu
+        _state.update { it.copy(isEditing = !it.isEditing, hasUnsavedChanges = false) }
     }
 
     private fun cancelEdit() {

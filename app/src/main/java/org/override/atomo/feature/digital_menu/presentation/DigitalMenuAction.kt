@@ -51,4 +51,9 @@ sealed interface DigitalMenuAction {
     data object ShowDeleteConfirmation : DigitalMenuAction
     data object HideDeleteConfirmation : DigitalMenuAction
     data object ConfirmDelete : DigitalMenuAction
+
+    // Discard Changes Confirmation
+    data object ShowDiscardConfirmation : DigitalMenuAction
+    data object HideDiscardConfirmation : DigitalMenuAction
+    data object ConfirmDiscard : DigitalMenuAction
 }

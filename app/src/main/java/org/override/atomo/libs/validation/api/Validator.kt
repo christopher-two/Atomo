@@ -33,4 +33,18 @@ object CommonValidators {
             return if (input != null && emailRegex.matches(input)) ValidationResult.Success else ValidationResult.Error(message)
         }
     }
+
+    fun price(message: String = "Invalid price"): Validator<String?> = object : Validator<String?> {
+        override fun validate(input: String?): ValidationResult {
+            if (input == null) return ValidationResult.Error(message)
+            val price = input.toDoubleOrNull()
+            return if (price != null && price >= 0) ValidationResult.Success else ValidationResult.Error(message)
+        }
+    }
+
+    fun minLength(length: Int, message: String = "Must be at least $length characters"): Validator<String?> = object : Validator<String?> {
+        override fun validate(input: String?): ValidationResult {
+            return if (input != null && input.length >= length) ValidationResult.Success else ValidationResult.Error(message)
+        }
+    }
 }

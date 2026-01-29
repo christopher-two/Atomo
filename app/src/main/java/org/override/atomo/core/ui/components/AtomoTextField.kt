@@ -53,6 +53,9 @@ import androidx.compose.ui.text.input.VisualTransformation
  * @param shape Shape of the text field.
  * @param colors Colors for the text field.
  */
+import androidx.compose.material3.Text
+import org.override.atomo.libs.validation.api.Validator
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AtomoTextField(
@@ -70,6 +73,8 @@ fun AtomoTextField(
     suffix: @Composable (() -> Unit)? = null,
     supportingText: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
+    errorMessage: String? = null,
+    validator: Validator<String?>? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
@@ -80,6 +85,10 @@ fun AtomoTextField(
     shape: Shape = MaterialTheme.shapes.medium,
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors()
 ) {
+    val validationResult = validator?.validate(value)
+    val hasError = isError || (validationResult?.isValid == false)
+    val displayError = errorMessage ?: (validationResult as? org.override.atomo.libs.validation.api.ValidationResult.Error)?.message
+
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
@@ -93,8 +102,14 @@ fun AtomoTextField(
         trailingIcon = trailingIcon,
         prefix = prefix,
         suffix = suffix,
-        supportingText = supportingText,
-        isError = isError,
+        supportingText = {
+            if (hasError && displayError != null) {
+                Text(text = displayError, color = MaterialTheme.colorScheme.error)
+            } else {
+                supportingText?.invoke()
+            }
+        },
+        isError = hasError,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,

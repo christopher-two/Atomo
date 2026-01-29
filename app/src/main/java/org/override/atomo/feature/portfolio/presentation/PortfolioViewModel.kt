@@ -92,17 +92,14 @@ class PortfolioViewModel(
     private fun toggleEditMode() {
         _state.update { state ->
             val isEditing = !state.isEditing
-            // If entering edit mode, ensure we have a copy (already satisfied since editingPortfolio is the active one)
-            // If exiting edit mode (without save - this action might be "Save & Exit" or just "Switch to View").
-            // Usually "Toggle" implies switching context.
-            // If we just switch to View, we should probably discard changes or prompt?
-            // For now, let's assume this is just unlocking the inputs.
-            state.copy(isEditing = isEditing)
+            state.copy(isEditing = isEditing, hasChanges = false)
         }
     }
 
     private fun updateEditingPortfolio(portfolio: Portfolio) {
-        _state.update { it.copy(editingPortfolio = portfolio) }
+        val original = _state.value.portfolios.find { it.id == portfolio.id }
+        val hasChanges = portfolio != original
+        _state.update { it.copy(editingPortfolio = portfolio, hasChanges = hasChanges) }
     }
 
     private fun savePortfolio() {
@@ -111,9 +108,7 @@ class PortfolioViewModel(
             _state.update { it.copy(isLoading = true) }
             
             portfolioUseCases.updatePortfolio(portfolio).onSuccess {
-                // Update list locally or wait for flow? Flow should update.
-                // But we need to ensure editingPortfolio is updated to the saved version (clean state)
-                _state.update { it.copy(isLoading = false, isEditing = false) }
+                _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
             }
@@ -124,7 +119,7 @@ class PortfolioViewModel(
         // Revert to original
         val currentId = _state.value.editingPortfolio?.id ?: return
         val original = _state.value.portfolios.find { it.id == currentId }
-        _state.update { it.copy(isEditing = false, editingPortfolio = original) }
+        _state.update { it.copy(isEditing = false, editingPortfolio = original, hasChanges = false) }
     }
 
     private fun loadPortfolios() {

@@ -85,10 +85,12 @@ fun DigitalMenuRoot(
             if (state.editingMenu != null) {
                 ServiceToolbar(
                     isEditing = state.isEditing,
+                    saveEnabled = state.hasUnsavedChanges,
                     onEditVerify = {
                         if (state.isEditing) viewModel.onAction(DigitalMenuAction.SaveMenu)
                         else viewModel.onAction(DigitalMenuAction.ToggleEditMode)
                     },
+                    onCancel = { viewModel.onAction(DigitalMenuAction.CancelEdit) },
                     onPreview = { viewModel.onAction(DigitalMenuAction.TogglePreviewSheet(true)) },
                     onDelete = { viewModel.onAction(DigitalMenuAction.ShowDeleteConfirmation) }
                 )
@@ -312,6 +314,24 @@ fun DigitalMenuContent(
                 modifier = Modifier.fillMaxSize()
             )
         }
+    }
+
+    if (state.isDiscardDialogVisible) {
+        AlertDialog(
+            onDismissRequest = { onAction(DigitalMenuAction.HideDiscardConfirmation) },
+            title = { Text("Descartar cambios") },
+            text = { Text("¿Estás seguro de que quieres salir sin guardar los cambios?") },
+            confirmButton = {
+                TextButton(onClick = { onAction(DigitalMenuAction.ConfirmDiscard) }) {
+                    Text("Descartar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { onAction(DigitalMenuAction.HideDiscardConfirmation) }) {
+                    Text("Continuar editando")
+                }
+            }
+        )
     }
 
     if (state.isDeleteDialogVisible) {

@@ -33,5 +33,6 @@ data class InvitationState(
     // Editor State
     val isEditing: Boolean = false,
     val editingInvitation: Invitation? = null,
+    val hasChanges: Boolean = false,
     val showPreviewSheet: Boolean = false
 )

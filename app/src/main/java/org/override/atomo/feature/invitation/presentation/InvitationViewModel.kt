@@ -89,11 +89,13 @@ class InvitationViewModel(
     }
 
     private fun toggleEditMode() {
-        _state.update { state -> state.copy(isEditing = !state.isEditing) }
+        _state.update { state -> state.copy(isEditing = !state.isEditing, hasChanges = false) }
     }
 
     private fun updateEditingInvitation(invitation: Invitation) {
-        _state.update { it.copy(editingInvitation = invitation) }
+        val original = _state.value.invitations.find { it.id == invitation.id }
+        val hasChanges = invitation != original
+        _state.update { it.copy(editingInvitation = invitation, hasChanges = hasChanges) }
     }
 
     private fun saveInvitation() {
@@ -102,7 +104,7 @@ class InvitationViewModel(
             _state.update { it.copy(isLoading = true) }
             
             invitationUseCases.updateInvitation(invitation).onSuccess {
-                _state.update { it.copy(isLoading = false, isEditing = false) }
+                _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
             }
@@ -112,7 +114,7 @@ class InvitationViewModel(
     private fun cancelEdit() {
         val currentId = _state.value.editingInvitation?.id ?: return
         val original = _state.value.invitations.find { it.id == currentId }
-        _state.update { it.copy(isEditing = false, editingInvitation = original) }
+        _state.update { it.copy(isEditing = false, editingInvitation = original, hasChanges = false) }
     }
 
     private fun loadInvitations() {

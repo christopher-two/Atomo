@@ -59,6 +59,8 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import org.override.atomo.domain.model.MenuCategory
 
+import org.override.atomo.libs.validation.api.CommonValidators
+
 @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun DishDialog(
@@ -157,6 +159,7 @@ fun DishDialog(
                     onValueChange = { name = it },
                     label = { Text("Name") },
                     singleLine = true,
+                    validator = CommonValidators.required(),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         imeAction = ImeAction.Next
@@ -181,6 +184,7 @@ fun DishDialog(
                     },
                     label = { Text("Price") },
                     singleLine = true,
+                    validator = CommonValidators.price(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Decimal,
                         imeAction = ImeAction.Done

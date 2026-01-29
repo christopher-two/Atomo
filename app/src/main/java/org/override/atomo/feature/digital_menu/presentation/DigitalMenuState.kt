@@ -32,6 +32,10 @@ data class DigitalMenuState(
     val isCategoryDialogVisible: Boolean = false,
     val categoryToEdit: org.override.atomo.domain.model.MenuCategory? = null,
     
+    // Changes Detection
+    val hasUnsavedChanges: Boolean = false,
+    val isDiscardDialogVisible: Boolean = false,
+    
     // Delete Confirmation
     val isDeleteDialogVisible: Boolean = false
 )

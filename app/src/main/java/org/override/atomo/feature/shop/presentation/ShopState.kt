@@ -33,5 +33,6 @@ data class ShopState(
     // Editor State
     val isEditing: Boolean = false,
     val editingShop: Shop? = null,
+    val hasChanges: Boolean = false,
     val showPreviewSheet: Boolean = false
 )

@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.domain.model.MenuCategory
 
+import org.override.atomo.libs.validation.api.CommonValidators
+
 @Composable
 fun CategoryDialog(
     category: MenuCategory?,
@@ -41,7 +43,8 @@ fun CategoryDialog(
                     value = name,
                     onValueChange = { name = it },
                     label = { Text("Category Name") },
-                    singleLine = true
+                    singleLine = true,
+                    validator = CommonValidators.required()
                 )
             }
         },

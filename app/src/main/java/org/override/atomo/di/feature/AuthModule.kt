@@ -25,7 +25,7 @@ import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
 import org.override.atomo.feature.auth.domain.usecase.LogoutUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.auth.presentation.AuthRoot
-import org.override.atomo.feature.auth.presentation.viewmodel.AuthViewModel
+import org.override.atomo.feature.auth.presentation.AuthViewModel
 import org.override.atomo.libs.auth.api.GoogleAuthManager
 import org.override.atomo.libs.auth.impl.GoogleAuthManagerImpl
 

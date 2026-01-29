@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.auth.presentation
 
-sealed interface AuthAction {
+import android.content.Context
 
+sealed interface AuthAction {
+    data class ContinueWithGoogle(val context: Context) : AuthAction
+    data class OpenUrl(val url: String) : AuthAction
 }

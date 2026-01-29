@@ -7,9 +7,15 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.auth.presentation.viewmodel
+package org.override.atomo.di.libs
 
-data class AuthState(
-    val isLoading: Boolean = false,
-    val error: String? = null
-)
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.module.dsl.singleOf
+import org.koin.dsl.bind
+import org.koin.dsl.module
+import org.override.atomo.libs.image.api.ImageManager
+import org.override.atomo.libs.image.impl.ImageManagerImpl
+
+val LibModule = module {
+    singleOf(::ImageManagerImpl) bind ImageManager::class
+}

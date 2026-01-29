@@ -34,6 +34,7 @@ import org.override.atomo.domain.usecase.subscription.CanAddItemResult
 import org.override.atomo.domain.usecase.subscription.CanAddDishUseCase
 import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
 import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
+import org.override.atomo.libs.image.api.ImageManager
 
 class DigitalMenuViewModelTest {
 
@@ -49,6 +50,7 @@ class DigitalMenuViewModelTest {
     private val deleteDishImageUseCase: DeleteDishImageUseCase = mockk()
     private val getServiceLimitsUseCase: GetServiceLimitsUseCase = mockk()
     private val subscriptionUseCases: SubscriptionUseCases = mockk()
+    private val imageManager: ImageManager = mockk()
     private val context: Context = mockk(relaxed = true)
 
     private val testMenu = Menu(
@@ -80,7 +82,7 @@ class DigitalMenuViewModelTest {
             canAddDishUseCase,
             uploadDishImageUseCase,
             deleteDishImageUseCase,
-            context
+            imageManager
         )
     }
 
@@ -103,7 +105,7 @@ class DigitalMenuViewModelTest {
             awaitItem() // Initial load
             
             // Act
-            viewModel.onAction(DigitalMenuAction.SaveDish("Pizza", "Good", 10.0, null))
+            viewModel.onAction(DigitalMenuAction.SaveDish("Pizza", "Good", 10.0, null, null))
             
             // Skip loading state and get updated state
             val state = awaitItem()

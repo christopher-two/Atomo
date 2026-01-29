@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,28 +45,35 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.override.atomo.R
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.auth.presentation.components.AuthShimmer
-import org.override.atomo.feature.auth.presentation.viewmodel.AuthAction
-import org.override.atomo.feature.auth.presentation.viewmodel.AuthState
-import org.override.atomo.feature.auth.presentation.viewmodel.AuthViewModel
+
+import android.content.Intent
+import androidx.core.net.toUri
 
 @Composable
 fun AuthRoot(
     viewModel: AuthViewModel
 ) {
-    val state = viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    LaunchedEffect(state.value.error) {
-        state.value.error?.let {
-            snackbarHostState.showSnackbar(it)
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is AuthEvent.ShowError -> snackbarHostState.showSnackbar(event.message)
+                AuthEvent.LoginSuccess -> { /* Handled by navigation */ }
+                is AuthEvent.OpenUrl -> {
+                    val intent = Intent(Intent.ACTION_VIEW, event.url.toUri())
+                    context.startActivity(intent)
+                }
+            }
         }
     }
 
     AuthScreen(
-        state = state.value,
+        state = state,
         snackbarHostState = snackbarHostState,
-        onAction = { viewModel.onAction(it, context) }
+        onAction = viewModel::onAction
     )
 }
 
@@ -76,12 +84,14 @@ fun AuthScreen(
     snackbarHostState: SnackbarHostState,
     onAction: (AuthAction) -> Unit,
 ) {
+    val context = LocalContext.current
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Crossfade(
-            targetState = state.isLoading
+            targetState = state.isLoading,
+            label = "auth_loading"
         ) { isLoading ->
             Column(
                 modifier = Modifier
@@ -93,7 +103,7 @@ fun AuthScreen(
                 if (isLoading) {
                     AuthShimmer()
                 } else {
-                    Content(onAction)
+                    Content(onAction = onAction, context = context)
                 }
             }
         }
@@ -101,7 +111,7 @@ fun AuthScreen(
 }
 
 @Composable
-fun ColumnScope.Content(onAction: (AuthAction) -> Unit) {
+fun ColumnScope.Content(onAction: (AuthAction) -> Unit, context: android.content.Context) {
     Spacer(modifier = Modifier.weight(1f))
     Text(
         text = stringResource(id = R.string.app_name),
@@ -116,7 +126,7 @@ fun ColumnScope.Content(onAction: (AuthAction) -> Unit) {
             containerColor = colorScheme.primaryContainer,
             contentColor = colorScheme.onPrimaryContainer
         ),
-        onClick = { onAction(AuthAction.ContinueWithGoogle) }
+        onClick = { onAction(AuthAction.ContinueWithGoogle(context)) }
     ) {
         Icon(
             painter = painterResource(id = R.drawable.google_brands_solid_full),

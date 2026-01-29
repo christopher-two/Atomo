@@ -7,9 +7,18 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.auth.presentation.viewmodel
+package org.override.atomo.libs.image.api
 
-sealed interface AuthAction {
-    data object ContinueWithGoogle : AuthAction
-    data class OpenUrl(val url: String) : AuthAction
+import android.net.Uri
+
+interface ImageManager {
+    /**
+     * Compresses an image from a Uri and returns the compressed bytes.
+     */
+    suspend fun compressImage(uri: Uri): Result<ByteArray>
+
+    /**
+     * Resolves a Uri to a temporary file.
+     */
+    fun resolveUriToBytes(uri: Uri): Result<ByteArray>
 }

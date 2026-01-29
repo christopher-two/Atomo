@@ -11,12 +11,16 @@ package org.override.atomo
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.android.ext.android.inject
@@ -39,12 +43,25 @@ class MainActivity : ComponentActivity() {
             !state.isSessionChecked || state.isLoading
         }
 
-        enableEdgeToEdge()
         setContent {
             val mainState by mainViewModel.state.collectAsStateWithLifecycle()
             val themeConfig = mainState.themeConfig
 
             val isDarkTheme = themeConfig.isDarkMode ?: isSystemInDarkTheme()
+
+            // Update System Bars based on theme
+            LaunchedEffect(isDarkTheme) {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(
+                        Color.Transparent.toArgb(),
+                        Color.Transparent.toArgb(),
+                    ) { isDarkTheme },
+                    navigationBarStyle = SystemBarStyle.auto(
+                        Color.Transparent.toArgb(),
+                        Color.Transparent.toArgb(),
+                    ) { isDarkTheme }
+                )
+            }
 
             AtomoTheme(
                 darkTheme = isDarkTheme,

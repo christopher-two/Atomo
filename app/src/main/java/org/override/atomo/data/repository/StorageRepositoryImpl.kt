@@ -26,10 +26,17 @@ class StorageRepositoryImpl(
     }
 
     override suspend fun deleteImage(imageUrl: String): Result<Unit> = runCatching {
-        // Extract path after bucket name "atomo"
-        // Standard URL: https://.../storage/v1/object/public/atomo/userId/service/fileName.jpg
-        val path = imageUrl.substringAfter("/atomo/")
-        val bucket = supabase.storage.from("atomo")
+        // Robust extraction: Extract everything after the bucket name "atomo/"
+        // Standard URL: https://[project].supabase.co/storage/v1/object/public/atomo/userId/service/fileName.jpg
+        val bucketName = "atomo"
+        val delimiter = "/$bucketName/"
+        
+        if (!imageUrl.contains(delimiter)) {
+             throw Exception("Invalid storage URL: bucket '$bucketName' not found in path")
+        }
+        
+        val path = imageUrl.substringAfter(delimiter)
+        val bucket = supabase.storage.from(bucketName)
         bucket.delete(listOf(path))
     }
 }

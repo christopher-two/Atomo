@@ -56,12 +56,6 @@ data class DashboardShortcut(
     val action: DashboardAction
 )
 
-sealed interface DashboardEvent {
-    data class ShowSnackbar(val message: String) : DashboardEvent
-    data class OpenUrl(val url: String) : DashboardEvent
-    data class ShareUrl(val url: String, val title: String) : DashboardEvent
-}
-
 sealed interface DashboardSheet {
     data class EditMenu(val menuId: String) : DashboardSheet
     data class EditPortfolio(val portfolioId: String) : DashboardSheet

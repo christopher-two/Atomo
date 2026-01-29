@@ -42,10 +42,9 @@ fun DashboardRoot(
                 is DashboardEvent.ShareUrl -> {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_SUBJECT, event.title)
-                        putExtra(Intent.EXTRA_TEXT, "${event.title}\n${event.url}")
+                        putExtra(Intent.EXTRA_TEXT, "${event.text}\n${event.url}")
                     }
-                    context.startActivity(Intent.createChooser(intent, "Compartir vía"))
+                    context.startActivity(Intent.createChooser(intent, "Share via"))
                 }
             }
         }

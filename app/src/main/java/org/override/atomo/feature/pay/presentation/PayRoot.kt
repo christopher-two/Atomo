@@ -9,16 +9,17 @@
 
 package org.override.atomo.feature.pay.presentation
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,19 +32,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.valentinilk.shimmer.LocalShimmerTheme
-import com.valentinilk.shimmer.ShimmerBounds
-import com.valentinilk.shimmer.ShimmerTheme
-import com.valentinilk.shimmer.rememberShimmer
-import com.valentinilk.shimmer.shimmer
 import org.koin.androidx.compose.koinViewModel
-import org.override.atomo.feature.pay.presentation.components.PlanSection
 import org.override.atomo.feature.pay.presentation.components.PayShimmer
+import org.override.atomo.feature.pay.presentation.components.PlanCard
 
 @Composable
 fun PayRoot(
@@ -66,43 +61,64 @@ fun PayScreen(
     if (state.isLoading) {
         PayShimmer()
     } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+        val uriHandler = LocalUriHandler.current
+
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 350.dp),
+            contentPadding = PaddingValues(
+                start = 24.dp,
+                end = 24.dp,
+                top = 24.dp,
+                bottom = 100.dp
+            ),
+            horizontalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            modifier = Modifier.fillMaxSize()
         ) {
-
-        state.currentPlan?.let { plan ->
-            Text(
-                text = "Tu Plan Actual",
-                style = MaterialTheme.typography.labelLarge,
-                color = colorScheme.onBackground.copy(0.7f),
-                letterSpacing = 2.sp
-            )
-            PlanSection(plan = plan)
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        if (!state.isLoading) {
-            Text(
-                text = "Mejora tu plan",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.onBackground,
-                fontWeight = FontWeight.Bold,
-            )
-        }
-
-        state.plans.forEach { plan ->
-            // Filter out current plan from options list
-            if (plan.id != state.currentPlan?.id) {
-                PlanSection(plan = plan)
+            items(state.plans) { plan ->
+                val isCurrent = plan.id == state.currentPlan?.id
+                PlanCard(
+                    plan = plan,
+                    isCurrent = isCurrent,
+                    onSubscribe = { onAction(PayAction.SelectPlan(plan)) }
+                )
             }
-        }
-        Spacer(modifier = Modifier.height(100.dp))
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Términos y Condiciones",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            uriHandler.openUri("https://atomo.click/atomo/terms")
+                        }
+                    )
+
+                    Text(
+                        text = " • ",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Text(
+                        text = "Privacidad",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textDecoration = TextDecoration.Underline,
+                        modifier = Modifier.clickable {
+                            uriHandler.openUri("https://atomo.click/atomo/privacy")
+                        }
+                    )
+                }
+            }
         }
     }
 
@@ -117,7 +133,7 @@ fun PayScreen(
             },
             confirmButton = {
                 Button(onClick = { onAction(PayAction.ConfirmSubscription) }) {
-                    Text("Confirmar")
+                    Text("Confirmar Compra")
                 }
             },
             dismissButton = {

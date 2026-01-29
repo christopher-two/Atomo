@@ -78,9 +78,6 @@ class MainViewModel(
     private fun checkSession() {
         viewModelScope.launch {
             try {
-                // Wait for initial settings load to avoid theme flicker if possible, 
-                // but prioritize auth check speed.
-                
                 val isLoggedIn = checkSessionUseCase().first()
                 rootNavigation.setInitialRoute(isLoggedIn)
             } catch (e: Exception) {

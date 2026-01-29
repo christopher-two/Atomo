@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.settings.presentation
 
 import androidx.lifecycle.ViewModel
@@ -16,6 +25,10 @@ import org.override.atomo.feature.settings.domain.usecase.SettingsUseCases
 
 import org.override.atomo.feature.navigation.RootNavigation
 
+/**
+ * ViewModel for managing Settings feature state and business logic.
+ * Handles reading and updating app configuration and user preferences.
+ */
 class SettingsViewModel(
     private val useCases: SettingsUseCases,
     private val rootNavigation: RootNavigation,
@@ -34,6 +47,11 @@ class SettingsViewModel(
             initialValue = SettingsState()
         )
 
+    /**
+     * Processes user intents/actions.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: SettingsAction) {
         when (action) {
             is SettingsAction.ToggleDarkMode -> updateTheme(action.enabled)

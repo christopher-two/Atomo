@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.repository
 
 import io.github.jan.supabase.SupabaseClient
@@ -19,6 +28,9 @@ import org.override.atomo.domain.model.ProductCategory
 import org.override.atomo.domain.model.Shop
 import org.override.atomo.domain.repository.ShopRepository
 
+/**
+ * Implementation of [ShopRepository] using [ShopDao] and [SupabaseClient].
+ */
 class ShopRepositoryImpl(
     private val shopDao: ShopDao,
     private val supabase: SupabaseClient

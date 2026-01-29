@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.profile.presentation
 
 import androidx.compose.foundation.layout.Box
@@ -19,6 +28,7 @@ import org.override.atomo.feature.profile.presentation.components.ProfileShimmer
 fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
+    onShareProfile: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading && state.profile == null) {
@@ -39,7 +49,8 @@ fun ProfileScreen(
                 ProfileDetailView(
                     profile = state.profile,
                     onEditClick = { onAction(ProfileAction.EnterEditMode) },
-                    onSyncClick = { onAction(ProfileAction.Refresh) }
+                    onSyncClick = { onAction(ProfileAction.Refresh) },
+                    onShareClick = onShareProfile
                 )
             }
         }

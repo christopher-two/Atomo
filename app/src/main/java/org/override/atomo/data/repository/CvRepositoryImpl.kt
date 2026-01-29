@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.repository
 
 import io.github.jan.supabase.SupabaseClient
@@ -21,6 +30,9 @@ import org.override.atomo.domain.model.CvExperience
 import org.override.atomo.domain.model.CvSkill
 import org.override.atomo.domain.repository.CvRepository
 
+/**
+ * Implementation of [CvRepository] that uses [CvDao] for local storage and [SupabaseClient] for remote synchronization.
+ */
 class CvRepositoryImpl(
     private val cvDao: CvDao,
     private val supabase: SupabaseClient

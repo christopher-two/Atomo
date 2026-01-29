@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.home.presentation
 
 import androidx.compose.material3.AlertDialog
@@ -13,7 +22,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.compose.koinInject
 import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.theme.AtomoTheme
-import org.override.atomo.feature.dashboard.presentation.DashboardScreen
 import org.override.atomo.feature.home.presentation.components.HomeScaffold
 import org.override.atomo.feature.navigation.wrapper.WrapperHomeNavigation
 
@@ -46,7 +54,7 @@ fun HomeScreen(
         },
         onAction = onAction
     )
-    
+
     // Upgrade Dialog
     if (state.showUpgradeDialog) {
         AlertDialog(

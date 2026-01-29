@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.profile.presentation
 
 import androidx.lifecycle.ViewModel
@@ -15,6 +24,12 @@ import org.override.atomo.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.feature.profile.domain.ProfileValidator
 import org.override.atomo.libs.session.api.SessionRepository
 
+/**
+ * ViewModel for managing Profile feature state and business logic.
+ * Handles profile loading, editing, validation (username check), and saving.
+ */
+import org.override.atomo.domain.util.AtomoUrlGenerator
+
 class ProfileViewModel(
     private val useCases: ProfileUseCases,
     private val sessionRepository: SessionRepository
@@ -29,8 +44,25 @@ class ProfileViewModel(
             initialValue = ProfileState()
         )
 
+    /**
+     * Gets the public "Link in Bio" URL for the current user.
+     */
+    fun getProfileUrl(): String? {
+        val username = state.value.profile?.username
+        return if (username != null) {
+            AtomoUrlGenerator.generateProfileUrl(username)
+        } else {
+            null
+        }
+    }
+
     private var checkUsernameJob: Job? = null
 
+    /**
+     * Processes user intents/actions.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: ProfileAction) {
         when (action) {
             ProfileAction.Refresh -> forceRefreshProfile()

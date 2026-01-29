@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.home.presentation
 
 import android.util.Log
@@ -23,13 +32,16 @@ import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.domain.model.ServiceType
 import kotlin.io.path.Path
 
+import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
+
 class HomeViewModel(
     private val homeNavigation: HomeNavigation,
     private val rootNavigation: RootNavigation,
     private val sessionRepository: SessionRepository,
     private val subscriptionUseCases: SubscriptionUseCases,
     private val getExistingServices: GetExistingServicesUseCase,
-    private val syncAllServices: SyncAllServicesUseCase
+    private val syncAllServices: SyncAllServicesUseCase,
+    private val getServiceLimitsUseCase: GetServiceLimitsUseCase
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -52,25 +64,40 @@ class HomeViewModel(
             userId = sessionRepository.getCurrentUserId().firstOrNull()
             if (userId == null) return@launch
 
-            // Sync subscription data from server
+            /* Sync subscription data from server */
             subscriptionUseCases.syncPlans()
-            subscriptionUseCases.syncSubscription(userId!!)
+            val safeUserId = userId ?: return@launch
+            subscriptionUseCases.syncSubscription(safeUserId)
 
-            // Load subscription
-            val subscription = subscriptionUseCases.getSubscription(userId!!).firstOrNull()
+            /* Load subscription */
+            val subscription = subscriptionUseCases.getSubscription(safeUserId).firstOrNull()
             val plan = subscription?.planId?.let {
                 subscriptionUseCases.getPlans().firstOrNull()?.find { it.id == subscription.planId }
             }
 
-            // Load existing services
-            val existingServices = getExistingServices(userId!!)
+            /* Load existing services */
+            val existingServices = getExistingServices(safeUserId)
+            
+            /* Calculate available services */
+            val limits = getServiceLimitsUseCase(plan)
+            val totalServices = existingServices.count { it.value }
+            val canAddMoreTotal = if (limits.isUnlimited) true else totalServices < limits.maxTotalServices
+            
+            val availableTypes = if (canAddMoreTotal) {
+                ServiceType.entries.filter { type ->
+                    existingServices[type] != true // Limit 1 per type
+                }
+            } else {
+                emptyList()
+            }
 
             _state.update {
                 it.copy(
                     currentTab = homeNavigation.currentTab,
                     currentSubscription = subscription,
                     currentPlan = plan,
-                    existingServices = existingServices
+                    existingServices = existingServices,
+                    availableServiceTypes = availableTypes
                 )
             }
             hasLoadedInitialData = true
@@ -92,10 +119,10 @@ class HomeViewModel(
                     _state.update { it.copy(isRefreshing = true) }
                     val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
 
-                    // Sync All Services
+                    /* Sync All Services */
                     syncAllServices(userId)
                     
-                    // Also reload subscription data
+                    /* Also reload subscription data */
                     loadSubscriptionData()
 
                     Log.d("HomeViewModel", "Refresh completed")
@@ -115,10 +142,11 @@ class HomeViewModel(
             is HomeAction.CreateService -> {
                 _state.update { it.copy(isFabExpanded = false) }
 
-                // Check if service can be created
+                /* Check if service can be created */
                 val availableTypes = _state.value.availableServiceTypes
+                // Double check with UseCase to be safe, although UI should have prevented this
                 if (!availableTypes.contains(action.type)) {
-                    // Show upgrade dialog
+                    /* Show upgrade dialog */
                     val message = if (_state.value.existingServices[action.type] == true) {
                         "Ya tienes un ${action.type.displayName} creado. Solo puedes tener uno de cada tipo."
                     } else {
@@ -133,7 +161,7 @@ class HomeViewModel(
                     return
                 }
 
-                // Switch to the respective tab
+                /* Switch to the respective tab */
                 when (action.type) {
                     ServiceType.DIGITAL_MENU -> homeNavigation.switchTab(AppTab.DIGITAL_MENU)
                     ServiceType.PORTFOLIO -> homeNavigation.switchTab(AppTab.PORTFOLIO)

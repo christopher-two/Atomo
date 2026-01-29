@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.portfolio.presentation
 
 import androidx.lifecycle.ViewModel
@@ -17,6 +26,10 @@ import org.override.atomo.libs.session.api.SessionRepository
 import kotlinx.coroutines.flow.first
 import java.util.UUID
 
+/**
+ * ViewModel for managing Portfolio feature state and business logic.
+ * Handles CRUD operations, state management, and navigation logic for Portfolios.
+ */
 class PortfolioViewModel(
     private val portfolioUseCases: PortfolioUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
@@ -32,13 +45,86 @@ class PortfolioViewModel(
             initialValue = PortfolioState(),
         )
 
+    /**
+     * Processes user intents/actions.
+     *
+     * @param action The action to perform.
+     */
     fun onAction(action: PortfolioAction) {
         when (action) {
             is PortfolioAction.CreatePortfolio -> createPortfolio()
             is PortfolioAction.DeletePortfolio -> deletePortfolio(action.id)
-            is PortfolioAction.OpenPortfolio -> { /* Handle navigation */ }
-            is PortfolioAction.UpgradePlan -> { /* Handle navigation to pay/subscription */ }
+            is PortfolioAction.OpenPortfolio -> openPortfolio(action.id)
+            is PortfolioAction.UpgradePlan -> { /* Handle navigation */ }
+            
+            // Editor Actions
+            PortfolioAction.ToggleEditMode -> toggleEditMode()
+            is PortfolioAction.UpdateEditingPortfolio -> updateEditingPortfolio(action.portfolio)
+            PortfolioAction.SavePortfolio -> savePortfolio()
+            PortfolioAction.CancelEdit -> cancelEdit()
+            is PortfolioAction.TogglePreviewSheet -> _state.update { it.copy(showPreviewSheet = action.show) }
+            PortfolioAction.Back -> handleBack()
         }
+    }
+
+    private fun handleBack() {
+        if (_state.value.isEditing) {
+            cancelEdit()
+        } else if (_state.value.editingPortfolio != null) {
+            // Close detail view
+            _state.update { it.copy(editingPortfolio = null, isEditing = false) }
+        } else {
+            // Navigate back from root
+            // rootNavigation.back() // If we had it injected
+        }
+    }
+
+    private fun openPortfolio(id: String) {
+        val portfolio = _state.value.portfolios.find { it.id == id } ?: return
+        _state.update { 
+            it.copy(
+                editingPortfolio = portfolio, 
+                isEditing = false 
+            ) 
+        }
+    }
+
+    private fun toggleEditMode() {
+        _state.update { state ->
+            val isEditing = !state.isEditing
+            // If entering edit mode, ensure we have a copy (already satisfied since editingPortfolio is the active one)
+            // If exiting edit mode (without save - this action might be "Save & Exit" or just "Switch to View").
+            // Usually "Toggle" implies switching context.
+            // If we just switch to View, we should probably discard changes or prompt?
+            // For now, let's assume this is just unlocking the inputs.
+            state.copy(isEditing = isEditing)
+        }
+    }
+
+    private fun updateEditingPortfolio(portfolio: Portfolio) {
+        _state.update { it.copy(editingPortfolio = portfolio) }
+    }
+
+    private fun savePortfolio() {
+        viewModelScope.launch {
+            val portfolio = _state.value.editingPortfolio ?: return@launch
+            _state.update { it.copy(isLoading = true) }
+            
+            portfolioUseCases.updatePortfolio(portfolio).onSuccess {
+                // Update list locally or wait for flow? Flow should update.
+                // But we need to ensure editingPortfolio is updated to the saved version (clean state)
+                _state.update { it.copy(isLoading = false, isEditing = false) }
+            }.onFailure { error ->
+                _state.update { it.copy(isLoading = false, error = error.message) }
+            }
+        }
+    }
+
+    private fun cancelEdit() {
+        // Revert to original
+        val currentId = _state.value.editingPortfolio?.id ?: return
+        val original = _state.value.portfolios.find { it.id == currentId }
+        _state.update { it.copy(isEditing = false, editingPortfolio = original) }
     }
 
     private fun loadPortfolios() {
@@ -47,14 +133,26 @@ class PortfolioViewModel(
             val userId = sessionRepository.getCurrentUserId().first()
             
             if (userId == null) {
-                // Handle not logged in or return
                 _state.update { it.copy(isLoading = false) }
                 return@launch
             }
             
             launch {
                 portfolioUseCases.getPortfolios(userId).collect { list ->
-                    _state.update { it.copy(portfolios = list) }
+                    _state.update { state -> 
+                        // specific logic: if we are editing/viewing a portfolio, update it if it changed in background?
+                        // Or keep local state?
+                        // For View mode, we want live updates.
+                        // For Edit mode, we don't want to overwrite user work.
+                        val currentId = state.editingPortfolio?.id
+                        val updatedEditing = if (currentId != null && !state.isEditing) {
+                             list.find { it.id == currentId } ?: state.editingPortfolio
+                        } else {
+                             state.editingPortfolio
+                        }
+                        
+                        state.copy(portfolios = list, editingPortfolio = updatedEditing) 
+                    }
                     checkCreationLimit(userId)
                 }
             }
@@ -75,30 +173,48 @@ class PortfolioViewModel(
     private fun createPortfolio() {
         viewModelScope.launch {
             val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
+            _state.update { it.copy(isLoading = true) }
             
-            val result = canCreateServiceUseCase(userId, ServiceType.PORTFOLIO)
-            if (result !is CanCreateResult.Success) {
-                return@launch
+            // Check limits first
+            val limitResult = canCreateServiceUseCase(userId, ServiceType.PORTFOLIO)
+            if (limitResult !is CanCreateResult.Success) {
+                 _state.update { it.copy(isLoading = false) } // Should show error/dialog
+                 return@launch
             }
-            
+
             val newPortfolio = Portfolio(
                 id = UUID.randomUUID().toString(),
                 userId = userId,
-                title = "My Porfolio",
-                description = "My awesome work",
+                title = "My New Portfolio",
+                description = "Showcase your best work",
                 isVisible = true,
                 templateId = "minimalist",
                 primaryColor = "#000000",
                 fontFamily = "Inter",
                 createdAt = System.currentTimeMillis()
             )
-            portfolioUseCases.createPortfolio(newPortfolio)
+            
+            portfolioUseCases.createPortfolio(newPortfolio).onSuccess {
+                 // Auto-open
+                 _state.update { it.copy(isLoading = false) } // Flow will update list
+                 // We can manually set editingPortfolio here if Flow is slow
+                 // But wait for Flow collection to act is safer for consistency?
+                 // Let's set it to ensure immediate UI feedback
+                 openPortfolio(newPortfolio.id) // Might fail if list not updated yet.
+                 // Better:
+                 _state.update { it.copy(editingPortfolio = newPortfolio, isEditing = true, isLoading = false) }
+            }.onFailure { error ->
+                _state.update { it.copy(isLoading = false, error = error.message) }
+            }
         }
     }
 
     private fun deletePortfolio(id: String) {
         viewModelScope.launch {
             portfolioUseCases.deletePortfolio(id)
+            if (_state.value.editingPortfolio?.id == id) {
+                _state.update { it.copy(editingPortfolio = null, isEditing = false) }
+            }
         }
     }
 }

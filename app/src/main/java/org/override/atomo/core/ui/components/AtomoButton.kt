@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.core.ui.components
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -13,6 +22,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 
+/**
+ * A custom button component for the Atomo design system.
+ * Wraps [Button] with default styling and behaviors.
+ *
+ * @param onClick Callback when the button is clicked.
+ * @param modifier Modifier for styling.
+ * @param enabled Whether the button is enabled.
+ * @param shape Shape of the button.
+ * @param colors Colors for the button.
+ * @param elevation Elevation for the button.
+ * @param border Border stroke for the button.
+ * @param contentPadding Padding for the content.
+ * @param interactionSource Interaction source for ripple effects.
+ * @param content The content of the button.
+ */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AtomoButton(

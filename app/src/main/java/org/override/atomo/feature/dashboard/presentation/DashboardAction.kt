@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.dashboard.presentation
 
 import org.override.atomo.domain.model.Cv
@@ -62,7 +71,7 @@ sealed interface DashboardAction {
     data object ConfirmDelete : DashboardAction
     
     // Generic Service Actions (Card Actions)
-    data class PreviewService(val type: String, val id: String) : DashboardAction // type: "menu", "cv", etc.
-    data class ShowQR(val type: String, val id: String) : DashboardAction
-    data class ShareService(val type: String, val id: String) : DashboardAction
+    data class PreviewService(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
+    data class ShowQR(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
+    data class ShareService(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
 }

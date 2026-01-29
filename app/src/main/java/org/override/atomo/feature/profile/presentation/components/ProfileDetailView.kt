@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.profile.presentation.components
 
 import android.content.Intent
@@ -75,10 +84,11 @@ fun ProfileDetailView(
     profile: Profile,
     onEditClick: () -> Unit,
     onSyncClick: () -> Unit,
+    onShareClick: () -> Unit, // New callback
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val profileUrl = "https://www.atomo.click/${profile.username}"
+    // No URL generation here anymore
 
     // 1. Configuración del Morphing
     val numVertices = 12
@@ -216,15 +226,7 @@ fun ProfileDetailView(
                     Icon(Icons.Default.Sync, contentDescription = "Sync Profile")
                 }
                 FilledIconButton(
-                    onClick = {
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, "Check out my profile on Atomo: $profileUrl")
-                            type = "text/plain"
-                        }
-                        val shareIntent = Intent.createChooser(sendIntent, null)
-                        context.startActivity(shareIntent)
-                    }
+                    onClick = onShareClick
                 ) {
                     Icon(Icons.Default.Share, contentDescription = "Share Profile")
                 }

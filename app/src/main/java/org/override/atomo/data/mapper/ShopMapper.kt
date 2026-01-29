@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.mapper
 
 import org.override.atomo.data.local.entity.ProductCategoryEntity
@@ -11,6 +20,8 @@ import org.override.atomo.domain.model.ProductCategory
 import org.override.atomo.domain.model.Shop
 
 // Shop mappers
+
+/** Maps ShopEntity to Shop domain model. */
 fun ShopEntity.toDomain(): Shop = Shop(
     id = id,
     userId = userId,
@@ -22,6 +33,7 @@ fun ShopEntity.toDomain(): Shop = Shop(
     createdAt = createdAt
 )
 
+/** Maps Shop domain model to ShopEntity. */
 fun Shop.toEntity(): ShopEntity = ShopEntity(
     id = id,
     userId = userId,
@@ -33,6 +45,7 @@ fun Shop.toEntity(): ShopEntity = ShopEntity(
     createdAt = createdAt
 )
 
+/** Maps ShopDto to ShopEntity. */
 fun ShopDto.toEntity(): ShopEntity = ShopEntity(
     id = id,
     userId = userId,
@@ -44,6 +57,7 @@ fun ShopDto.toEntity(): ShopEntity = ShopEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Shop domain model to ShopDto. */
 fun Shop.toDto(): ShopDto = ShopDto(
     id = id,
     userId = userId,
@@ -55,6 +69,8 @@ fun Shop.toDto(): ShopDto = ShopDto(
 )
 
 // Category mappers
+
+/** Maps ProductCategoryEntity to ProductCategory domain model. */
 fun ProductCategoryEntity.toDomain(): ProductCategory = ProductCategory(
     id = id,
     shopId = shopId,
@@ -63,6 +79,7 @@ fun ProductCategoryEntity.toDomain(): ProductCategory = ProductCategory(
     createdAt = createdAt
 )
 
+/** Maps ProductCategory domain model to ProductCategoryEntity. */
 fun ProductCategory.toEntity(): ProductCategoryEntity = ProductCategoryEntity(
     id = id,
     shopId = shopId,
@@ -71,6 +88,7 @@ fun ProductCategory.toEntity(): ProductCategoryEntity = ProductCategoryEntity(
     createdAt = createdAt
 )
 
+/** Maps ProductCategoryDto to ProductCategoryEntity. */
 fun ProductCategoryDto.toEntity(): ProductCategoryEntity = ProductCategoryEntity(
     id = id,
     shopId = shopId,
@@ -80,6 +98,8 @@ fun ProductCategoryDto.toEntity(): ProductCategoryEntity = ProductCategoryEntity
 )
 
 // Product mappers
+
+/** Maps ProductEntity to Product domain model. */
 fun ProductEntity.toDomain(): Product = Product(
     id = id,
     shopId = shopId,
@@ -93,6 +113,7 @@ fun ProductEntity.toDomain(): Product = Product(
     createdAt = createdAt
 )
 
+/** Maps Product domain model to ProductEntity. */
 fun Product.toEntity(): ProductEntity = ProductEntity(
     id = id,
     shopId = shopId,
@@ -106,6 +127,7 @@ fun Product.toEntity(): ProductEntity = ProductEntity(
     createdAt = createdAt
 )
 
+/** Maps ProductDto to ProductEntity. */
 fun ProductDto.toEntity(): ProductEntity = ProductEntity(
     id = id,
     shopId = shopId,
@@ -119,6 +141,7 @@ fun ProductDto.toEntity(): ProductEntity = ProductEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Product domain model to ProductDto. */
 fun Product.toDto(): ProductDto = ProductDto(
     id = id,
     shopId = shopId,

@@ -1,8 +1,20 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/**
+ * Data Transfer Object for CV.
+ */
 @Serializable
 data class CvDto(
     val id: String,
@@ -16,6 +28,9 @@ data class CvDto(
     @SerialName("created_at") val createdAt: String? = null
 )
 
+/**
+ * Data Transfer Object for CV Education.
+ */
 @Serializable
 data class CvEducationDto(
     val id: String,
@@ -30,6 +45,9 @@ data class CvEducationDto(
     @SerialName("created_at") val createdAt: String? = null
 )
 
+/**
+ * Data Transfer Object for CV Experience.
+ */
 @Serializable
 data class CvExperienceDto(
     val id: String,
@@ -44,6 +62,9 @@ data class CvExperienceDto(
     @SerialName("created_at") val createdAt: String? = null
 )
 
+/**
+ * Data Transfer Object for CV Skill.
+ */
 @Serializable
 data class CvSkillDto(
     val id: String,

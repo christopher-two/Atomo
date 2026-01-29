@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.feature.dashboard.presentation
 
 import androidx.compose.animation.AnimatedVisibility
@@ -26,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import org.override.atomo.feature.dashboard.presentation.components.ServiceCard
 import org.override.atomo.feature.dashboard.presentation.components.DashboardAd
 import org.override.atomo.feature.dashboard.presentation.components.DashboardHeader
 import org.override.atomo.feature.dashboard.presentation.components.DashboardShimmer
@@ -33,6 +43,8 @@ import org.override.atomo.feature.dashboard.presentation.components.DashboardSho
 import org.override.atomo.feature.dashboard.presentation.components.DashboardStats
 import org.override.atomo.feature.dashboard.presentation.components.base.DashboardDeleteDialog
 import org.override.atomo.feature.dashboard.presentation.components.base.DashboardSheetsHandler
+
+import org.override.atomo.domain.model.ServiceType
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +56,7 @@ fun DashboardScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Loading overlay
+        /* Loading overlay */
         AnimatedVisibility(
             visible = state.isLoading,
             enter = fadeIn(),
@@ -54,7 +66,7 @@ fun DashboardScreen(
             DashboardShimmer()
         }
 
-        // Operations loading overlay (small indicator)
+        /* Operations loading overlay (small indicator) */
         AnimatedVisibility(
             visible = state.isOperationLoading,
             enter = fadeIn(),
@@ -84,7 +96,7 @@ fun DashboardScreen(
                     contentPadding = PaddingValues(bottom = 80.dp), // Extra padding for FAB/Snackbar
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
-                    // Header with greeting
+                    /* Header with greeting */
                     item(key = "header") {
                         DashboardHeader(
                             displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
@@ -92,7 +104,7 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Statistics
+                    /* Statistics */
                     item(key = "stats") {
                         DashboardStats(
                             statistics = state.statistics,
@@ -100,7 +112,7 @@ fun DashboardScreen(
                         )
                     }
 
-                    // Shortcuts
+                    /* Shortcuts */
                     if (state.shortcuts.isNotEmpty()) {
                         item(key = "shortcuts") {
                             DashboardShortcuts(
@@ -111,14 +123,14 @@ fun DashboardScreen(
                         }
                     }
 
-                    // Advertisement
+                    /* Advertisement */
                     item(key = "ad") {
                         DashboardAd(
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                     }
 
-                    // Services Title
+                    /* Services Title */
                     if (state.hasAnyServices) {
                         item(key = "services_title") {
                             Text(
@@ -131,71 +143,72 @@ fun DashboardScreen(
                         }
                     }
 
-                    // Render Service Cards dynamically
+
+                    /* Render Service Cards dynamically */
                     items(state.services) { module ->
                          if (module.isActive) {
                              when (module) {
                                  is ServiceModule.MenuModule -> {
                                      val menu = module.menus.first()
-                                     org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                     ServiceCard(
                                          title = menu.name,
                                          subtitle = "${module.totalDishes} Platillos",
                                          icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("menu", menu.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("menu", menu.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("menu", menu.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.DIGITAL_MENU, menu.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.DIGITAL_MENU, menu.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.DIGITAL_MENU, menu.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
                                  
                                  is ServiceModule.ShopModule -> {
                                      val shop = module.shops.first()
-                                      org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                      ServiceCard(
                                          title = shop.name,
                                          subtitle = "${module.totalProducts} Productos",
                                          icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("shop", shop.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("shop", shop.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("shop", shop.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.SHOP, shop.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.SHOP, shop.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.SHOP, shop.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
                                  
                                  is ServiceModule.CvModule -> {
                                      val cv = module.cvs.first()
-                                      org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                      ServiceCard(
                                          title = cv.title,
                                          subtitle = "${module.totalSkills} Habilidades, ${module.totalExperiences} Exp.",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("cv", cv.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("cv", cv.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("cv", cv.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.CV, cv.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.CV, cv.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.CV, cv.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
                                  
                                  is ServiceModule.PortfolioModule -> {
                                      val portfolio = module.portfolios.first()
-                                      org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                      ServiceCard(
                                          title = portfolio.title,
                                          subtitle = "${module.totalItems} Proyectos",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("portfolio", portfolio.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("portfolio", portfolio.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("portfolio", portfolio.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.PORTFOLIO, portfolio.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.PORTFOLIO, portfolio.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.PORTFOLIO, portfolio.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
                                  
                                  is ServiceModule.InvitationModule -> {
                                      val invitation = module.invitations.first()
-                                     org.override.atomo.feature.dashboard.presentation.components.ServiceCard(
+                                     ServiceCard(
                                          title = invitation.eventName,
                                          subtitle = invitation.description ?: "Sin descripción",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("invitation", invitation.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("invitation", invitation.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("invitation", invitation.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.INVITATION, invitation.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.INVITATION, invitation.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.INVITATION, invitation.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
@@ -207,7 +220,7 @@ fun DashboardScreen(
             }
         }
 
-        // Dialogs
+        /* Dialogs */
         state.deleteDialog?.let { dialogState ->
             DashboardDeleteDialog(
                 dialogState = dialogState,
@@ -215,7 +228,7 @@ fun DashboardScreen(
             )
         }
 
-        // Sheets
+        /* Sheets */
         DashboardSheetsHandler(
             state = state,
             onAction = onAction

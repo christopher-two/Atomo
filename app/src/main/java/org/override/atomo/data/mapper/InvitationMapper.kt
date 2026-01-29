@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
 package org.override.atomo.data.mapper
 
 import org.override.atomo.data.local.entity.InvitationEntity
@@ -8,6 +17,7 @@ import org.override.atomo.domain.model.Invitation
 import org.override.atomo.domain.model.InvitationResponse
 import org.override.atomo.domain.model.ResponseStatus
 
+/** Maps InvitationEntity to Invitation domain model. */
 fun InvitationEntity.toDomain(): Invitation = Invitation(
     id = id,
     userId = userId,
@@ -22,6 +32,7 @@ fun InvitationEntity.toDomain(): Invitation = Invitation(
     createdAt = createdAt
 )
 
+/** Maps Invitation domain model to InvitationEntity. */
 fun Invitation.toEntity(): InvitationEntity = InvitationEntity(
     id = id,
     userId = userId,
@@ -36,6 +47,7 @@ fun Invitation.toEntity(): InvitationEntity = InvitationEntity(
     createdAt = createdAt
 )
 
+/** Maps InvitationDto to InvitationEntity. */
 fun InvitationDto.toEntity(): InvitationEntity = InvitationEntity(
     id = id,
     userId = userId,
@@ -50,6 +62,7 @@ fun InvitationDto.toEntity(): InvitationEntity = InvitationEntity(
     createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
 )
 
+/** Maps Invitation domain model to InvitationDto. */
 fun Invitation.toDto(): InvitationDto = InvitationDto(
     id = id,
     userId = userId,
@@ -63,6 +76,7 @@ fun Invitation.toDto(): InvitationDto = InvitationDto(
     fontFamily = fontFamily
 )
 
+/** Maps InvitationResponseEntity to InvitationResponse domain model. */
 fun InvitationResponseEntity.toDomain(): InvitationResponse = InvitationResponse(
     id = id,
     invitationId = invitationId,
@@ -73,6 +87,7 @@ fun InvitationResponseEntity.toDomain(): InvitationResponse = InvitationResponse
     createdAt = createdAt
 )
 
+/** Maps InvitationResponse domain model to InvitationResponseEntity. */
 fun InvitationResponse.toEntity(): InvitationResponseEntity = InvitationResponseEntity(
     id = id,
     invitationId = invitationId,
@@ -83,6 +98,7 @@ fun InvitationResponse.toEntity(): InvitationResponseEntity = InvitationResponse
     createdAt = createdAt
 )
 
+/** Maps InvitationResponseDto to InvitationResponseEntity. */
 fun InvitationResponseDto.toEntity(): InvitationResponseEntity = InvitationResponseEntity(
     id = id,
     invitationId = invitationId,

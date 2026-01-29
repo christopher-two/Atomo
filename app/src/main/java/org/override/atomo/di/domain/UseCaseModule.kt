@@ -20,7 +20,12 @@ import org.override.atomo.domain.usecase.shop.*
 import org.override.atomo.domain.usecase.subscription.*
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 
+import org.override.atomo.domain.usecase.session.CheckSessionUseCase
+
 val UseCaseModule = module {
+    // Session
+    singleOf(::CheckSessionUseCase)
+
     // Profile
     singleOf(::GetProfileUseCase)
     singleOf(::SyncProfileUseCase)

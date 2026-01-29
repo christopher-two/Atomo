@@ -41,6 +41,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 
+import org.override.atomo.domain.util.AtomoUrlGenerator
+
 class DashboardViewModel(
     private val sessionRepository: SessionRepository,
     private val profileUseCases: ProfileUseCases,
@@ -140,16 +142,30 @@ class DashboardViewModel(
 
             /* New Service Card Actions */
             is DashboardAction.PreviewService -> {
-                val url = "https://atomo.click/${action.type}/${action.id}"
-                viewModelScope.launch {
-                    _events.send(DashboardEvent.OpenUrl(url))
+                val username = _state.value.profile?.username
+                if (username != null) {
+                    val url = AtomoUrlGenerator.generateServiceUrl(username, action.type)
+                    viewModelScope.launch {
+                        _events.send(DashboardEvent.OpenUrl(url))
+                    }
+                } else {
+                    viewModelScope.launch {
+                        _events.send(DashboardEvent.ShowSnackbar("No se pudo obtener el nombre de usuario"))
+                    }
                 }
             }
             is DashboardAction.ShowQR -> { /* TODO: Show QR Dialog */ }
             is DashboardAction.ShareService -> {
-                val url = "https://atomo.click/${action.type}/${action.id}"
-                viewModelScope.launch {
-                    _events.send(DashboardEvent.ShareUrl(url, "Mira mi servicio en Atomo"))
+                val username = _state.value.profile?.username
+                if (username != null) {
+                    val url = AtomoUrlGenerator.generateServiceUrl(username, action.type)
+                    viewModelScope.launch {
+                        _events.send(DashboardEvent.ShareUrl(url, "Mira mi ${action.type.name.lowercase().replace("_", " ")} en Atomo"))
+                    }
+                } else {
+                     viewModelScope.launch {
+                        _events.send(DashboardEvent.ShowSnackbar("No se pudo obtener el nombre de usuario"))
+                    }
                 }
             }
 

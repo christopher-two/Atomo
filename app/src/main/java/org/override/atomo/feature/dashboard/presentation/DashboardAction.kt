@@ -71,7 +71,7 @@ sealed interface DashboardAction {
     data object ConfirmDelete : DashboardAction
     
     // Generic Service Actions (Card Actions)
-    data class PreviewService(val type: String, val id: String) : DashboardAction // type: "menu", "cv", etc.
-    data class ShowQR(val type: String, val id: String) : DashboardAction
-    data class ShareService(val type: String, val id: String) : DashboardAction
+    data class PreviewService(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
+    data class ShowQR(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
+    data class ShareService(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
 }

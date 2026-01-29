@@ -44,6 +44,8 @@ import org.override.atomo.feature.dashboard.presentation.components.DashboardSta
 import org.override.atomo.feature.dashboard.presentation.components.base.DashboardDeleteDialog
 import org.override.atomo.feature.dashboard.presentation.components.base.DashboardSheetsHandler
 
+import org.override.atomo.domain.model.ServiceType
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
@@ -152,9 +154,9 @@ fun DashboardScreen(
                                          title = menu.name,
                                          subtitle = "${module.totalDishes} Platillos",
                                          icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("menu", menu.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("menu", menu.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("menu", menu.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.DIGITAL_MENU, menu.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.DIGITAL_MENU, menu.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.DIGITAL_MENU, menu.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
@@ -165,9 +167,9 @@ fun DashboardScreen(
                                          title = shop.name,
                                          subtitle = "${module.totalProducts} Productos",
                                          icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("shop", shop.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("shop", shop.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("shop", shop.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.SHOP, shop.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.SHOP, shop.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.SHOP, shop.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
@@ -178,9 +180,9 @@ fun DashboardScreen(
                                          title = cv.title,
                                          subtitle = "${module.totalSkills} Habilidades, ${module.totalExperiences} Exp.",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("cv", cv.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("cv", cv.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("cv", cv.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.CV, cv.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.CV, cv.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.CV, cv.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
@@ -191,9 +193,9 @@ fun DashboardScreen(
                                          title = portfolio.title,
                                          subtitle = "${module.totalItems} Proyectos",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("portfolio", portfolio.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("portfolio", portfolio.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("portfolio", portfolio.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.PORTFOLIO, portfolio.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.PORTFOLIO, portfolio.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.PORTFOLIO, portfolio.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }
@@ -204,9 +206,9 @@ fun DashboardScreen(
                                          title = invitation.eventName,
                                          subtitle = invitation.description ?: "Sin descripción",
                                          icon = androidx.compose.material.icons.Icons.Filled.Description,
-                                         onPreviewClick = { onAction(DashboardAction.PreviewService("invitation", invitation.id)) },
-                                         onShareClick = { onAction(DashboardAction.ShareService("invitation", invitation.id)) },
-                                         onQrClick = { onAction(DashboardAction.ShowQR("invitation", invitation.id)) },
+                                         onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.INVITATION, invitation.id)) },
+                                         onShareClick = { onAction(DashboardAction.ShareService(ServiceType.INVITATION, invitation.id)) },
+                                         onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.INVITATION, invitation.id)) },
                                          modifier = Modifier.padding(horizontal = 16.dp)
                                      )
                                  }

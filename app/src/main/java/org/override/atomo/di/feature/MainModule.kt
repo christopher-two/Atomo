@@ -9,20 +9,10 @@
 
 package org.override.atomo.di.feature
 
-import org.koin.core.module.Module
+import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.dsl.module
+import org.override.atomo.feature.main.MainViewModel
 
-val FeaturesModule: List<Module>
-    get() = listOf(
-        MainModule,
-        AuthModule,
-        HomeModule,
-        DashboardModule,
-        ProfileModule,
-        SettingsModule,
-        CvModule,
-        DigitalMenuModule,
-        InvitationModule,
-        PortfolioModule,
-        ShopModule,
-        PayModule
-    )
+val MainModule = module {
+    viewModel { MainViewModel(get(), get(), get()) }
+}

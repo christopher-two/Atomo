@@ -7,22 +7,13 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.di.feature
+package org.override.atomo.domain.usecase.session
 
-import org.koin.core.module.Module
+import kotlinx.coroutines.flow.Flow
+import org.override.atomo.libs.session.api.SessionRepository
 
-val FeaturesModule: List<Module>
-    get() = listOf(
-        MainModule,
-        AuthModule,
-        HomeModule,
-        DashboardModule,
-        ProfileModule,
-        SettingsModule,
-        CvModule,
-        DigitalMenuModule,
-        InvitationModule,
-        PortfolioModule,
-        ShopModule,
-        PayModule
-    )
+class CheckSessionUseCase(
+    private val sessionRepository: SessionRepository
+) {
+    operator fun invoke(): Flow<Boolean> = sessionRepository.isUserLoggedIn()
+}

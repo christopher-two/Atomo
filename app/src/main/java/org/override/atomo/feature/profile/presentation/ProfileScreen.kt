@@ -28,6 +28,7 @@ import org.override.atomo.feature.profile.presentation.components.ProfileShimmer
 fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
+    onShareProfile: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.isLoading && state.profile == null) {
@@ -48,7 +49,8 @@ fun ProfileScreen(
                 ProfileDetailView(
                     profile = state.profile,
                     onEditClick = { onAction(ProfileAction.EnterEditMode) },
-                    onSyncClick = { onAction(ProfileAction.Refresh) }
+                    onSyncClick = { onAction(ProfileAction.Refresh) },
+                    onShareClick = onShareProfile
                 )
             }
         }

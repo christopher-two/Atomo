@@ -28,6 +28,8 @@ import org.override.atomo.libs.session.api.SessionRepository
  * ViewModel for managing Profile feature state and business logic.
  * Handles profile loading, editing, validation (username check), and saving.
  */
+import org.override.atomo.domain.util.AtomoUrlGenerator
+
 class ProfileViewModel(
     private val useCases: ProfileUseCases,
     private val sessionRepository: SessionRepository
@@ -41,6 +43,18 @@ class ProfileViewModel(
             started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = ProfileState()
         )
+
+    /**
+     * Gets the public "Link in Bio" URL for the current user.
+     */
+    fun getProfileUrl(): String? {
+        val username = state.value.profile?.username
+        return if (username != null) {
+            AtomoUrlGenerator.generateProfileUrl(username)
+        } else {
+            null
+        }
+    }
 
     private var checkUsernameJob: Job? = null
 

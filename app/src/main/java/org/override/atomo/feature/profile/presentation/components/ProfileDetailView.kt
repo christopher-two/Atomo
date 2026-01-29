@@ -84,10 +84,11 @@ fun ProfileDetailView(
     profile: Profile,
     onEditClick: () -> Unit,
     onSyncClick: () -> Unit,
+    onShareClick: () -> Unit, // New callback
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val profileUrl = "https://www.atomo.click/${profile.username}"
+    // No URL generation here anymore
 
     // 1. Configuración del Morphing
     val numVertices = 12
@@ -225,15 +226,7 @@ fun ProfileDetailView(
                     Icon(Icons.Default.Sync, contentDescription = "Sync Profile")
                 }
                 FilledIconButton(
-                    onClick = {
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, "Check out my profile on Atomo: $profileUrl")
-                            type = "text/plain"
-                        }
-                        val shareIntent = Intent.createChooser(sendIntent, null)
-                        context.startActivity(shareIntent)
-                    }
+                    onClick = onShareClick
                 ) {
                     Icon(Icons.Default.Share, contentDescription = "Share Profile")
                 }

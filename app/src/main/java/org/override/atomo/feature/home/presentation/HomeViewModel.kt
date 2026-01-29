@@ -32,13 +32,16 @@ import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.domain.model.ServiceType
 import kotlin.io.path.Path
 
+import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
+
 class HomeViewModel(
     private val homeNavigation: HomeNavigation,
     private val rootNavigation: RootNavigation,
     private val sessionRepository: SessionRepository,
     private val subscriptionUseCases: SubscriptionUseCases,
     private val getExistingServices: GetExistingServicesUseCase,
-    private val syncAllServices: SyncAllServicesUseCase
+    private val syncAllServices: SyncAllServicesUseCase,
+    private val getServiceLimitsUseCase: GetServiceLimitsUseCase
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -74,13 +77,27 @@ class HomeViewModel(
 
             /* Load existing services */
             val existingServices = getExistingServices(safeUserId)
+            
+            /* Calculate available services */
+            val limits = getServiceLimitsUseCase(plan)
+            val totalServices = existingServices.count { it.value }
+            val canAddMoreTotal = if (limits.isUnlimited) true else totalServices < limits.maxTotalServices
+            
+            val availableTypes = if (canAddMoreTotal) {
+                ServiceType.entries.filter { type ->
+                    existingServices[type] != true // Limit 1 per type
+                }
+            } else {
+                emptyList()
+            }
 
             _state.update {
                 it.copy(
                     currentTab = homeNavigation.currentTab,
                     currentSubscription = subscription,
                     currentPlan = plan,
-                    existingServices = existingServices
+                    existingServices = existingServices,
+                    availableServiceTypes = availableTypes
                 )
             }
             hasLoadedInitialData = true
@@ -127,6 +144,7 @@ class HomeViewModel(
 
                 /* Check if service can be created */
                 val availableTypes = _state.value.availableServiceTypes
+                // Double check with UseCase to be safe, although UI should have prevented this
                 if (!availableTypes.contains(action.type)) {
                     /* Show upgrade dialog */
                     val message = if (_state.value.existingServices[action.type] == true) {

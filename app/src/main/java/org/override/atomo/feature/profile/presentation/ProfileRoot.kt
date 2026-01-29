@@ -16,14 +16,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 import org.override.atomo.core.ui.theme.AtomoTheme
 
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+
 @Composable
 fun ProfileRoot(
     viewModel: ProfileViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     ProfileScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        onShareProfile = {
+            viewModel.getProfileUrl()?.let { url ->
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, "Check out my profile on Atomo: $url")
+                    type = "text/plain"
+                }
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                context.startActivity(shareIntent)
+            }
+        }
     )
 }

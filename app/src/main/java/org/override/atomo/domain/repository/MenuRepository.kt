@@ -66,6 +66,9 @@ interface MenuRepository {
     /** Creates a new dish. */
     suspend fun createDish(dish: Dish): Result<Dish>
 
+    /** Upserts a dish (creates if not exists, updates if exists). */
+    suspend fun upsertDish(dish: Dish): Result<Dish>
+
     /** Updates a dish. */
     suspend fun updateDish(dish: Dish): Result<Dish>
 

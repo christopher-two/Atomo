@@ -41,6 +41,12 @@ class RootNavigation {
         _backstack.update { mutableListOf(route) }
     }
 
+    fun navQr(data: String?) {
+        _backstack.update { current ->
+            current.toMutableList().apply { add(RouteApp.Qr(data)) }
+        }
+    }
+
     fun navTo(
         route: RouteApp
     ) {

@@ -38,6 +38,7 @@ data class MenuUseCases(
     val deleteMenu: DeleteMenuUseCase,
     val createCategory: CreateCategoryUseCase,
     val createDish: CreateDishUseCase,
+    val upsertDish: UpsertDishUseCase,
     val updateDish: UpdateDishUseCase,
     val deleteDish: DeleteDishUseCase
 )
@@ -80,6 +81,11 @@ class CreateCategoryUseCase(private val repository: MenuRepository) {
 /** Creates a new dish in a menu. */
 class CreateDishUseCase(private val repository: MenuRepository) {
     suspend operator fun invoke(dish: Dish): Result<Dish> = repository.createDish(dish)
+}
+
+/** Upserts a dish in a menu. */
+class UpsertDishUseCase(private val repository: MenuRepository) {
+    suspend operator fun invoke(dish: Dish): Result<Dish> = repository.upsertDish(dish)
 }
 
 /** Updates an existing dish. */

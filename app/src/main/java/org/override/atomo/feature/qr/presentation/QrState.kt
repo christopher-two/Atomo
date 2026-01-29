@@ -7,16 +7,8 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.core.common
+package org.override.atomo.feature.qr.presentation
 
-import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.Serializable
-
-@Serializable
-sealed interface RouteApp : NavKey {
-    object Auth : RouteApp
-    object Home : RouteApp
-    object Settings : RouteApp
-    object CreateDigitalMenu : RouteApp
-    data class Qr(val data: String?) : RouteApp
-}
+data class QrState(
+    val data: String? = null
+)

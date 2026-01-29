@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -33,7 +34,7 @@ enum class AppTab(
     CV("CV", Icons.Filled.Description),
     PORTFOLIO("Portafolio", Icons.Filled.Folder),
     INVITATION("Invitaciones", Icons.Filled.Email),
-    
+
     // Special tab for mobile navigation sheet
     MENU("Menú", Icons.Filled.Menu) 
 }

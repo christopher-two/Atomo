@@ -24,5 +24,6 @@ val FeaturesModule: List<Module>
         InvitationModule,
         PortfolioModule,
         ShopModule,
-        PayModule
+        PayModule,
+        QrModule
     )

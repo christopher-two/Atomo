@@ -63,7 +63,18 @@ class DigitalMenuViewModel(
             DigitalMenuAction.CloseDishDialog -> _state.update { it.copy(isDishDialogVisible = false, dishToEdit = null) }
             is DigitalMenuAction.SaveDish -> saveDish(action)
             is DigitalMenuAction.DeleteDish -> deleteDish(action.dish)
+
+            // Delete Confirmation
+            DigitalMenuAction.ShowDeleteConfirmation -> _state.update { it.copy(isDeleteDialogVisible = true) }
+            DigitalMenuAction.HideDeleteConfirmation -> _state.update { it.copy(isDeleteDialogVisible = false) }
+            DigitalMenuAction.ConfirmDelete -> confirmDeleteMenu()
         }
+    }
+
+    private fun confirmDeleteMenu() {
+        val menuId = _state.value.editingMenu?.id ?: return
+        _state.update { it.copy(isDeleteDialogVisible = false) }
+        deleteMenu(menuId)
     }
 
     private fun handleBack() {
@@ -101,12 +112,9 @@ class DigitalMenuViewModel(
             val menu = _state.value.editingMenu ?: return@launch
             _state.update { it.copy(isLoading = true) }
             
-            menuUseCases.createMenu(menu).onSuccess {
-                 // Save dishes effectively happened if createMenu handles it. 
-                 // If not, we iterate dishes. Assuming createMenu acts as upsert for Menu entity including dishes if configured.
-                 // Based on previous code, it iterated dishes. Let's do that to be safe.
+            menuUseCases.updateMenu(menu).onSuccess {
                  menu.dishes.forEach { dish ->
-                     menuUseCases.createDish(dish)
+                     menuUseCases.upsertDish(dish)
                  }
                 _state.update { it.copy(isLoading = false, isEditing = false) }
             }.onFailure { error ->
@@ -190,14 +198,25 @@ class DigitalMenuViewModel(
             
             launch {
                 menuUseCases.getMenus(userId).collect { list ->
-                     _state.update { state -> 
-                         val currentId = state.editingMenu?.id
-                        val updatedEditing = if (currentId != null && !state.isEditing) {
-                             list.find { it.id == currentId } ?: state.editingMenu
+                     _state.update { state ->
+                         // Logic for Single Menu:
+                         // If we find a menu, we automatically set it as editingMenu (view mode)
+                         // This effectively bypasses the list screen.
+                         val existingMenu = list.firstOrNull()
+
+                         // If we are currently editing/viewing something, we might want to keep it updated,
+                         // but if it's the *first load* (or refresh), we default to the existing menu.
+                         // If no menu exists, editingMenu is null, which the UI should handle by showing Create screen.
+
+                        val currentId = state.editingMenu?.id
+                        val updatedEditing = if (currentId != null) {
+                             // Update the currently viewed menu with new data from flow
+                             list.find { it.id == currentId } ?: (if (state.isEditing) state.editingMenu else existingMenu)
                         } else {
-                             state.editingMenu
+                             // Initial load or no menu selected yet -> auto select first
+                             existingMenu
                         }
-                        
+
                         state.copy(menus = list, editingMenu = updatedEditing)
                     }
                     checkCreationLimit(userId)
@@ -253,14 +272,12 @@ class DigitalMenuViewModel(
 
     private fun deleteMenu(id: String) {
         viewModelScope.launch {
-            // Assuming we have deleteMenu
-            // menuUseCases.deleteMenu(id) 
-            // Reuse logic from others:
-            // But verify deleteMenu exists. If not, maybe we skip or add it.
-            // Previous code did not have deleteMenu because it only assumed ONE menu.
-            // If function is missing, I might get a compilation error.
-            // I'll comment it out or assume it exists if standard pattern.
-            // Actually, Service implementations usually have it.
+            _state.update { it.copy(isLoading = true) }
+            menuUseCases.deleteMenu(id).onSuccess {
+                _state.update { it.copy(isLoading = false) }
+            }.onFailure { error ->
+                _state.update { it.copy(isLoading = false, error = error.message) }
+            }
         }
     }
 }

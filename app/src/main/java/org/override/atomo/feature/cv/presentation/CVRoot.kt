@@ -133,7 +133,6 @@ fun CVContent(
             floatingActionButton = {
                  ServiceToolbar(
                      isEditing = state.isEditing,
-                     onBack = { onAction(CVAction.Back) },
                      onEditVerify = { 
                          if (state.isEditing) onAction(CVAction.SaveCv) 
                          else onAction(CVAction.ToggleEditMode) 

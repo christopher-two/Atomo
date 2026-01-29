@@ -135,7 +135,6 @@ fun ShopContent(
             floatingActionButton = {
                  ServiceToolbar(
                      isEditing = state.isEditing,
-                     onBack = { onAction(ShopAction.Back) },
                      onEditVerify = { 
                          if (state.isEditing) onAction(ShopAction.SaveShop) 
                          else onAction(ShopAction.ToggleEditMode) 

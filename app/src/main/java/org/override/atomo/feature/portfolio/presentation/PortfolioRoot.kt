@@ -144,7 +144,6 @@ fun PortfolioContent(
             floatingActionButton = {
                  ServiceToolbar(
                      isEditing = state.isEditing,
-                     onBack = { onAction(PortfolioAction.Back) },
                      onEditVerify = { 
                          if (state.isEditing) onAction(PortfolioAction.SavePortfolio) 
                          else onAction(PortfolioAction.ToggleEditMode) 

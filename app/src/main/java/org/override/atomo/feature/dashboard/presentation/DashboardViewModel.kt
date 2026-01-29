@@ -154,7 +154,15 @@ class DashboardViewModel(
                     }
                 }
             }
-            is DashboardAction.ShowQR -> { /* TODO: Show QR Dialog */ }
+            is DashboardAction.ShowQR -> {
+                val username = _state.value.profile?.username
+                if (username != null) {
+                    val url = AtomoUrlGenerator.generateServiceUrl(username, action.type)
+                    rootNavigation.navQr(
+                        data = url
+                    )
+                }
+            }
             is DashboardAction.ShareService -> {
                 val username = _state.value.profile?.username
                 if (username != null) {

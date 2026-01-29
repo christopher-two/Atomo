@@ -19,6 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.override.atomo.domain.usecase.subscription.GetExistingServicesUseCase
+import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
 import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.feature.navigation.HomeNavigation
@@ -37,6 +38,7 @@ class HomeViewModelTest {
     private val sessionRepository: SessionRepository = mockk()
     private val subscriptionUseCases: SubscriptionUseCases = mockk()
     private val getExistingServices: GetExistingServicesUseCase = mockk()
+    private val getServiceLimitsUseCase: GetServiceLimitsUseCase = mockk(relaxed = true)
     private val syncAllServices: SyncAllServicesUseCase = mockk()
 
     @Before
@@ -50,7 +52,7 @@ class HomeViewModelTest {
         
         viewModel = HomeViewModel(
             homeNavigation, rootNavigation, sessionRepository,
-            subscriptionUseCases, getExistingServices, syncAllServices
+            subscriptionUseCases, getExistingServices, syncAllServices, getServiceLimitsUseCase
         )
     }
 

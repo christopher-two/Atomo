@@ -137,7 +137,6 @@ fun InvitationContent(
             floatingActionButton = {
                  ServiceToolbar(
                      isEditing = state.isEditing,
-                     onBack = { onAction(InvitationAction.Back) },
                      onEditVerify = { 
                          if (state.isEditing) onAction(InvitationAction.SaveInvitation) 
                          else onAction(InvitationAction.ToggleEditMode) 

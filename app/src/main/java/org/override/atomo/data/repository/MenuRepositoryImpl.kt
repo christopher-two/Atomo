@@ -186,6 +186,12 @@ class MenuRepositoryImpl(
         dish
     }
     
+    override suspend fun upsertDish(dish: Dish): Result<Dish> = runCatching {
+        supabase.from("dishes").upsert(dish.toDto())
+        menuDao.insertDish(dish.toEntity())
+        dish
+    }
+
     override suspend fun updateDish(dish: Dish): Result<Dish> = runCatching {
         supabase.from("dishes").update(dish.toDto()) {
             filter { eq("id", dish.id) }

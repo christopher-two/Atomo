@@ -15,6 +15,7 @@ import org.override.atomo.domain.model.Invitation
 import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.domain.model.PortfolioItem
+import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.model.Shop
 
 sealed interface DashboardAction {
@@ -71,7 +72,7 @@ sealed interface DashboardAction {
     data object ConfirmDelete : DashboardAction
     
     // Generic Service Actions (Card Actions)
-    data class PreviewService(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
-    data class ShowQR(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
-    data class ShareService(val type: org.override.atomo.domain.model.ServiceType, val id: String) : DashboardAction
+    data class PreviewService(val type: ServiceType, val id: String) : DashboardAction
+    data class ShowQR(val type: ServiceType, val id: String) : DashboardAction
+    data class ShareService(val type: ServiceType, val id: String) : DashboardAction
 }

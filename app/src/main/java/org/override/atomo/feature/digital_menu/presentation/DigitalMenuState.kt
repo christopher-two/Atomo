@@ -26,5 +26,8 @@ data class DigitalMenuState(
     
     // Dish Editor State (kept for dialogs)
     val isDishDialogVisible: Boolean = false,
-    val dishToEdit: Dish? = null
+    val dishToEdit: Dish? = null,
+    
+    // Delete Confirmation
+    val isDeleteDialogVisible: Boolean = false
 )

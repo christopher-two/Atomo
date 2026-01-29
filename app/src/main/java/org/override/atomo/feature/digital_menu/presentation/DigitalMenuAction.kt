@@ -37,4 +37,9 @@ sealed interface DigitalMenuAction {
         val imageUrl: String?
     ) : DigitalMenuAction
     data class DeleteDish(val dish: Dish) : DigitalMenuAction
+
+    // Delete Confirmation
+    data object ShowDeleteConfirmation : DigitalMenuAction
+    data object HideDeleteConfirmation : DigitalMenuAction
+    data object ConfirmDelete : DigitalMenuAction
 }

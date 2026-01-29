@@ -139,9 +139,19 @@ class DashboardViewModel(
             DashboardAction.ConfirmDelete -> deleteService()
 
             /* New Service Card Actions */
-            is DashboardAction.PreviewService -> { /* TODO: Open Preview */ }
+            is DashboardAction.PreviewService -> {
+                val url = "https://atomo.click/${action.type}/${action.id}"
+                viewModelScope.launch {
+                    _events.send(DashboardEvent.OpenUrl(url))
+                }
+            }
             is DashboardAction.ShowQR -> { /* TODO: Show QR Dialog */ }
-            is DashboardAction.ShareService -> { /* TODO: Share Link */ }
+            is DashboardAction.ShareService -> {
+                val url = "https://atomo.click/${action.type}/${action.id}"
+                viewModelScope.launch {
+                    _events.send(DashboardEvent.ShareUrl(url, "Mira mi servicio en Atomo"))
+                }
+            }
 
             /* Create new services (Switch to tab) */
             DashboardAction.CreateMenu -> homeNavigation.switchTab(AppTab.DIGITAL_MENU)

@@ -58,6 +58,8 @@ data class DashboardShortcut(
 
 sealed interface DashboardEvent {
     data class ShowSnackbar(val message: String) : DashboardEvent
+    data class OpenUrl(val url: String) : DashboardEvent
+    data class ShareUrl(val url: String, val title: String) : DashboardEvent
 }
 
 sealed interface DashboardSheet {

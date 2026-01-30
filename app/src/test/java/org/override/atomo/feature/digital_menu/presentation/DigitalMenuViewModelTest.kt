@@ -197,6 +197,10 @@ class DigitalMenuViewModelTest {
         viewModel.state.test {
             awaitItem() // Initial load
             
+            // Enter edit mode first
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // Edit mode enabled, hasUnsavedChanges = false
+            
             // Act
             viewModel.onAction(DigitalMenuAction.SaveDish("Pizza", "Good", 10.0, null, null))
             
@@ -226,6 +230,10 @@ class DigitalMenuViewModelTest {
         viewModel.state.test {
             awaitItem() // Load state
             
+            // Enter edit mode first
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // Edit mode enabled, hasUnsavedChanges = false
+            
             // Act
             viewModel.onAction(DigitalMenuAction.DeleteDish(dish))
             
@@ -239,6 +247,10 @@ class DigitalMenuViewModelTest {
     fun `save category should set hasUnsavedChanges to true`() = runTest {
         viewModel.state.test {
             awaitItem() // Initial load
+            
+            // Enter edit mode first
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // Edit mode enabled, hasUnsavedChanges = false
             
             // Act
             viewModel.onAction(DigitalMenuAction.SaveCategory("Drinks"))
@@ -267,6 +279,10 @@ class DigitalMenuViewModelTest {
 
         viewModel.state.test {
             awaitItem() // Load state
+            
+            // Enter edit mode first
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // Edit mode enabled, hasUnsavedChanges = false
             
             // Act
             viewModel.onAction(DigitalMenuAction.DeleteCategory(category))

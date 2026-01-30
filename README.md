@@ -60,22 +60,42 @@ org.override.atomo/
 - **Personalización**: Temas dinámicos y generadores de URLs personalizadas.
 - **Biometría**: Seguridad adicional mediante huella digital o reconocimiento facial.
 
+## 🔄 Sincronización Offline (WorkManager)
+
+El sistema de sincronización garantiza que los datos estén siempre disponibles y consistentes,
+incluso sin conexión a internet.
+
+- **Arquitectura**: Basada en `WorkManager` para tareas en segundo plano diferibles y garantizadas.
+- **Offline-First**:
+    - **Lectura**: Siempre desde la base de datos local (Room).
+    - **Escritura**: Actualización optimista local (`isSynced = false`) y programación de subida.
+- **Workers**:
+    - `ProfileSyncWorker`: Descarga datos del perfil al iniciar sesión.
+    - `DataSyncWorker`: Sincronización completa manual (pull-to-refresh).
+    - `UploadWorker`: Subida automática de cambios locales pendientes.
+- **SyncManager**: Gestor centralizado para la programación de tareas de sincronización.
+
 ## 🛠️ Configuración
 
 ### Requisitos
+
 - Android SDK 33+ (Min SDK 33, Target SDK 36)
 - Android Studio Ladybug o superior
 - Java 11
 
 ### Variables de Entorno
+
 El proyecto requiere un archivo `local.properties` y `keystore.properties` para la configuración de Supabase y firmas de la aplicación.
 
 ## 🧪 Pruebas
+
 Ejecuta las pruebas unitarias con:
+
 ```bash
 ./gradlew test
 ```
 
 ---
+
 © 2026 Christopher Alejandro Maldonado Chávez. **Override**. Todos los derechos reservados.
 Uruapan, Michoacán, México. | [atomo.click](https://atomo.click)

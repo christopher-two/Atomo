@@ -41,8 +41,8 @@ import androidx.compose.ui.unit.dp
 fun ColorSelector(
     selectedColor: Color,
     onColorSelected: (Color) -> Unit,
-    label: String = "Color de énfasis",
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    label: String = "Color de énfasis"
 ) {
     val colors = listOf(
         Color(0xFFE53935), // Red

@@ -62,6 +62,7 @@ import org.override.atomo.feature.digital_menu.presentation.components.CategoryD
 import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer
 import org.override.atomo.feature.digital_menu.presentation.components.DishDialog
 import org.override.atomo.feature.digital_menu.presentation.components.DishItemRow
+import android.annotation.SuppressLint
 
 @Composable
 fun DigitalMenuRoot(
@@ -107,6 +108,7 @@ fun DigitalMenuRoot(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun DigitalMenuContent(
     state: DigitalMenuState,

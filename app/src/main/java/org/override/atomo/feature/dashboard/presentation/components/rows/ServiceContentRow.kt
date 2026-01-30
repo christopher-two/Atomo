@@ -44,8 +44,8 @@ fun <T> ServiceContentRow(
     items: List<T>,
     onAddClick: () -> Unit,
     onItemClick: (T) -> Unit,
-    itemContent: @Composable (T) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    itemContent: @Composable (T) -> Unit
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Row(

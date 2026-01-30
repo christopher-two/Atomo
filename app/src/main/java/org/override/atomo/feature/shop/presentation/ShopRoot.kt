@@ -64,6 +64,7 @@ import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Shop
 import org.override.atomo.feature.shop.presentation.components.ShopShimmer
+import android.annotation.SuppressLint
 
 /**
  * Root composable for the Shop feature.
@@ -89,6 +90,7 @@ fun ShopRoot(
  * @param onAction Callback for user actions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun ShopContent(
     state: ShopState,

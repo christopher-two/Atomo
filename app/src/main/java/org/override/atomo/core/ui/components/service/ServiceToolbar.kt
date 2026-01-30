@@ -27,14 +27,14 @@ import androidx.compose.ui.unit.dp
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ServiceToolbar(
-    expanded: Boolean = true,
     isEditing: Boolean,
     onEditVerify: () -> Unit, // Callback to switch to edit or save
+    modifier: Modifier = Modifier,
+    expanded: Boolean = true,
     onCancel: (() -> Unit)? = null,
     onPreview: () -> Unit,
     onDelete: (() -> Unit)? = null,
-    saveEnabled: Boolean = true,
-    modifier: Modifier = Modifier
+    saveEnabled: Boolean = true
 ) {
     HorizontalFloatingToolbar(
         expanded = expanded,

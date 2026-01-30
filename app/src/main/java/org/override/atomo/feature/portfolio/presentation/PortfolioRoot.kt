@@ -66,6 +66,7 @@ import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.feature.portfolio.presentation.components.PortfolioShimmer
+import android.annotation.SuppressLint
 
 /**
  * Root composable for the Portfolio feature.
@@ -90,7 +91,9 @@ fun PortfolioRoot(
  * @param state Current UI state.
  * @param onAction Callback for user actions.
  */
+
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun PortfolioContent(
     state: PortfolioState,

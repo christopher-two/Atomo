@@ -64,6 +64,7 @@ import org.override.atomo.core.ui.components.service.FontSelector
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Cv
+import android.annotation.SuppressLint
 // CvItem import removed
 
 /**
@@ -87,6 +88,7 @@ fun CVRoot(
  * @param onAction Callback for user actions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun CVContent(
     state: CVState,

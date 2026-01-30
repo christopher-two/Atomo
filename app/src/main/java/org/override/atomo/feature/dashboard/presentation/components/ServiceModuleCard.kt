@@ -44,9 +44,9 @@ fun ServiceModuleCard(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    accentColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    accentColor: Color = MaterialTheme.colorScheme.primary,
     previewContent: (@Composable () -> Unit)? = null
 ) {
     AtomoCard(

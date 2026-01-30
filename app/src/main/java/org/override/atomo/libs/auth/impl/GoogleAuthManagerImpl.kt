@@ -92,6 +92,9 @@ class GoogleAuthManagerImpl(
                 )
                 Result.failure(Exception("Tipo de credencial no reconocido: ${credential.type}"))
             }
+        } catch (e: androidx.credentials.exceptions.GetCredentialException) {
+            Log.e(TAG, "Credential Manager error: ${e.message}", e)
+            Result.failure(e)
         } catch (e: Exception) {
             Log.e(TAG, "Error durante el sign-in: ${e.message}", e)
             Result.failure(e)

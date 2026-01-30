@@ -64,6 +64,7 @@ import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Invitation
 import org.override.atomo.feature.invitation.presentation.components.InvitationShimmer
+import android.annotation.SuppressLint
 
 /**
  * Root composable for the Invitation feature.
@@ -89,6 +90,7 @@ fun InvitationRoot(
  * @param onAction Callback for user actions.
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun InvitationContent(
     state: InvitationState,

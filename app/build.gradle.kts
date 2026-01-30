@@ -104,9 +104,9 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.android)
     implementation(libs.material.icons.ext)
-    implementation("androidx.graphics:graphics-core:1.0.4")
-    implementation("androidx.graphics:graphics-path:1.1.0-beta01")
-    implementation("androidx.graphics:graphics-shapes:1.1.0")
+    implementation(libs.androidx.graphics.core)
+    implementation(libs.androidx.graphics.path)
+    implementation(libs.androidx.graphics.shapes)
 
     // Android / utilidades
     implementation(libs.core.splashscreen)

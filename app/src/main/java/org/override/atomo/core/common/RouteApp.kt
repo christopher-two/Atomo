@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface RouteApp : NavKey {
     object Auth : RouteApp
+    object Onboarding : RouteApp
     object Home : RouteApp
     object Settings : RouteApp
     object CreateDigitalMenu : RouteApp

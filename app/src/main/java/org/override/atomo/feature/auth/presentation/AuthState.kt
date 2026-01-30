@@ -11,5 +11,7 @@ package org.override.atomo.feature.auth.presentation
 
 data class AuthState(
     val isLoading: Boolean = false,
+    val isSettingUp: Boolean = false,
     val error: String? = null
 )
+

@@ -14,11 +14,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
+import org.override.atomo.domain.usecase.onboarding.ShouldShowOnboardingUseCase
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.navigation.RootNavigation
@@ -27,6 +29,7 @@ import org.override.atomo.libs.auth.api.ExternalAuthResult
 class AuthViewModel(
     private val continueWithGoogleUseCase: ContinueWithGoogleUseCase,
     private val saveUserSessionUseCase: SaveUserSessionUseCase,
+    private val shouldShowOnboardingUseCase: ShouldShowOnboardingUseCase,
     private val rootNavigation: RootNavigation,
     private val syncManager: org.override.atomo.data.manager.SyncManager
 ) : ViewModel() {
@@ -77,7 +80,7 @@ class AuthViewModel(
                                 .onSuccess {
                                     _state.update { it.copy(isLoading = false) }
                                     syncManager.scheduleInitialSync(result.userId)
-                                    rootNavigation.replaceWith(RouteApp.Home)
+                                    navigateAfterLogin(result.userId)
                                     _events.send(AuthEvent.LoginSuccess)
                                 }
                                 .onFailure { error ->
@@ -98,6 +101,16 @@ class AuthViewModel(
                     _state.update { it.copy(isLoading = false, error = error.message) }
                     _events.send(AuthEvent.ShowError(error.message ?: "Unknown error"))
                 }
+        }
+    }
+
+    private suspend fun navigateAfterLogin(userId: String) {
+        _state.update { it.copy(isLoading = false, isSettingUp = true) }
+        val shouldShowOnboarding = shouldShowOnboardingUseCase(userId).firstOrNull() ?: false
+        if (shouldShowOnboarding) {
+            rootNavigation.replaceWith(RouteApp.Onboarding)
+        } else {
+            rootNavigation.replaceWith(RouteApp.Home)
         }
     }
 }

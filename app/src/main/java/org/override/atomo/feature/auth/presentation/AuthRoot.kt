@@ -89,7 +89,7 @@ fun AuthScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Crossfade(
-            targetState = state.isLoading,
+            targetState = state.isLoading || state.isSettingUp,
             label = "auth_loading"
         ) { isLoading ->
             Column(

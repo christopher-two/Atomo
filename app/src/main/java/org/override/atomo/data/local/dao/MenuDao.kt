@@ -14,7 +14,6 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 import org.override.atomo.data.local.entity.DishEntity
@@ -54,6 +53,10 @@ interface MenuDao {
     
     @Query("DELETE FROM menus WHERE userId = :userId")
     suspend fun deleteAllMenusByUser(userId: String)
+
+    @Query("SELECT * FROM menus WHERE isSynced = 0 AND userId = :userId")
+    suspend fun getUnsyncedMenus(userId: String): List<MenuEntity>
+
     
     // Category operations
     @Query("SELECT * FROM menu_categories WHERE menuId = :menuId ORDER BY sortOrder ASC")
@@ -76,6 +79,10 @@ interface MenuDao {
     
     @Query("DELETE FROM menu_categories WHERE id = :categoryId")
     suspend fun deleteCategoryById(categoryId: String)
+
+    @Query("SELECT * FROM menu_categories WHERE isSynced = 0")
+    suspend fun getAllUnsyncedCategories(): List<MenuCategoryEntity>
+
     
     // Dish operations
     @Query("SELECT * FROM dishes WHERE menuId = :menuId ORDER BY sortOrder ASC")
@@ -110,4 +117,8 @@ interface MenuDao {
     
     @Query("DELETE FROM menu_categories WHERE menuId = :menuId")
     suspend fun deleteCategoriesByMenuId(menuId: String)
+
+    @Query("SELECT * FROM dishes WHERE isSynced = 0")
+    suspend fun getAllUnsyncedDishes(): List<DishEntity>
+
 }

@@ -139,6 +139,8 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.koin.compose.viewmodel)
     implementation(libs.koin.compose.navigation3)
+    implementation(libs.koin.workmanager)
+
 
     // Ktor
     implementation(platform(libs.ktor.bom))
@@ -164,6 +166,7 @@ dependencies {
 
     // Room
     implementation(libs.room.runtime)
+    implementation(libs.androidx.work.runtime.ktx)
     ksp(libs.room.compiler)
     implementation(libs.room.ktx)
 

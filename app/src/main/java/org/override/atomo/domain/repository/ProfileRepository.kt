@@ -36,4 +36,7 @@ interface ProfileRepository {
 
     /** Checks if a username is available. */
     suspend fun checkUsernameAvailability(username: String): Boolean
+
+    /** Synchronizes local changes to the remote data source. */
+    suspend fun syncUp(userId: String): Result<Unit>
 }

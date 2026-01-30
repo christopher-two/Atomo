@@ -42,8 +42,10 @@ class DashboardViewModel(
     private val invitationUseCases: InvitationUseCases,
     private val syncAllServices: SyncAllServicesUseCase,
     private val rootNavigation: RootNavigation,
-    private val homeNavigation: HomeNavigation
+    private val homeNavigation: HomeNavigation,
+    private val syncManager: org.override.atomo.data.manager.SyncManager
 ) : ViewModel() {
+
 
     companion object {
         private const val TAG = "DashboardViewModel"
@@ -69,10 +71,10 @@ class DashboardViewModel(
     private fun triggerSync() {
         viewModelScope.launch {
             val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
-            syncAllServices(userId)
-                .onFailure { Log.e(TAG, "Sync failed: ${it.message}") }
+            syncManager.scheduleDataSync(userId)
         }
     }
+
 
     fun onAction(action: DashboardAction) {
         when (action) {
@@ -264,8 +266,14 @@ class DashboardViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isRefreshing = true) }
             val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
-            syncAllServices(userId).onFailure { Log.e(TAG, "Sync failed: ${it.message}") }
+            syncManager.scheduleDataSync(userId)
+
+            // For UX, wait a bit or just let it finish. 
+            // In a real app we would observe WorkInfo.
+            // For now, simple delay to show spinner or remove spinner immediately and let loading flow handle it.
+            kotlinx.coroutines.delay(1000) 
             _state.update { it.copy(isRefreshing = false) }
         }
     }
+
 }

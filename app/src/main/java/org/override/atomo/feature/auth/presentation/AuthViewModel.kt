@@ -27,8 +27,10 @@ import org.override.atomo.libs.auth.api.ExternalAuthResult
 class AuthViewModel(
     private val continueWithGoogleUseCase: ContinueWithGoogleUseCase,
     private val saveUserSessionUseCase: SaveUserSessionUseCase,
-    private val rootNavigation: RootNavigation
+    private val rootNavigation: RootNavigation,
+    private val syncManager: org.override.atomo.data.manager.SyncManager
 ) : ViewModel() {
+
 
     private var hasLoadedInitialData = false
 
@@ -74,6 +76,7 @@ class AuthViewModel(
                             saveUserSessionUseCase(result.userId)
                                 .onSuccess {
                                     _state.update { it.copy(isLoading = false) }
+                                    syncManager.scheduleInitialSync(result.userId)
                                     rootNavigation.replaceWith(RouteApp.Home)
                                     _events.send(AuthEvent.LoginSuccess)
                                 }

@@ -41,4 +41,8 @@ interface ProfileDao {
     
     @Query("DELETE FROM profiles WHERE id = :userId")
     suspend fun deleteProfileById(userId: String)
+
+    @Query("SELECT * FROM profiles WHERE isSynced = 0 AND id = :userId")
+    suspend fun getUnsyncedProfile(userId: String): ProfileEntity?
+
 }

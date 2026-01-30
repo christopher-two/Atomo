@@ -9,10 +9,12 @@
 
 package org.override.atomo.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+
 
 /**
  * Room Entity for Menu.
@@ -32,8 +34,11 @@ data class MenuEntity(
     val primaryColor: String = "#000000",
     val fontFamily: String = "Inter",
     val logoUrl: String?,
+    @ColumnInfo(defaultValue = "1")
+    val isSynced: Boolean = true,
     val createdAt: Long
 )
+
 
 /**
  * Room Entity for Menu Category.
@@ -56,6 +61,9 @@ data class MenuCategoryEntity(
     val menuId: String,
     val name: String,
     val sortOrder: Int = 0,
+    @ColumnInfo(defaultValue = "1")
+    val isSynced: Boolean = true,
+
     val createdAt: Long
 )
 
@@ -91,5 +99,8 @@ data class DishEntity(
     val imageUrl: String?,
     val isVisible: Boolean = true,
     val sortOrder: Int = 0,
+    @ColumnInfo(defaultValue = "1")
+    val isSynced: Boolean = true,
+
     val createdAt: Long
 )

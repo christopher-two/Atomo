@@ -56,7 +56,10 @@ import org.override.atomo.data.local.entity.SubscriptionEntity
         PlanEntity::class,
         SubscriptionEntity::class
     ],
-    version = 2,
+    version = 3,
+    autoMigrations = [
+        androidx.room.AutoMigration(from = 2, to = 3)
+    ],
     exportSchema = true
 )
 abstract class AtomoDatabase : RoomDatabase() {

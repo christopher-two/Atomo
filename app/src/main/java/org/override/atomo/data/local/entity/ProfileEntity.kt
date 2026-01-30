@@ -9,8 +9,10 @@
 
 package org.override.atomo.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+
 
 /**
  * Room Entity for User Profile.
@@ -24,5 +26,8 @@ data class ProfileEntity(
     val avatarUrl: String?,
     val socialLinks: String?, // JSON string
     val createdAt: Long,
+    @ColumnInfo(defaultValue = "1")
+    val isSynced: Boolean = true,
     val updatedAt: Long
+
 )

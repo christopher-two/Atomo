@@ -43,6 +43,10 @@ interface MenuRepository {
 
     /** Deletes a menu. */
     suspend fun deleteMenu(menuId: String): Result<Unit>
+
+    /** Synchronizes local changes to the remote data source. */
+    suspend fun syncUp(userId: String): Result<Unit>
+
     
     // Category operations
 

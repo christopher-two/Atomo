@@ -27,8 +27,10 @@ import org.override.atomo.domain.repository.ProfileRepository
  */
 class ProfileRepositoryImpl(
     private val profileDao: ProfileDao,
-    private val supabase: SupabaseClient
+    private val supabase: SupabaseClient,
+    private val syncManager: org.override.atomo.data.manager.SyncManager
 ) : ProfileRepository {
+
     
     override fun getProfileFlow(userId: String): Flow<Profile?> {
         return profileDao.getProfileFlow(userId).map { it?.toDomain() }
@@ -53,14 +55,15 @@ class ProfileRepositoryImpl(
     }
     
     override suspend fun updateProfile(profile: Profile): Result<Profile> = runCatching {
-        val dto = profile.toDto()
-        supabase.from("profiles")
-            .upsert(dto)
+        // Optimistic update
+        profileDao.updateProfile(profile.toEntity().copy(isSynced = false))
+
+        syncManager.scheduleUpload(profile.id)
         
-        profileDao.insertProfile(profile.toEntity())
         profile
     }
-    
+
+
     override suspend fun deleteProfile(userId: String): Result<Unit> = runCatching {
         supabase.from("profiles")
             .delete { filter { eq("id", userId) } }
@@ -81,4 +84,14 @@ class ProfileRepositoryImpl(
             false // Assume unavailable on error or handle differently if needed
         }
     }
+
+    override suspend fun syncUp(userId: String): Result<Unit> = runCatching {
+        val unsyncedProfile = profileDao.getUnsyncedProfile(userId)
+        if (unsyncedProfile != null) {
+            val dto = unsyncedProfile.toDomain().toDto()
+            supabase.from("profiles").upsert(dto)
+            profileDao.updateProfile(unsyncedProfile.copy(isSynced = true))
+        }
+    }
 }
+

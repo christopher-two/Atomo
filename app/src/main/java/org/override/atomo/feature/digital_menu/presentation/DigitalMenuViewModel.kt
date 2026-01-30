@@ -231,14 +231,14 @@ class DigitalMenuViewModel(
                 currentDishes.add(Dish(UUID.randomUUID().toString(), menu.id, action.categoryId, action.name, action.description, action.price, imageUrlResult, true, currentDishes.size, System.currentTimeMillis()))
             }
 
-            _state.update { it.copy(editingMenu = menu.copy(dishes = currentDishes), isDishDialogVisible = false, dishToEdit = null, isLoading = false) }
+            _state.update { it.copy(editingMenu = menu.copy(dishes = currentDishes), isDishDialogVisible = false, dishToEdit = null, isLoading = false, hasUnsavedChanges = true) }
         }
     }
 
     private fun deleteDish(dish: Dish) {
         val menu = _state.value.editingMenu ?: return
         val currentDishes = menu.dishes.toMutableList().apply { remove(dish) }
-        _state.update { it.copy(editingMenu = menu.copy(dishes = currentDishes)) }
+        _state.update { it.copy(editingMenu = menu.copy(dishes = currentDishes), hasUnsavedChanges = true) }
         viewModelScope.launch {
             if (dish.imageUrl != null) deleteDishImage(dish.imageUrl)
             menuUseCases.deleteDish(dish.id)
@@ -257,14 +257,14 @@ class DigitalMenuViewModel(
             currentCategories.add(MenuCategory(UUID.randomUUID().toString(), menu.id, name, currentCategories.size, System.currentTimeMillis()))
         }
 
-        _state.update { it.copy(editingMenu = menu.copy(categories = currentCategories), isCategoryDialogVisible = false, categoryToEdit = null) }
+        _state.update { it.copy(editingMenu = menu.copy(categories = currentCategories), isCategoryDialogVisible = false, categoryToEdit = null, hasUnsavedChanges = true) }
     }
 
     private fun deleteCategory(category: MenuCategory) {
         val menu = _state.value.editingMenu ?: return
         val currentCategories = menu.categories.toMutableList().apply { remove(category) }
         val currentDishes = menu.dishes.map { if (it.categoryId == category.id) it.copy(categoryId = null) else it }
-        _state.update { it.copy(editingMenu = menu.copy(categories = currentCategories, dishes = currentDishes)) }
+        _state.update { it.copy(editingMenu = menu.copy(categories = currentCategories, dishes = currentDishes), hasUnsavedChanges = true) }
         viewModelScope.launch { menuUseCases.deleteCategory(category.id) }
     }
 

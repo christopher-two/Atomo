@@ -28,6 +28,7 @@ import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.util.MainDispatcherRule
 
 import android.content.Context
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
 import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
 import org.override.atomo.domain.usecase.subscription.CanAddItemResult
@@ -51,6 +52,7 @@ class DigitalMenuViewModelTest {
     private val getServiceLimitsUseCase: GetServiceLimitsUseCase = mockk()
     private val subscriptionUseCases: SubscriptionUseCases = mockk()
     private val imageManager: ImageManager = mockk()
+    private val snackbarManager: SnackbarManager = mockk(relaxed = true)
     private val context: Context = mockk(relaxed = true)
 
     private val testMenu = Menu(
@@ -82,7 +84,8 @@ class DigitalMenuViewModelTest {
             canAddDishUseCase,
             uploadDishImageUseCase,
             deleteDishImageUseCase,
-            imageManager
+            imageManager,
+            snackbarManager
         )
     }
 
@@ -146,7 +149,7 @@ class DigitalMenuViewModelTest {
         viewModel = DigitalMenuViewModel(
             sessionRepository, menuUseCases, getServiceLimitsUseCase, 
             subscriptionUseCases, canCreateServiceUseCase, canAddDishUseCase,
-            uploadDishImageUseCase, deleteDishImageUseCase, imageManager
+            uploadDishImageUseCase, deleteDishImageUseCase, imageManager, snackbarManager
         )
 
         viewModel.state.test {
@@ -183,6 +186,94 @@ class DigitalMenuViewModelTest {
             }
             
             assertEquals("Network Error", state.error)
+        }
+    }
+
+    @Test
+    fun `save new dish should set hasUnsavedChanges to true`() = runTest {
+        // Arrange
+        coEvery { canAddDishUseCase("user123", testMenu.id) } returns CanAddItemResult.Success
+        
+        viewModel.state.test {
+            awaitItem() // Initial load
+            
+            // Act
+            viewModel.onAction(DigitalMenuAction.SaveDish("Pizza", "Good", 10.0, null, null))
+            
+            // Skip loading state and get updated state
+            val state = awaitItem()
+            
+            // Assert
+            assertEquals(true, state.hasUnsavedChanges)
+        }
+    }
+
+    @Test
+    fun `delete dish should set hasUnsavedChanges to true`() = runTest {
+        // Arrange
+        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, null, "Pasta", "Desc", 10.0, null, true, 0, 1000L)
+        val menuWithDish = testMenu.copy(dishes = listOf(dish))
+        coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithDish))
+        coEvery { menuUseCases.deleteDish(dish.id) } returns Result.success(Unit)
+        
+        // Re-init to load new mock data
+        viewModel = DigitalMenuViewModel(
+            sessionRepository, menuUseCases, getServiceLimitsUseCase, 
+            subscriptionUseCases, canCreateServiceUseCase, canAddDishUseCase,
+            uploadDishImageUseCase, deleteDishImageUseCase, imageManager, snackbarManager
+        )
+
+        viewModel.state.test {
+            awaitItem() // Load state
+            
+            // Act
+            viewModel.onAction(DigitalMenuAction.DeleteDish(dish))
+            
+            // Assert
+            val state = awaitItem()
+            assertEquals(true, state.hasUnsavedChanges)
+        }
+    }
+
+    @Test
+    fun `save category should set hasUnsavedChanges to true`() = runTest {
+        viewModel.state.test {
+            awaitItem() // Initial load
+            
+            // Act
+            viewModel.onAction(DigitalMenuAction.SaveCategory("Drinks"))
+            
+            // Assert
+            val state = awaitItem()
+            assertEquals(true, state.hasUnsavedChanges)
+        }
+    }
+
+    @Test
+    fun `delete category should set hasUnsavedChanges to true`() = runTest {
+        // Arrange
+        val categoryId = "cat123"
+        val category = org.override.atomo.domain.model.MenuCategory(categoryId, testMenu.id, "Food", 0, 1000L)
+        val menuWithCategory = testMenu.copy(categories = listOf(category))
+        coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithCategory))
+        coEvery { menuUseCases.deleteCategory(categoryId) } returns Result.success(Unit)
+        
+        // Re-init to load new mock data
+        viewModel = DigitalMenuViewModel(
+            sessionRepository, menuUseCases, getServiceLimitsUseCase, 
+            subscriptionUseCases, canCreateServiceUseCase, canAddDishUseCase,
+            uploadDishImageUseCase, deleteDishImageUseCase, imageManager, snackbarManager
+        )
+
+        viewModel.state.test {
+            awaitItem() // Load state
+            
+            // Act
+            viewModel.onAction(DigitalMenuAction.DeleteCategory(category))
+            
+            // Assert
+            val state = awaitItem()
+            assertEquals(true, state.hasUnsavedChanges)
         }
     }
 }

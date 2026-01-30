@@ -9,11 +9,10 @@
 
 package org.override.atomo.feature.main
 
-import org.override.atomo.core.common.RouteApp
+import androidx.compose.ui.graphics.Color
 
-data class MainState(
-    val isSessionChecked: Boolean = false,
-    val isLoading: Boolean = true,
-    val startDestination: RouteApp = RouteApp.Auth,
-    val themeConfig: ThemeConfig = ThemeConfig()
+data class ThemeConfig(
+    val isDarkMode: Boolean? = null, // null = system, true = dark, false = light
+    val seedColor: Color = Color(0xFFDAEDFF),
+    val useDynamicColors: Boolean = false
 )

@@ -9,6 +9,10 @@
 
 package org.override.atomo.feature.shop.presentation
 
+/**
+ * ViewModel for managing Shop feature state and business logic.
+ * Handles CRUD operations, state management, and navigation logic for Shops.
+ */
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,22 +22,20 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.override.atomo.domain.model.Shop
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.domain.model.Shop
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
-/**
- * ViewModel for managing Shop feature state and business logic.
- * Handles CRUD operations, state management, and navigation logic for Shops.
- */
 class ShopViewModel(
     private val shopUseCases: ShopUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ShopState())
@@ -106,7 +108,8 @@ class ShopViewModel(
             shopUseCases.updateShop(shop).onSuccess {
                 _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
-                _state.update { it.copy(isLoading = false, error = error.message) }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage(error.message ?: "Error saving shop")
             }
         }
     }

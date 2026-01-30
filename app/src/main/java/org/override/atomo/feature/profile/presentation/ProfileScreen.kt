@@ -11,8 +11,6 @@ package org.override.atomo.feature.profile.presentation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ContainedLoadingIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,6 +26,7 @@ import org.override.atomo.feature.profile.presentation.components.ProfileShimmer
 fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
+    snackbarHostState: androidx.compose.material3.SnackbarHostState,
     onShareProfile: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -43,14 +42,16 @@ fun ProfileScreen(
             if (state.isEditing) {
                 ProfileEditView(
                     state = state,
-                    onAction = onAction
+                    onAction = onAction,
+                    snackbarHostState = snackbarHostState
                 )
             } else {
                 ProfileDetailView(
                     profile = state.profile,
                     onEditClick = { onAction(ProfileAction.EnterEditMode) },
                     onSyncClick = { onAction(ProfileAction.Refresh) },
-                    onShareClick = onShareProfile
+                    onShareClick = onShareProfile,
+                    snackbarHostState = snackbarHostState
                 )
             }
         }

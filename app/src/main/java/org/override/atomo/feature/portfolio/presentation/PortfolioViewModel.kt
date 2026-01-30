@@ -9,31 +9,33 @@
 
 package org.override.atomo.feature.portfolio.presentation
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import org.override.atomo.domain.model.Portfolio
-import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
-import org.override.atomo.domain.usecase.subscription.CanCreateResult
-import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.domain.model.ServiceType
-import org.override.atomo.libs.session.api.SessionRepository
-import kotlinx.coroutines.flow.first
-import java.util.UUID
-
 /**
  * ViewModel for managing Portfolio feature state and business logic.
  * Handles CRUD operations, state management, and navigation logic for Portfolios.
  */
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import org.override.atomo.core.common.SnackbarManager
+import org.override.atomo.domain.model.Portfolio
+import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
+import org.override.atomo.domain.usecase.subscription.CanCreateResult
+import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
+import org.override.atomo.libs.session.api.SessionRepository
+import java.util.UUID
+
 class PortfolioViewModel(
     private val portfolioUseCases: PortfolioUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PortfolioState())

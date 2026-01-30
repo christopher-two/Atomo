@@ -27,16 +27,10 @@ import org.override.atomo.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.domain.util.AtomoUrlGenerator
+import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.libs.session.api.SessionRepository
-import org.override.atomo.feature.navigation.AppTab
-
-sealed interface DashboardEvent {
-    data class ShowSnackbar(val message: String) : DashboardEvent
-    data class OpenUrl(val url: String) : DashboardEvent
-    data class ShareUrl(val url: String, val text: String) : DashboardEvent
-}
 
 class DashboardViewModel(
     private val sessionRepository: SessionRepository,

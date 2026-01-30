@@ -9,15 +9,13 @@
 
 package org.override.atomo.feature.profile.presentation
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.koin.androidx.compose.koinViewModel
-import org.override.atomo.core.ui.theme.AtomoTheme
-
 import androidx.compose.ui.platform.LocalContext
-import android.content.Intent
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.koin.compose.koinInject
+import org.override.atomo.core.common.SnackbarManager
 
 @Composable
 fun ProfileRoot(
@@ -25,10 +23,12 @@ fun ProfileRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarManager = koinInject<SnackbarManager>()
 
     ProfileScreen(
         state = state,
         onAction = viewModel::onAction,
+        snackbarHostState = snackbarManager.snackbarHostState,
         onShareProfile = {
             viewModel.getProfileUrl()?.let { url ->
                 val sendIntent = Intent().apply {

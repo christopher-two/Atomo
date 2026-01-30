@@ -7,13 +7,10 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.main
+package org.override.atomo.feature.settings.domain.model
 
-import org.override.atomo.core.common.RouteApp
-
-data class MainState(
-    val isSessionChecked: Boolean = false,
-    val isLoading: Boolean = true,
-    val startDestination: RouteApp = RouteApp.Auth,
-    val themeConfig: ThemeConfig = ThemeConfig()
+data class NotificationSettings(
+    val areNotificationsEnabled: Boolean,
+    val isNotificationSoundEnabled: Boolean,
+    val notificationPriority: Float
 )

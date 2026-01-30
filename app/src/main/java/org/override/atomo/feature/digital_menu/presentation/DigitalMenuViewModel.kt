@@ -9,19 +9,21 @@
 
 package org.override.atomo.feature.digital_menu.presentation
 
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Dish
 import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.model.MenuCategory
@@ -29,21 +31,15 @@ import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.menu.MenuUseCases
 import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
 import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
-import org.override.atomo.domain.usecase.subscription.CanAddItemResult
 import org.override.atomo.domain.usecase.subscription.CanAddDishUseCase
+import org.override.atomo.domain.usecase.subscription.CanAddItemResult
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
 import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.libs.image.api.ImageManager
 import org.override.atomo.libs.session.api.SessionRepository
-import androidx.core.net.toUri
 import java.util.UUID
-
-sealed interface DigitalMenuEvent {
-    data class ShowSnackbar(val message: String) : DigitalMenuEvent
-    data object MenuSaved : DigitalMenuEvent
-}
 
 class DigitalMenuViewModel(
     private val sessionRepository: SessionRepository,
@@ -54,7 +50,8 @@ class DigitalMenuViewModel(
     private val canAddDishUseCase: CanAddDishUseCase,
     private val uploadDishImage: UploadDishImageUseCase,
     private val deleteDishImage: DeleteDishImageUseCase,
-    private val imageManager: ImageManager
+    private val imageManager: ImageManager,
+    private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
     private var menuBeforeEdit: Menu? = null
@@ -146,6 +143,7 @@ class DigitalMenuViewModel(
         _events.send(event)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun loadMenus() {
         viewModelScope.launch {
             sessionRepository.getCurrentUserId()
@@ -207,7 +205,8 @@ class DigitalMenuViewModel(
             if (editingDish == null) {
                 val canAdd = canAddDishUseCase(userId, menu.id)
                 if (canAdd is CanAddItemResult.LimitReached) {
-                    _state.update { it.copy(isLoading = false, error = "Limit reached: ${canAdd.limit} dishes.") }
+                    _state.update { it.copy(isLoading = false) }
+                    snackbarManager.showMessage("Limit reached: ${canAdd.limit} dishes.")
                     return@launch
                 }
             }
@@ -219,7 +218,8 @@ class DigitalMenuViewModel(
                     uploadDishImage(userId, editingDish?.id ?: UUID.randomUUID().toString(), bytes).getOrThrow()
                 } else action.imageUrl
             } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false, error = "Image error: ${e.message}") }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Image error: ${e.message}")
                 return@launch
             }
 

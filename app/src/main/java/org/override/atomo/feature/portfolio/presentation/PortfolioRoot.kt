@@ -9,6 +9,11 @@
 
 package org.override.atomo.feature.portfolio.presentation
 
+/**
+ * Root composable for the Portfolio feature.
+ * Collects state from [PortfolioViewModel] and passes it to the content.
+ */
+import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -34,7 +39,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -45,7 +49,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -54,33 +57,29 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.components.UpgradePlanScreen
-import org.override.atomo.core.ui.components.service.ColorPickerField
 import org.override.atomo.core.ui.components.service.EditableSection
-import org.override.atomo.core.ui.components.service.FontSelector
-import org.override.atomo.core.ui.components.service.ImagePicker // If needed
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.feature.portfolio.presentation.components.PortfolioShimmer
-import android.annotation.SuppressLint
 
-/**
- * Root composable for the Portfolio feature.
- * Collects state from [PortfolioViewModel] and passes it to the content.
- */
 @Composable
 fun PortfolioRoot(
     viewModel: PortfolioViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarManager = koinInject<SnackbarManager>()
 
     PortfolioContent(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        snackbarHostState = snackbarManager.snackbarHostState
     )
 }
 
@@ -98,6 +97,7 @@ fun PortfolioRoot(
 fun PortfolioContent(
     state: PortfolioState,
     onAction: (PortfolioAction) -> Unit,
+    snackbarHostState: androidx.compose.material3.SnackbarHostState
 ) {
     // Back Handler to ensure we close edit mode/detail view
     BackHandler(enabled = state.editingPortfolio != null) {
@@ -157,13 +157,14 @@ fun PortfolioContent(
 
     // LIST VIEW
     if (state.editingPortfolio == null) {
-        PortfolioListScreen(state, onAction)
-    } 
+        PortfolioListScreen(state, onAction, snackbarHostState)
+    }  
     // DETAIL / EDIT VIEW
     else {
-        val portfolio = state.editingPortfolio!!
+        val portfolio = state.editingPortfolio
         
         AtomoScaffold(
+            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
             topBar = {
                 // We use floating toolbar instead, but if AtomoScaffold requires topBar, we can pass generic header
                 // Or just empty
@@ -231,7 +232,9 @@ fun PortfolioContent(
                 }
                 
                  // Extra spacing for FAB
-                Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.2f))
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.2f))
             }
         }
     }
@@ -271,8 +274,13 @@ fun PortfolioContent(
  * @param onAction Callback for user actions.
  */
 @Composable
-fun PortfolioListScreen(state: PortfolioState, onAction: (PortfolioAction) -> Unit) {
+fun PortfolioListScreen(
+    state: PortfolioState,
+    onAction: (PortfolioAction) -> Unit,
+    snackbarHostState: androidx.compose.material3.SnackbarHostState
+) {
     AtomoScaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(PortfolioAction.CreatePortfolio) }) {
@@ -341,7 +349,8 @@ private fun Preview() {
     AtomoTheme {
         PortfolioContent(
             state = PortfolioState(),
-            onAction = {}
+            onAction = {},
+            snackbarHostState = androidx.compose.material3.SnackbarHostState()
         )
     }
 }

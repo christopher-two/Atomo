@@ -7,13 +7,13 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.main
+package org.override.atomo.feature.dashboard.presentation
 
-import org.override.atomo.core.common.RouteApp
+import androidx.compose.ui.graphics.vector.ImageVector
 
-data class MainState(
-    val isSessionChecked: Boolean = false,
-    val isLoading: Boolean = true,
-    val startDestination: RouteApp = RouteApp.Auth,
-    val themeConfig: ThemeConfig = ThemeConfig()
+data class DashboardShortcut(
+    val id: String,
+    val title: String,
+    val icon: ImageVector,
+    val action: DashboardAction
 )

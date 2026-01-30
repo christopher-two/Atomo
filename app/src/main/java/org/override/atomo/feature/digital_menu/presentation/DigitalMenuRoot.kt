@@ -9,6 +9,7 @@
 
 package org.override.atomo.feature.digital_menu.presentation
 
+import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -35,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -52,6 +52,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.components.UpgradePlanScreen
@@ -62,26 +64,25 @@ import org.override.atomo.feature.digital_menu.presentation.components.CategoryD
 import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer
 import org.override.atomo.feature.digital_menu.presentation.components.DishDialog
 import org.override.atomo.feature.digital_menu.presentation.components.DishItemRow
-import android.annotation.SuppressLint
+
 
 @Composable
 fun DigitalMenuRoot(
     viewModel: DigitalMenuViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarManager = koinInject<SnackbarManager>()
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is DigitalMenuEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
-                DigitalMenuEvent.MenuSaved -> snackbarHostState.showSnackbar("Menu saved successfully")
+                DigitalMenuEvent.MenuSaved -> snackbarManager.showMessage("Menu saved successfully")
             }
         }
     }
 
     AtomoScaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarManager.snackbarHostState) },
         floatingActionButton = {
             if (state.editingMenu != null) {
                 ServiceToolbar(

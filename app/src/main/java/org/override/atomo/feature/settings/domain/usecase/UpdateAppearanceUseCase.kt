@@ -19,18 +19,3 @@ class UpdateAppearanceUseCase(
     suspend fun toggleDynamicColor(enabled: Boolean) = repository.setDynamicColorEnabled(enabled)
     suspend fun toggleSystemTheme(enabled: Boolean) = repository.setSystemThemeEnabled(enabled)
 }
-
-class UpdateNotificationsUseCase(
-    private val repository: SettingsRepository
-) {
-    suspend fun toggleNotifications(enabled: Boolean) = repository.setNotificationsEnabled(enabled)
-    suspend fun toggleNotificationSound(enabled: Boolean) = repository.setNotificationSoundEnabled(enabled)
-    suspend fun setNotificationPriority(priority: Float) = repository.setNotificationPriority(priority)
-}
-
-class UpdatePrivacyUseCase(
-    private val repository: SettingsRepository
-) {
-    suspend fun toggleBiometricAuth(enabled: Boolean) = repository.setBiometricAuthEnabled(enabled)
-    suspend fun toggleAnalytics(enabled: Boolean) = repository.setAnalyticsEnabled(enabled)
-}

@@ -9,6 +9,7 @@
 
 package org.override.atomo.feature.invitation.presentation
 
+import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
@@ -34,7 +35,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -53,32 +53,34 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.delay
 import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.components.UpgradePlanScreen
-import org.override.atomo.core.ui.components.service.ColorPickerField
 import org.override.atomo.core.ui.components.service.EditableSection
-import org.override.atomo.core.ui.components.service.FontSelector
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.domain.model.Invitation
 import org.override.atomo.feature.invitation.presentation.components.InvitationShimmer
-import android.annotation.SuppressLint
 
 /**
  * Root composable for the Invitation feature.
  * Collects state from [InvitationViewModel] and passes it to the content.
  */
+
 @Composable
 fun InvitationRoot(
     viewModel: InvitationViewModel = koinViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarManager = koinInject<SnackbarManager>()
 
     InvitationContent(
         state = state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
+        snackbarHostState = snackbarManager.snackbarHostState
     )
 }
 
@@ -95,6 +97,7 @@ fun InvitationRoot(
 fun InvitationContent(
     state: InvitationState,
     onAction: (InvitationAction) -> Unit,
+    snackbarHostState: androidx.compose.material3.SnackbarHostState
 ) {
     BackHandler(enabled = state.editingInvitation != null) {
         onAction(InvitationAction.Back)
@@ -153,11 +156,12 @@ fun InvitationContent(
     }
 
     if (state.editingInvitation == null) {
-        InvitationListScreen(state, onAction)
+        InvitationListScreen(state, onAction, snackbarHostState)
     } else {
-        val invitation = state.editingInvitation!!
+        val invitation = state.editingInvitation
         
         AtomoScaffold(
+            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
             topBar = {
                  TopAppBar(title = { Text(if (state.isEditing) "Edit Invitation" else invitation.eventName) })
             },
@@ -239,7 +243,9 @@ fun InvitationContent(
                 
 
                 
-                 Box(modifier = Modifier.fillMaxWidth().fillMaxHeight(0.2f))
+                 Box(modifier = Modifier
+                     .fillMaxWidth()
+                     .fillMaxHeight(0.2f))
             }
         }
     }
@@ -278,8 +284,13 @@ fun InvitationContent(
  * @param onAction Callback for user actions.
  */
 @Composable
-fun InvitationListScreen(state: InvitationState, onAction: (InvitationAction) -> Unit) {
+fun InvitationListScreen(
+    state: InvitationState,
+    onAction: (InvitationAction) -> Unit,
+    snackbarHostState: androidx.compose.material3.SnackbarHostState
+) {
     AtomoScaffold(
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(InvitationAction.CreateInvitation) }) {
@@ -352,7 +363,8 @@ private fun Preview() {
     AtomoTheme {
         InvitationContent(
             state = InvitationState(),
-            onAction = {}
+            onAction = {},
+            snackbarHostState = androidx.compose.material3.SnackbarHostState()
         )
     }
 }

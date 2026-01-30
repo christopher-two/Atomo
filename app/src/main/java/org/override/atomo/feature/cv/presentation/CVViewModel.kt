@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Cv
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.cv.CvUseCases
@@ -31,10 +32,12 @@ import java.util.UUID
  * ViewModel for managing CV feature state and business logic.
  * Handles CRUD operations, state management, and navigation logic for CVs.
  */
+
 class CVViewModel(
     private val cvUseCases: CvUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CVState())
@@ -108,7 +111,8 @@ class CVViewModel(
             cvUseCases.updateCv(cv).onSuccess {
                 _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
-                _state.update { it.copy(isLoading = false, error = error.message) }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage(error.message ?: "Error saving CV")
             }
         }
     }
@@ -184,7 +188,8 @@ class CVViewModel(
             cvUseCases.createCv(newCv).onSuccess {
                  _state.update { it.copy(editingCv = newCv, isEditing = true, isLoading = false) }
             }.onFailure { error ->
-                 _state.update { it.copy(isLoading = false, error = error.message) }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage(error.message ?: "Error creating CV")
             }
         }
     }

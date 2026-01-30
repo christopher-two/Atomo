@@ -7,13 +7,8 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.main
+package org.override.atomo.feature.digital_menu.presentation
 
-import org.override.atomo.core.common.RouteApp
-
-data class MainState(
-    val isSessionChecked: Boolean = false,
-    val isLoading: Boolean = true,
-    val startDestination: RouteApp = RouteApp.Auth,
-    val themeConfig: ThemeConfig = ThemeConfig()
-)
+sealed interface DigitalMenuEvent {
+    data object MenuSaved : DigitalMenuEvent
+}

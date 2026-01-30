@@ -7,13 +7,13 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.main
+package org.override.atomo.feature.settings.domain.usecase
 
-import org.override.atomo.core.common.RouteApp
+import org.override.atomo.libs.settings.api.SettingsRepository
 
-data class MainState(
-    val isSessionChecked: Boolean = false,
-    val isLoading: Boolean = true,
-    val startDestination: RouteApp = RouteApp.Auth,
-    val themeConfig: ThemeConfig = ThemeConfig()
-)
+class UpdatePrivacyUseCase(
+    private val repository: SettingsRepository
+) {
+    suspend fun toggleBiometricAuth(enabled: Boolean) = repository.setBiometricAuthEnabled(enabled)
+    suspend fun toggleAnalytics(enabled: Boolean) = repository.setAnalyticsEnabled(enabled)
+}

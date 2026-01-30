@@ -9,6 +9,11 @@
 
 package org.override.atomo.feature.profile.presentation
 
+/**
+ * ViewModel for managing Profile feature state and business logic.
+ * Handles profile loading, editing, validation (username check), and saving.
+ */
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -20,19 +25,16 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.domain.util.AtomoUrlGenerator
 import org.override.atomo.feature.profile.domain.ProfileValidator
 import org.override.atomo.libs.session.api.SessionRepository
 
-/**
- * ViewModel for managing Profile feature state and business logic.
- * Handles profile loading, editing, validation (username check), and saving.
- */
-import org.override.atomo.domain.util.AtomoUrlGenerator
-
 class ProfileViewModel(
     private val useCases: ProfileUseCases,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProfileState())
@@ -139,8 +141,8 @@ class ProfileViewModel(
     private fun syncProfile(userId: String) {
          viewModelScope.launch {
              useCases.syncProfile(userId)
-                 .onFailure { e -> 
-                     _state.update { it.copy(error = e.message) }
+                 .onFailure { e ->
+                     snackbarManager.showMessage(e.message ?: "Sync error")
                  }
          }
     }

@@ -9,6 +9,10 @@
 
 package org.override.atomo.feature.invitation.presentation
 
+/**
+ * ViewModel for managing Invitation feature state and business logic.
+ * Handles CRUD operations, state management, and navigation logic for Invitations.
+ */
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +22,7 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Invitation
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.invitation.InvitationUseCases
@@ -26,14 +31,11 @@ import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
-/**
- * ViewModel for managing Invitation feature state and business logic.
- * Handles CRUD operations, state management, and navigation logic for Invitations.
- */
 class InvitationViewModel(
     private val invitationUseCases: InvitationUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
-    private val sessionRepository: SessionRepository
+    private val sessionRepository: SessionRepository,
+    private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(InvitationState())
@@ -106,7 +108,8 @@ class InvitationViewModel(
             invitationUseCases.updateInvitation(invitation).onSuccess {
                 _state.update { it.copy(isLoading = false, isEditing = false, hasChanges = false) }
             }.onFailure { error ->
-                _state.update { it.copy(isLoading = false, error = error.message) }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage(error.message ?: "Error saving invitation")
             }
         }
     }

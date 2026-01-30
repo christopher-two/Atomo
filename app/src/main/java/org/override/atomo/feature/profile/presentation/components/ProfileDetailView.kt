@@ -9,9 +9,7 @@
 
 package org.override.atomo.feature.profile.presentation.components
 
-import android.content.Intent
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -50,33 +48,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Matrix
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.graphics.shapes.CornerRounding
 import androidx.graphics.shapes.Morph
 import androidx.graphics.shapes.RoundedPolygon
 import androidx.graphics.shapes.circle
 import androidx.graphics.shapes.star
-import androidx.graphics.shapes.toPath
 import coil3.compose.AsyncImage
 import org.override.atomo.core.ui.components.MorphPolygonShape
 import org.override.atomo.domain.model.Profile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.math.max
-import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -84,10 +72,11 @@ fun ProfileDetailView(
     profile: Profile,
     onEditClick: () -> Unit,
     onSyncClick: () -> Unit,
-    onShareClick: () -> Unit, // New callback
+    onShareClick: () -> Unit,
+    snackbarHostState: androidx.compose.material3.SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    LocalContext.current
     // No URL generation here anymore
 
     // 1. Configuración del Morphing
@@ -134,7 +123,8 @@ fun ProfileDetailView(
             FloatingActionButton(onClick = onEditClick) {
                 Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
             }
-        }
+        },
+        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = modifier
@@ -164,7 +154,10 @@ fun ProfileDetailView(
                             // AQUI ESTABA LA CLAVE: Aplicar el clip correctamente calculado
                             .clip(currentAnimatedShape)
                             // Añadimos un fondo/borde sutil que también sigue la forma
-                            .background(MaterialTheme.colorScheme.primaryContainer, currentAnimatedShape)
+                            .background(
+                                MaterialTheme.colorScheme.primaryContainer,
+                                currentAnimatedShape
+                            )
                             .padding(4.dp) // Padding interno entre el borde y la imagen
                             .clip(currentAnimatedShape), // Volvemos a recortar la imagen interna
                         contentScale = ContentScale.Crop,

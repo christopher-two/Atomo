@@ -21,14 +21,8 @@ import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
-import org.override.atomo.libs.auth.api.ExternalAuthResult
 import org.override.atomo.feature.navigation.RootNavigation
-
-sealed interface AuthEvent {
-    data class ShowError(val message: String) : AuthEvent
-    data object LoginSuccess : AuthEvent
-    data class OpenUrl(val url: String) : AuthEvent
-}
+import org.override.atomo.libs.auth.api.ExternalAuthResult
 
 class AuthViewModel(
     private val continueWithGoogleUseCase: ContinueWithGoogleUseCase,

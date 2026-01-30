@@ -27,6 +27,7 @@ import org.override.atomo.di.data.RepositoryModule
 import org.override.atomo.di.data.SupabaseModule
 import org.override.atomo.di.domain.UseCaseModule
 import org.override.atomo.di.feature.FeaturesModule
+import org.override.atomo.di.libs.LibModule
 
 class CheckModulesTest : KoinTest {
 
@@ -47,7 +48,7 @@ class CheckModulesTest : KoinTest {
             modules(
                 FeaturesModule + DataModule + SupabaseModule +
                         DatabaseModule + RepositoryModule + UseCaseModule +
-                        NavModule + testMocks
+                        NavModule + LibModule + testMocks
             )
         }.checkModules()
     }

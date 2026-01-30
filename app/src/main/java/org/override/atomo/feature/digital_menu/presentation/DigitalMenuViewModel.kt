@@ -37,6 +37,7 @@ import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
 import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.libs.image.api.ImageManager
 import org.override.atomo.libs.session.api.SessionRepository
+import androidx.core.net.toUri
 import java.util.UUID
 
 sealed interface DigitalMenuEvent {
@@ -213,7 +214,7 @@ class DigitalMenuViewModel(
 
             val imageUrlResult = try {
                 if (action.imageUrl != null && action.imageUrl.startsWith("content://")) {
-                    val uri = android.net.Uri.parse(action.imageUrl)
+                    val uri = action.imageUrl.toUri()
                     val bytes = imageManager.compressImage(uri).getOrThrow()
                     uploadDishImage(userId, editingDish?.id ?: UUID.randomUUID().toString(), bytes).getOrThrow()
                 } else action.imageUrl

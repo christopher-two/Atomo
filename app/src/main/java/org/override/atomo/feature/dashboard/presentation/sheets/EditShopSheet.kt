@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.dashboard.presentation.sheets
 
+import androidx.core.graphics.toColorInt
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -48,7 +50,7 @@ fun EditShopSheet(
     var name by remember { mutableStateOf(shop.name) }
     var description by remember { mutableStateOf(shop.description ?: "") }
     var isActive by remember { mutableStateOf(shop.isActive) }
-    var primaryColor by remember { mutableStateOf(Color(android.graphics.Color.parseColor(shop.primaryColor))) }
+    var primaryColor by remember { mutableStateOf(Color(shop.primaryColor.toColorInt())) }
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,

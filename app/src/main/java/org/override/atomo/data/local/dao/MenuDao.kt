@@ -74,6 +74,9 @@ interface MenuDao {
     @Delete
     suspend fun deleteCategory(category: MenuCategoryEntity)
     
+    @Query("DELETE FROM menu_categories WHERE id = :categoryId")
+    suspend fun deleteCategoryById(categoryId: String)
+    
     // Dish operations
     @Query("SELECT * FROM dishes WHERE menuId = :menuId ORDER BY sortOrder ASC")
     fun getDishesFlow(menuId: String): Flow<List<DishEntity>>

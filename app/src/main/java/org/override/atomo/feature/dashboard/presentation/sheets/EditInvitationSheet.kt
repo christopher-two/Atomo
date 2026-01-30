@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.dashboard.presentation.sheets
 
+import androidx.core.graphics.toColorInt
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -48,7 +50,7 @@ fun EditInvitationSheet(
     var eventName by remember { mutableStateOf(invitation.eventName) }
     var description by remember { mutableStateOf(invitation.description ?: "") }
     var isActive by remember { mutableStateOf(invitation.isActive) }
-    var primaryColor by remember { mutableStateOf(Color(android.graphics.Color.parseColor(invitation.primaryColor))) }
+    var primaryColor by remember { mutableStateOf(Color(invitation.primaryColor.toColorInt())) }
     
     ModalBottomSheet(
         onDismissRequest = onDismiss,

@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import androidx.core.graphics.toColorInt
 // FileKit imports removed
 
 @Composable
@@ -51,7 +52,7 @@ fun ColorPreview(colorHex: String) {
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(try { Color(android.graphics.Color.parseColor(colorHex)) } catch (e: Exception) { Color.Black })
+                .background(try { Color(colorHex.toColorInt()) } catch (e: IllegalArgumentException) { Color.Black })
                 .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
         )
         Spacer(modifier = Modifier.width(8.dp))
@@ -92,7 +93,7 @@ fun ColorPickerField(
             contentPadding = PaddingValues(horizontal = 4.dp)
         ) {
             items(colors) { colorHex ->
-                val color = try { Color(android.graphics.Color.parseColor(colorHex)) } catch (e: Exception) { Color.Black }
+                val color = try { Color(colorHex.toColorInt()) } catch (e: IllegalArgumentException) { Color.Black }
                 val isSelected = selectedColor.equals(colorHex, ignoreCase = true)
                 
                 Box(

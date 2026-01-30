@@ -62,7 +62,6 @@
 -dontwarn io.github.jan.supabase.**
 
 # 5. Room
--disablebundleresourcefiles
 -keep class * extends androidx.room.RoomDatabase
 -keep class * implements androidx.room.RoomDatabase
 -dontwarn androidx.room.paging.**

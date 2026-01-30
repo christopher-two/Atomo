@@ -9,10 +9,10 @@
 
 package org.override.atomo.di.feature
 
-import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import org.override.atomo.feature.main.MainViewModel
 
 val MainModule = module {
-    viewModel { MainViewModel(get(), get(), get()) }
+    viewModelOf(::MainViewModel)
 }

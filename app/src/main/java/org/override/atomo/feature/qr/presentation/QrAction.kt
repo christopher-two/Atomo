@@ -10,5 +10,5 @@
 package org.override.atomo.feature.qr.presentation
 
 sealed interface QrAction {
-
+    object Download : QrAction
 }

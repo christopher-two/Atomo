@@ -90,7 +90,10 @@
 -keep class com.google.android.gms.auth.api.identity.** { *; }
 -keep class com.google.android.gms.auth.api.signin.** { *; }
 -keep class androidx.credentials.** { *; }
+-keep class androidx.credentials.playservices.** { *; }
+-keep class com.google.android.libraries.identity.googleid.** { *; }
 -dontwarn com.google.android.gms.**
+
 
 # 9. App Specific Data Classes
 # If you have data classes not marked with @Serializable but used in reflection/JSON
@@ -102,3 +105,12 @@
 
 # 11. Compressor
 -keep class id.zelory.compressor.** { *; }
+
+# 12. JVM Specific (Ktor/Coroutines on Android)
+# These classes are used in Ktor's JVM code but are not available on Android.
+# It is safe to ignore them as Ktor handles their absence.
+-dontwarn java.lang.management.**
+-dontwarn javax.naming.**
+-dontwarn javax.xml.**
+-dontwarn org.slf4j.**
+-dontwarn javax.annotation.**

@@ -10,5 +10,4 @@
 <resources>
     <string name="app_name">Atomo</string>
     <string name="continue_with_google">Continuar con Google</string>
-    <string name="created_by">Creado por Override</string>
 </resources>

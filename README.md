@@ -1,6 +1,6 @@
 # Atomo App
 
-![Logo](app/src/main/main/logo_app-playstore.png)
+![Logo](/docs/images/Logo.jpg)
 
 Atomo es una aplicación Android nativa de vanguardia diseñada para la gestión de servicios digitales y presencia profesional. Construida con **Kotlin** y las últimas tecnologías de Android, sigue los principios de **Clean Architecture** y una organización modular basada en características (feature-based).
 

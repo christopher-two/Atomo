@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Functions
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -24,7 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,6 +40,7 @@ import io.github.alexzhirkevich.qrose.options.QrShapes
 import io.github.alexzhirkevich.qrose.options.brush
 import io.github.alexzhirkevich.qrose.options.circle
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
+import org.override.atomo.R
 import org.override.atomo.core.ui.theme.AtomoTheme
 
 @Composable
@@ -70,7 +69,7 @@ fun QrScreen(
         centralSymmetry = true
     )
     val logo = QrLogo(
-        painter = rememberVectorPainter(Icons.Default.Functions),
+        painter = painterResource(R.drawable.logo_atomo_app_monochrome),//rememberVectorPainter(Icons.Default.Functions),
         size = 0.25f,
         padding = QrLogoPadding.Accurate(0.1f),
         shape = QrLogoShape.circle(),

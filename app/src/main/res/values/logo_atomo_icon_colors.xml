@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
   ~ Override. Todos los derechos reservados.
   ~ Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
@@ -9,5 +8,8 @@
   -->
 
 <resources>
-    <color name="white">#ffffff</color>
+    <!-- Color para el icono monocromo (cambia según tema en values-night) -->
+    <color name="logo_atomo_icon_monochrome">#000000</color>
+    <!-- Color para el foreground del logo (se usará en el vector principal) -->
+    <color name="logo_atomo_icon_foreground">#000000</color>
 </resources>

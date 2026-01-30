@@ -9,6 +9,7 @@
 
 package org.override.atomo.feature.auth.presentation
 
+import android.content.Intent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,13 +42,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.override.atomo.R
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.auth.presentation.components.AuthShimmer
-
-import android.content.Intent
-import androidx.core.net.toUri
 
 @Composable
 fun AuthRoot(
@@ -113,10 +112,16 @@ fun AuthScreen(
 @Composable
 fun ColumnScope.Content(onAction: (AuthAction) -> Unit, context: android.content.Context) {
     Spacer(modifier = Modifier.weight(1f))
+    Icon(
+        painter = painterResource(id = R.drawable.logo_atomo_app_monochrome),
+        contentDescription = "Atomo",
+        modifier = Modifier.size(208.dp),
+        tint = colorScheme.onBackground
+    )
     Text(
         text = stringResource(id = R.string.app_name),
         style = typography.headlineLarge.copy(
-            fontSize = 70.sp,
+            fontSize = 50.sp,
             color = colorScheme.onBackground
         )
     )

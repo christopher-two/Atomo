@@ -41,7 +41,7 @@ class QrViewModel(
 
     fun onAction(action: QrAction) {
         when (action) {
-            else -> {}
+            QrAction.Download -> {}
         }
     }
 

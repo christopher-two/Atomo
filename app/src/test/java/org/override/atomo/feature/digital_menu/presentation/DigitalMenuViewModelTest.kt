@@ -117,4 +117,72 @@ class DigitalMenuViewModelTest {
             assertEquals(10.0, addedDish?.price ?: 0.0, 0.0)
         }
     }
+
+    @Test
+    fun `save category should update state with new category`() = runTest {
+        viewModel.state.test {
+            awaitItem() // Initial load
+            
+            viewModel.onAction(DigitalMenuAction.SaveCategory("Drinks"))
+            
+            val state = awaitItem()
+            val category = state.editingMenu?.categories?.find { it.name == "Drinks" }
+            assert(category != null)
+        }
+    }
+
+    @Test
+    fun `delete category should remove it from state and update dishes`() = runTest {
+        // Arrange
+        val categoryId = "cat123"
+        val category = org.override.atomo.domain.model.MenuCategory(categoryId, testMenu.id, "Food", 0, 1000L)
+        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, categoryId, "Pasta", "Desc", 10.0, null, true, 0, 1000L)
+        
+        val menuWithData = testMenu.copy(categories = listOf(category), dishes = listOf(dish))
+        coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithData))
+        coEvery { menuUseCases.deleteCategory(categoryId) } returns Result.success(Unit)
+        
+        // Re-init to load new mock data
+        viewModel = DigitalMenuViewModel(
+            sessionRepository, menuUseCases, getServiceLimitsUseCase, 
+            subscriptionUseCases, canCreateServiceUseCase, canAddDishUseCase,
+            uploadDishImageUseCase, deleteDishImageUseCase, imageManager
+        )
+
+        viewModel.state.test {
+            awaitItem() // Load state
+            
+            viewModel.onAction(DigitalMenuAction.DeleteCategory(category))
+            
+            val state = awaitItem()
+            assert(state.editingMenu?.categories?.isEmpty() == true)
+            assertEquals(null, state.editingMenu?.dishes?.first()?.categoryId)
+        }
+    }
+
+    @Test
+    fun `save menu failure should update state with error message`() = runTest {
+        coEvery { menuUseCases.updateMenu(any()) } returns Result.failure(Exception("Network Error"))
+
+        viewModel.state.test {
+            // Consume initial load items
+            while (awaitItem().isLoading) { /* wait */ }
+            
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // isEditing = true
+            
+            viewModel.onAction(DigitalMenuAction.SaveMenu)
+            
+            // Should get: isLoading = true, then isLoading = false with error
+            var state = awaitItem()
+            while (!state.isLoading && state.error == null) {
+                state = awaitItem()
+            }
+            if (state.isLoading) {
+                state = awaitItem() // Get the one with error
+            }
+            
+            assertEquals("Network Error", state.error)
+        }
+    }
 }

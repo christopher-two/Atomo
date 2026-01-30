@@ -20,6 +20,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
+import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
+import org.override.atomo.libs.auth.api.ExternalAuthResult
 import org.override.atomo.feature.navigation.RootNavigation
 
 sealed interface AuthEvent {
@@ -30,6 +32,7 @@ sealed interface AuthEvent {
 
 class AuthViewModel(
     private val continueWithGoogleUseCase: ContinueWithGoogleUseCase,
+    private val saveUserSessionUseCase: SaveUserSessionUseCase,
     private val rootNavigation: RootNavigation
 ) : ViewModel() {
 
@@ -71,10 +74,28 @@ class AuthViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             continueWithGoogleUseCase(context)
-                .onSuccess {
-                    _state.update { it.copy(isLoading = false) }
-                    rootNavigation.replaceWith(RouteApp.Home)
-                    _events.send(AuthEvent.LoginSuccess)
+                .onSuccess { result ->
+                    when (result) {
+                        is ExternalAuthResult.Success -> {
+                            saveUserSessionUseCase(result.userId)
+                                .onSuccess {
+                                    _state.update { it.copy(isLoading = false) }
+                                    rootNavigation.replaceWith(RouteApp.Home)
+                                    _events.send(AuthEvent.LoginSuccess)
+                                }
+                                .onFailure { error ->
+                                    _state.update { it.copy(isLoading = false, error = error.message) }
+                                    _events.send(AuthEvent.ShowError(error.message ?: "Failed to save session"))
+                                }
+                        }
+                        is ExternalAuthResult.Error -> {
+                            _state.update { it.copy(isLoading = false, error = result.message) }
+                            _events.send(AuthEvent.ShowError(result.message))
+                        }
+                        ExternalAuthResult.Cancelled -> {
+                            _state.update { it.copy(isLoading = false) }
+                        }
+                    }
                 }
                 .onFailure { error ->
                     _state.update { it.copy(isLoading = false, error = error.message) }

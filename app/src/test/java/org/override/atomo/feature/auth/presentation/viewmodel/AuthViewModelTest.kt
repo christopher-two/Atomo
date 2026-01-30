@@ -25,6 +25,9 @@ import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.libs.auth.api.ExternalAuthResult
+import org.override.atomo.feature.auth.presentation.AuthAction
+import org.override.atomo.feature.auth.presentation.AuthViewModel
+import org.override.atomo.feature.auth.presentation.AuthState
 import org.override.atomo.util.MainDispatcherRule
 
 class AuthViewModelTest {
@@ -53,7 +56,7 @@ class AuthViewModelTest {
         coEvery { continueWithGoogleUseCase(any()) } returns Result.success(ExternalAuthResult.Success(userId))
         coEvery { saveUserSessionUseCase(userId) } returns Result.success(Unit)
 
-        viewModel.onAction(AuthAction.ContinueWithGoogle, context)
+        viewModel.onAction(AuthAction.ContinueWithGoogle(context))
 
         viewModel.state.test {
             // Initial state
@@ -72,14 +75,19 @@ class AuthViewModelTest {
     @Test
     fun `ContinueWithGoogle error should update state with error`() = runTest {
         val errorMessage = "Auth Failed"
-        coEvery { continueWithGoogleUseCase(any()) } returns Result.success(ExternalAuthResult.Error(errorMessage))
+        coEvery { continueWithGoogleUseCase(any()) } returns Result.failure(Exception(errorMessage))
 
-        viewModel.onAction(AuthAction.ContinueWithGoogle, context)
+        viewModel.onAction(AuthAction.ContinueWithGoogle(context))
 
         viewModel.state.test {
             var currentState = awaitItem()
             
-            while (currentState.isLoading && currentState.error == null) {
+            // Wait for loading to start and then finish
+            while (currentState.isLoading) {
+                currentState = awaitItem()
+            }
+            // Skip initial state if needed or handle it
+            if (currentState.error == null) {
                 currentState = awaitItem()
             }
             

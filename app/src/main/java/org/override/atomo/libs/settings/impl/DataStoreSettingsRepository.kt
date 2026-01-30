@@ -93,6 +93,6 @@ class DataStoreSettingsRepository(
         setValue(DYNAMIC_COLOR_KEY, enabled)
     }
 
-    override fun isSystemThemeEnabled(): Flow<Boolean> = getValue(SYSTEM_THEME_KEY, false) // Default false as per plan
+    override fun isSystemThemeEnabled(): Flow<Boolean> = getValue(SYSTEM_THEME_KEY, true)
     override suspend fun setSystemThemeEnabled(enabled: Boolean) = setValue(SYSTEM_THEME_KEY, enabled)
 }

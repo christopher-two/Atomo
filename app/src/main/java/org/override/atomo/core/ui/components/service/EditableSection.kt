@@ -24,6 +24,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
+/**
+ * A container component for editable sections in a service screen.
+ * Displays a title, an optional header action (like an "Add" button),
+ * and can be styled depending on whether the UI is in editing mode.
+ *
+ * @param title The title of the section.
+ * @param isEditing Whether the section is currently in editing mode.
+ * @param modifier Modifier for styling the container.
+ * @param headerAction Optional composable to be displayed on the right side of the title.
+ * @param content The main content of the section.
+ */
 @Composable
 fun EditableSection(
     title: String,

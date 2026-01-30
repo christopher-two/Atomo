@@ -67,6 +67,7 @@ import org.override.atomo.feature.navigation.AppTab
 fun HomeScaffold(
     snackbarManager: SnackbarManager,
     state: HomeState,
+    isFabVisible: Boolean = state.currentTab == AppTab.DASHBOARD,
     content: @Composable () -> Unit,
     onAction: (HomeAction) -> Unit
 ) {
@@ -127,7 +128,7 @@ fun HomeScaffold(
                 },
                 snackbarHost = { SnackbarHost(snackbarManager.snackbarHostState) },
                 floatingActionButton = {
-                    if (state.currentTab == AppTab.DASHBOARD)
+                    if (isFabVisible)
                         ExpandableFab(
                             expanded = state.isFabExpanded,
                             availableServiceTypes = state.availableServiceTypes,

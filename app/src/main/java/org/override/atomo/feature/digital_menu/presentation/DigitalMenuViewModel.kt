@@ -14,7 +14,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -58,7 +60,6 @@ class DigitalMenuViewModel(
 
     private val _state = MutableStateFlow(DigitalMenuState())
     val state = _state
-        .onStart { loadMenus() }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000L),
@@ -146,22 +147,25 @@ class DigitalMenuViewModel(
 
     private fun loadMenus() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
-            
-            menuUseCases.getMenus(userId).collect { list ->
-                val existingMenu = list.firstOrNull()
-                _state.update { state ->
-                    val currentId = state.editingMenu?.id
-                    val updatedEditing = if (currentId != null) {
-                        list.find { it.id == currentId } ?: (if (state.isEditing) state.editingMenu else existingMenu)
-                    } else {
-                        existingMenu
-                    }
-                    state.copy(menus = list, editingMenu = updatedEditing)
+            sessionRepository.getCurrentUserId()
+                .filterNotNull()
+                .flatMapLatest { userId ->
+                    checkCreationLimit(userId)
+                    menuUseCases.getMenus(userId)
                 }
-                checkCreationLimit(userId)
-            }
+                .collect { list ->
+                    val existingMenu = list.firstOrNull()
+                    _state.update { state ->
+                        val currentId = state.editingMenu?.id
+                        val updatedEditing = if (currentId != null) {
+                            list.find { it.id == currentId } ?: (if (state.isEditing) state.editingMenu else existingMenu)
+                        } else {
+                            existingMenu
+                        }
+                        // Ensure isLoading is disabled once data arrives
+                        state.copy(menus = list, editingMenu = updatedEditing, isLoading = false)
+                    }
+                }
         }
     }
 

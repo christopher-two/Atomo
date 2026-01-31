@@ -19,7 +19,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import Dish
 import org.override.atomo.domain.model.Menu
+import MenuCategory
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.menu.MenuUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
@@ -138,8 +140,8 @@ class DigitalMenuViewModelTest {
     fun `delete category should remove it from state and update dishes`() = runTest {
         // Arrange
         val categoryId = "cat123"
-        val category = org.override.atomo.domain.model.MenuCategory(categoryId, testMenu.id, "Food", 0, 1000L)
-        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, categoryId, "Pasta", "Desc", 10.0, null, true, 0, 1000L)
+        val category = MenuCategory(categoryId, testMenu.id, "Food", 0, 1000L)
+        val dish = Dish("dish1", testMenu.id, categoryId, "Pasta", "Desc", 10.0, null, true, 0, 1000L)
         
         val menuWithData = testMenu.copy(categories = listOf(category), dishes = listOf(dish))
         coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithData))
@@ -215,7 +217,7 @@ class DigitalMenuViewModelTest {
     @Test
     fun `delete dish should set hasUnsavedChanges to true`() = runTest {
         // Arrange
-        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, null, "Pasta", "Desc", 10.0, null, true, 0, 1000L)
+        val dish = Dish("dish1", testMenu.id, null, "Pasta", "Desc", 10.0, null, true, 0, 1000L)
         val menuWithDish = testMenu.copy(dishes = listOf(dish))
         coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithDish))
         coEvery { menuUseCases.deleteDish(dish.id) } returns Result.success(Unit)
@@ -265,7 +267,7 @@ class DigitalMenuViewModelTest {
     fun `delete category should set hasUnsavedChanges to true`() = runTest {
         // Arrange
         val categoryId = "cat123"
-        val category = org.override.atomo.domain.model.MenuCategory(categoryId, testMenu.id, "Food", 0, 1000L)
+        val category = MenuCategory(categoryId, testMenu.id, "Food", 0, 1000L)
         val menuWithCategory = testMenu.copy(categories = listOf(category))
         coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithCategory))
         coEvery { menuUseCases.deleteCategory(categoryId) } returns Result.success(Unit)
@@ -296,8 +298,8 @@ class DigitalMenuViewModelTest {
     @Test
     fun `save menu success should save all dishes and categories`() = runTest {
         // Arrange
-        val category = org.override.atomo.domain.model.MenuCategory("cat1", testMenu.id, "Drinks", 0, 1000L)
-        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, "cat1", "Pasta", null, 10.0, null, true, 0, 1000L)
+        val category = MenuCategory("cat1", testMenu.id, "Drinks", 0, 1000L)
+        val dish = Dish("dish1", testMenu.id, "cat1", "Pasta", null, 10.0, null, true, 0, 1000L)
         val menuWithData = testMenu.copy(categories = listOf(category), dishes = listOf(dish))
         
         coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithData))
@@ -345,7 +347,7 @@ class DigitalMenuViewModelTest {
     @Test
     fun `save menu with dish failure should report error`() = runTest {
         // Arrange
-        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, null, "Pasta", null, 10.0, null, true, 0, 1000L)
+        val dish = Dish("dish1", testMenu.id, null, "Pasta", null, 10.0, null, true, 0, 1000L)
         val menuWithDish = testMenu.copy(dishes = listOf(dish))
         
         coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithDish))

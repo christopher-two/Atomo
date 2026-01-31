@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import org.override.atomo.data.local.dao.CvDao
 import org.override.atomo.data.mapper.toDomain
 import org.override.atomo.data.mapper.toDto
@@ -223,5 +222,10 @@ class CvRepositoryImpl(
     
     override suspend fun deleteSkill(skillId: String): Result<Unit> = runCatching {
         supabase.from("cv_skills").delete { filter { eq("id", skillId) } }
+    }
+
+    override suspend fun syncUp(userId: String): Result<Unit> = runCatching {
+        // CvRepository syncs immediately on create/update operations
+        // No optimistic updates with isSynced flag, so nothing to sync
     }
 }

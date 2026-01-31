@@ -114,7 +114,7 @@ class DigitalMenuViewModel(
         _state.update { 
             it.copy(
                 editingMenu = menu,
-                hasUnsavedChanges = menu != menuBeforeEdit
+                hasUnsavedChanges = it.hasUnsavedChanges || (menu != menuBeforeEdit)
             )
         }
     }

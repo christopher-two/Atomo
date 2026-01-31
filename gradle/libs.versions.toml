@@ -1,10 +1,10 @@
 [versions]
 
 # Android
-agp = "8.6.1"
+agp = "9.0.0"
 coreKtx = "1.17.0"
 lifecycleRuntimeKtx = "2.10.0"
-activityCompose = "1.12.2"
+activityCompose = "1.12.3"
 biometric = "1.2.0-alpha05"
 core-splashscreen = "1.2.0"
 accompanist-permissions = "0.37.3"
@@ -16,8 +16,8 @@ graphics-shapes = "1.1.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
-mockk = "1.13.17"
-turbine = "1.2.0"
+mockk = "1.14.9"
+turbine = "1.2.1"
 
 # Kotlin
 kotlin = "2.3.0"
@@ -31,8 +31,8 @@ composeShimmer = "1.3.3"
 coil = "3.3.0"
 coilNetworkKtor3 = "3.3.0"
 materialKolor = "4.1.0"
-composeBom = "2026.01.00"
-material3Android = "1.5.0-alpha12"
+composeBom = "2026.01.01"
+material3Android = "1.5.0-alpha13"
 material-icons-ext = "1.7.8"
 material3Adaptive = "1.2.0"
 material3AdaptiveNavSuite = "1.4.0"
@@ -45,7 +45,7 @@ ktor = "3.4.0"
 
 # Other
 filekit = "0.12.0"
-qrose = "1.0.1"
+qrose = "1.1.0"
 compressor = "3.0.1"
 
 # Data
@@ -62,7 +62,7 @@ gms-plugin = "4.4.4"
 gms-auth = "21.5.0"
 cred-play-services = "1.5.0"
 credentials = "1.5.0"
-workRuntimeKtx = "2.11.0"
+workRuntimeKtx = "2.11.1"
 
 [libraries]
 # Test
@@ -170,6 +170,7 @@ androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx"
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gms-plugin = { id = "com.google.gms.google-services", version.ref = "gms-plugin" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

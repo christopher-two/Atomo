@@ -32,9 +32,7 @@ if (localPropertiesFile.exists()) {
 
 android {
     namespace = "org.override.atomo"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     signingConfigs {
         create("release") {
@@ -80,18 +78,17 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+    }
+}
+
 room {
     schemaDirectory("$projectDir/schemas")
 }
 
-kotlin {
-    target {
-        compilerOptions {
-            optIn.add("kotlin.RequiresOptIn")
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
-        }
-    }
-}
 
 dependencies {
     implementation(libs.androidx.core.ktx)

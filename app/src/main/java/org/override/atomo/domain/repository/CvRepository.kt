@@ -42,6 +42,9 @@ interface CvRepository {
 
     /** Deletes a CV. */
     suspend fun deleteCv(cvId: String): Result<Unit>
+
+    /** Uploads unsynced local changes to remote. */
+    suspend fun syncUp(userId: String): Result<Unit>
     
     // Education operations
 

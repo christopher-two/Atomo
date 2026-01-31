@@ -9,7 +9,6 @@
 
 package org.override.atomo.data.manager
 
-import android.content.Context
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.Data
@@ -22,8 +21,7 @@ import org.override.atomo.data.worker.ProfileSyncWorker
 import org.override.atomo.data.worker.UploadWorker
 import java.util.concurrent.TimeUnit
 
-class SyncManager(context: Context) {
-    private val workManager = WorkManager.getInstance(context)
+class SyncManager(private val workManager: WorkManager) {
 
     fun scheduleInitialSync(userId: String) {
         val data = Data.Builder().putString("userId", userId).build()

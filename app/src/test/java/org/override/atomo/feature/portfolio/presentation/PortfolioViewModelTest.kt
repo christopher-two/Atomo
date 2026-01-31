@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
@@ -37,6 +38,7 @@ class PortfolioViewModelTest {
     private val portfolioUseCases: PortfolioUseCases = mockk()
     private val canCreateServiceUseCase: CanCreateServiceUseCase = mockk()
     private val sessionRepository: SessionRepository = mockk()
+    private val snackbarManager: SnackbarManager = mockk(relaxed = true)
 
     private val testPortfolio = Portfolio(
         id = "port123",
@@ -55,8 +57,13 @@ class PortfolioViewModelTest {
         coEvery { sessionRepository.getCurrentUserId() } returns flowOf("user123")
         coEvery { portfolioUseCases.getPortfolios("user123") } returns flowOf(listOf(testPortfolio))
         coEvery { canCreateServiceUseCase("user123", ServiceType.PORTFOLIO) } returns CanCreateResult.Success
-        
-        viewModel = PortfolioViewModel(portfolioUseCases, canCreateServiceUseCase, sessionRepository)
+
+        viewModel = PortfolioViewModel(
+            portfolioUseCases,
+            canCreateServiceUseCase,
+            sessionRepository,
+            snackbarManager
+        )
     }
 
     @Test

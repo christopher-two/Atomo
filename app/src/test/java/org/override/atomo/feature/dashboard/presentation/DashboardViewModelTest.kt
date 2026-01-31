@@ -21,6 +21,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.override.atomo.data.manager.SyncManager
 import org.override.atomo.domain.usecase.cv.CvUseCases
 import org.override.atomo.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.domain.usecase.menu.MenuUseCases
@@ -49,6 +50,7 @@ class DashboardViewModelTest {
     private val syncAllServices: SyncAllServicesUseCase = mockk()
     private val rootNavigation: RootNavigation = mockk()
     private val homeNavigation: HomeNavigation = mockk()
+    private val syncManager: SyncManager = mockk(relaxed = true)
 
     @Before
     fun setUp() {
@@ -69,7 +71,7 @@ class DashboardViewModelTest {
         viewModel = DashboardViewModel(
             sessionRepository, profileUseCases, menuUseCases, portfolioUseCases,
             cvUseCases, shopUseCases, invitationUseCases, syncAllServices,
-            rootNavigation, homeNavigation
+            rootNavigation, homeNavigation, syncManager
         )
     }
 

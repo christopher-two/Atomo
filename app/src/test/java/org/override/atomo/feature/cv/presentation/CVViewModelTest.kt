@@ -18,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Cv
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.cv.CvUseCases
@@ -35,6 +36,7 @@ class CVViewModelTest {
     private val cvUseCases: CvUseCases = mockk()
     private val canCreateServiceUseCase: CanCreateServiceUseCase = mockk()
     private val sessionRepository: SessionRepository = mockk()
+    private val snackbarManager: SnackbarManager = mockk(relaxed = true)
 
     private val testCv = Cv(
         id = "cv123",
@@ -53,8 +55,9 @@ class CVViewModelTest {
         coEvery { sessionRepository.getCurrentUserId() } returns flowOf("user123")
         coEvery { cvUseCases.getCvs("user123") } returns flowOf(listOf(testCv))
         coEvery { canCreateServiceUseCase("user123", ServiceType.CV) } returns CanCreateResult.Success
-        
-        viewModel = CVViewModel(cvUseCases, canCreateServiceUseCase, sessionRepository)
+
+        viewModel =
+            CVViewModel(cvUseCases, canCreateServiceUseCase, sessionRepository, snackbarManager)
     }
 
     @Test

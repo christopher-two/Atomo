@@ -18,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Invitation
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.domain.usecase.invitation.InvitationUseCases
@@ -35,6 +36,7 @@ class InvitationViewModelTest {
     private val invitationUseCases: InvitationUseCases = mockk()
     private val canCreateServiceUseCase: CanCreateServiceUseCase = mockk()
     private val sessionRepository: SessionRepository = mockk()
+    private val snackbarManager: SnackbarManager = mockk(relaxed = true)
 
     private val testInvitation = Invitation(
         id = "inv123",
@@ -56,8 +58,13 @@ class InvitationViewModelTest {
         coEvery { sessionRepository.getCurrentUserId() } returns flowOf("user123")
         coEvery { invitationUseCases.getInvitations("user123") } returns flowOf(listOf(testInvitation))
         coEvery { canCreateServiceUseCase("user123", ServiceType.INVITATION) } returns CanCreateResult.Success
-        
-        viewModel = InvitationViewModel(invitationUseCases, canCreateServiceUseCase, sessionRepository)
+
+        viewModel = InvitationViewModel(
+            invitationUseCases,
+            canCreateServiceUseCase,
+            sessionRepository,
+            snackbarManager
+        )
     }
 
     @Test

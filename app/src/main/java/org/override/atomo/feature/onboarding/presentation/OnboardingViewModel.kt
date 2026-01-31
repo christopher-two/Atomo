@@ -50,6 +50,13 @@ class OnboardingViewModel(
     private val portfolioUseCases: PortfolioUseCases,
     private val cvUseCases: CvUseCases,
     private val invitationUseCases: InvitationUseCases,
+    // Repositories for direct sync
+    private val profileRepository: org.override.atomo.domain.repository.ProfileRepository,
+    private val menuRepository: org.override.atomo.domain.repository.MenuRepository,
+    private val shopRepository: org.override.atomo.domain.repository.ShopRepository,
+    private val portfolioRepository: org.override.atomo.domain.repository.PortfolioRepository,
+    private val cvRepository: org.override.atomo.domain.repository.CvRepository,
+    private val invitationRepository: org.override.atomo.domain.repository.InvitationRepository,
     private val sessionRepository: SessionRepository,
     private val rootNavigation: RootNavigation,
     private val snackbarManager: SnackbarManager
@@ -189,7 +196,9 @@ class OnboardingViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // 1. Update profile
+            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+
+            // 1. Update profile locally
             val updatedProfile = currentProfile.copy(
                 displayName = currentState.displayName,
                 username = currentState.username,
@@ -208,10 +217,8 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 2. Create service
-            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+            // 2. Create service locally
             val serviceResult = createService(userId, currentState)
-
             if (serviceResult.isFailure) {
                 _state.update {
                     it.copy(
@@ -223,10 +230,45 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 3. Navigate to Home
+            // 3. Sync profile to remote immediately
+            val profileSyncResult = profileRepository.syncUp(userId)
+            if (profileSyncResult.isFailure) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Error al sincronizar perfil: ${profileSyncResult.exceptionOrNull()?.message}"
+                    )
+                }
+                return@launch
+            }
+
+            // 4. Sync service to remote immediately
+            val serviceSyncResult = syncService(userId, currentState.selectedServiceType)
+            if (serviceSyncResult.isFailure) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Error al sincronizar servicio: ${serviceSyncResult.exceptionOrNull()?.message}"
+                    )
+                }
+                return@launch
+            }
+
+            // 5. Navigate to Home
             _state.update { it.copy(isLoading = false) }
             snackbarManager.showMessage("¡Bienvenido a Átomo!")
             rootNavigation.replaceWith(RouteApp.Home)
+        }
+    }
+
+    private suspend fun syncService(userId: String, serviceType: ServiceType?): Result<Unit> {
+        return when (serviceType) {
+            ServiceType.SHOP -> shopRepository.syncUp(userId)
+            ServiceType.DIGITAL_MENU -> menuRepository.syncUp(userId)
+            ServiceType.PORTFOLIO -> portfolioRepository.syncUp(userId)
+            ServiceType.CV -> cvRepository.syncUp(userId)
+            ServiceType.INVITATION -> invitationRepository.syncUp(userId)
+            null -> Result.failure(Exception("No service type selected"))
         }
     }
 

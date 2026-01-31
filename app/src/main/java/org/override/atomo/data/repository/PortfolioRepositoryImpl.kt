@@ -145,4 +145,9 @@ class PortfolioRepositoryImpl(
         supabase.from("portfolio_items").delete { filter { eq("id", itemId) } }
         portfolioDao.deleteItemById(itemId)
     }
+
+    override suspend fun syncUp(userId: String): Result<Unit> = runCatching {
+        // PortfolioRepository syncs immediately on create/update operations
+        // No optimistic updates with isSynced flag, so nothing to sync
+    }
 }

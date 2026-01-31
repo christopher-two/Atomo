@@ -40,6 +40,9 @@ interface InvitationRepository {
 
     /** Deletes an invitation. */
     suspend fun deleteInvitation(invitationId: String): Result<Unit>
+
+    /** Uploads unsynced local changes to remote. */
+    suspend fun syncUp(userId: String): Result<Unit>
     
     // Response operations
 

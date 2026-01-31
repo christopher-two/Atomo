@@ -21,17 +21,18 @@ import org.junit.Before
 import org.junit.Test
 import org.override.atomo.data.local.dao.ProfileDao
 import org.override.atomo.data.local.entity.ProfileEntity
-import org.override.atomo.domain.model.Profile
+import org.override.atomo.data.manager.SyncManager
 
 class ProfileRepositoryImplTest {
 
     private lateinit var repository: ProfileRepositoryImpl
     private val profileDao: ProfileDao = mockk()
     private val supabaseClient: SupabaseClient = mockk()
+    private val syncManager: SyncManager = mockk()
 
     @Before
     fun setUp() {
-        repository = ProfileRepositoryImpl(profileDao, supabaseClient)
+        repository = ProfileRepositoryImpl(profileDao, supabaseClient, syncManager)
     }
 
     @Test

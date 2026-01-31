@@ -41,6 +41,9 @@ interface ShopRepository {
 
     /** Deletes a shop. */
     suspend fun deleteShop(shopId: String): Result<Unit>
+
+    /** Uploads unsynced local changes to remote. */
+    suspend fun syncUp(userId: String): Result<Unit>
     
     // Category operations
 

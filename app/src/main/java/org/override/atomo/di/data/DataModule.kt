@@ -13,6 +13,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.work.WorkManager
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -31,6 +32,9 @@ val DataModule: Module
     get() = module {
         // Proporcionar DataStore
         single<DataStore<Preferences>> { get<Context>().dataStore }
+
+        // Proporcionar WorkManager
+        single { WorkManager.getInstance(get()) }
         
         singleOf(::DataStoreSessionRepository) bind SessionRepository::class
         singleOf(::DataStoreSettingsRepository) bind SettingsRepository::class

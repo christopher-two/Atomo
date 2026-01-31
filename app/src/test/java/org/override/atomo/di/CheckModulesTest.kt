@@ -12,6 +12,7 @@ package org.override.atomo.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.work.WorkManager
 import io.github.jan.supabase.SupabaseClient
 import io.mockk.mockk
 import org.junit.Test
@@ -43,6 +44,7 @@ class CheckModulesTest : KoinTest {
                 single<DataStore<Preferences>> { mockk(relaxed = true) }
                 single<SupabaseClient> { mockk(relaxed = true) }
                 single<AtomoDatabase> { mockk(relaxed = true) }
+                single<WorkManager> { mockk(relaxed = true) }
             }
 
             modules(

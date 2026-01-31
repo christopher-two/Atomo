@@ -20,6 +20,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.Profile
 import org.override.atomo.domain.usecase.profile.CheckUsernameAvailabilityUseCase
 import org.override.atomo.domain.usecase.profile.GetProfileUseCase
@@ -37,6 +38,7 @@ class ProfileViewModelTest {
     private lateinit var viewModel: ProfileViewModel
     private val useCases: ProfileUseCases = mockk()
     private val sessionRepository: SessionRepository = mockk()
+    private val snackbarManager: SnackbarManager = mockk(relaxed = true)
     
     private val getProfileUseCase: GetProfileUseCase = mockk()
     private val syncProfileUseCase: SyncProfileUseCase = mockk()
@@ -62,8 +64,8 @@ class ProfileViewModelTest {
         
         coEvery { sessionRepository.getCurrentUserId() } returns flowOf("user123")
         coEvery { getProfileUseCase(any()) } returns flowOf(testProfile)
-        
-        viewModel = ProfileViewModel(useCases, sessionRepository)
+
+        viewModel = ProfileViewModel(useCases, sessionRepository, snackbarManager)
     }
 
     @Test

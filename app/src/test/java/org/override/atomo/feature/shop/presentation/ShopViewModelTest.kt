@@ -18,8 +18,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.override.atomo.domain.model.Shop
+import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.ServiceType
+import org.override.atomo.domain.model.Shop
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
@@ -35,6 +36,7 @@ class ShopViewModelTest {
     private val shopUseCases: ShopUseCases = mockk()
     private val canCreateServiceUseCase: CanCreateServiceUseCase = mockk()
     private val sessionRepository: SessionRepository = mockk()
+    private val snackbarManager: SnackbarManager = mockk(relaxed = true)
 
     private val testShop = Shop(
         id = "shop123",
@@ -54,8 +56,9 @@ class ShopViewModelTest {
         coEvery { sessionRepository.getCurrentUserId() } returns flowOf("user123")
         coEvery { shopUseCases.getShops("user123") } returns flowOf(listOf(testShop))
         coEvery { canCreateServiceUseCase("user123", ServiceType.SHOP) } returns CanCreateResult.Success
-        
-        viewModel = ShopViewModel(shopUseCases, canCreateServiceUseCase, sessionRepository)
+
+        viewModel =
+            ShopViewModel(shopUseCases, canCreateServiceUseCase, sessionRepository, snackbarManager)
     }
 
     @Test

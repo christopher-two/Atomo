@@ -40,6 +40,9 @@ interface PortfolioRepository {
 
     /** Deletes a portfolio. */
     suspend fun deletePortfolio(portfolioId: String): Result<Unit>
+
+    /** Uploads unsynced local changes to remote. */
+    suspend fun syncUp(userId: String): Result<Unit>
     
     // Item operations
 

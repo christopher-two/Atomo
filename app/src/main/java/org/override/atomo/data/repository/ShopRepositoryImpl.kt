@@ -196,4 +196,9 @@ class ShopRepositoryImpl(
         supabase.from("products").delete { filter { eq("id", productId) } }
         shopDao.deleteProductById(productId)
     }
+
+    override suspend fun syncUp(userId: String): Result<Unit> = runCatching {
+        // ShopRepository syncs immediately on create/update operations
+        // No optimistic updates with isSynced flag, so nothing to sync
+    }
 }

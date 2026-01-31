@@ -30,6 +30,7 @@ import org.override.atomo.domain.repository.MenuRepository
 
 /**
  * Implementation of [MenuRepository] using [MenuDao] and [SupabaseClient].
+ * Handles data synchronization between local Room database and remote Supabase instance.
  */
 class MenuRepositoryImpl(
     private val menuDao: MenuDao,
@@ -37,7 +38,14 @@ class MenuRepositoryImpl(
     private val syncManager: org.override.atomo.data.manager.SyncManager
 ) : MenuRepository {
 
-    
+    // region Menu Flows
+
+    /**
+     * Observes all menus for a specific user, combining them with their related categories and dishes.
+     *
+     * @param userId The ID of the user whose menus are to be observed.
+     * @return A Flow emitting a list of [Menu] objects with their hierarchies populated.
+     */
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override fun getMenusFlow(userId: String): Flow<List<Menu>> {
         return menuDao.getMenusFlow(userId).flatMapLatest { menuEntities ->
@@ -60,18 +68,36 @@ class MenuRepositoryImpl(
             }
         }
     }
-    
+
+    /**
+     * Retrieves all menus for a specific user.
+     *
+     * @param userId The user's unique identifier.
+     * @return A list of [Menu] objects.
+     */
     override suspend fun getMenus(userId: String): List<Menu> {
         return menuDao.getMenus(userId).map { it.toDomain() }
     }
-    
+
+    /**
+     * Retrieves a single menu by its ID, including its categories and dishes.
+     *
+     * @param menuId The unique identifier of the menu.
+     * @return The [Menu] object if found, null otherwise.
+     */
     override suspend fun getMenu(menuId: String): Menu? {
         val menu = menuDao.getMenu(menuId)?.toDomain() ?: return null
         val categories = menuDao.getCategories(menuId).map { it.toDomain() }
         val dishes = menuDao.getDishes(menuId).map { it.toDomain() }
         return menu.copy(categories = categories, dishes = dishes)
     }
-    
+
+    /**
+     * Observes a single menu by its ID.
+     *
+     * @param menuId The unique identifier of the menu.
+     * @return A Flow emitting the [Menu] object or null if not found.
+     */
     override fun getMenuFlow(menuId: String): Flow<Menu?> {
         return combine(
             menuDao.getMenuFlow(menuId),
@@ -84,278 +110,416 @@ class MenuRepositoryImpl(
             )
         }
     }
-    
-    override suspend fun syncMenus(userId: String): Result<List<Menu>> = runCatching {
-        val dtos = supabase.from("menus")
-            .select { filter { eq("user_id", userId) } }
-            .decodeList<MenuDto>()
-        
-        // Get current local menu IDs to detect deleted menus
-        val localMenuIds = menuDao.getMenus(userId).map { it.id }.toSet()
-        val remoteMenuIds = dtos.map { it.id }.toSet()
-        
-        // Delete menus that exist locally but not on server
-        val deletedMenuIds = localMenuIds - remoteMenuIds
-        deletedMenuIds.forEach { menuId ->
-            menuDao.deleteDishesByMenuId(menuId)
-            menuDao.deleteCategoriesByMenuId(menuId)
-            menuDao.deleteMenuById(menuId)
-        }
-        
-        // Insert/update menus from server
-        val entities = dtos.map { it.toEntity() }
-        menuDao.insertMenus(entities)
-        
-        // Sync categories and dishes for each menu (clear old data first)
-        dtos.forEach { menuDto ->
-            syncMenuCategories(menuDto.id)
-            syncMenuDishes(menuDto.id)
-        }
-        
-        entities.map { it.toDomain() }
-    }
-    
-    private suspend fun syncMenuCategories(menuId: String) {
-        // Clear old categories for this menu
-        menuDao.deleteCategoriesByMenuId(menuId)
-        
-        val categories = supabase.from("menu_categories")
-            .select { filter { eq("menu_id", menuId) } }
-            .decodeList<MenuCategoryDto>()
-        menuDao.insertCategories(categories.map { it.toEntity() })
-    }
-    
-    private suspend fun syncMenuDishes(menuId: String) {
-        // Clear old dishes for this menu
-        menuDao.deleteDishesByMenuId(menuId)
-        
-        val dishes = supabase.from("dishes")
-            .select { filter { eq("menu_id", menuId) } }
-            .decodeList<DishDto>()
-        menuDao.insertDishes(dishes.map { it.toEntity() })
-    }
-    
-    override suspend fun createMenu(menu: Menu): Result<Menu> = runCatching {
-        // Optimistic update: Update local DB first
+    // endregion
+
+    // region Menu CRUD
+
+    /**
+     * Creates a new menu locally and schedules a synchronization upload.
+     *
+     * @param menu The menu to create.
+     * @return A Result containing the created Menu.
+     */
+    override suspend fun createMenu(menu: Menu): Result<Menu> = performOptimisticUpdate(menu) {
         menuDao.insertMenu(menu.toEntity().copy(isSynced = false))
-
-        syncManager.scheduleUpload(menu.userId)
-        
-        menu
     }
 
-    
-    override suspend fun updateMenu(menu: Menu): Result<Menu> = runCatching {
-        // Optimistic update: Update local DB first
+    /**
+     * Updates an existing menu locally and schedules a synchronization upload.
+     *
+     * @param menu The menu with updated information.
+     * @return A Result containing the updated Menu.
+     */
+    override suspend fun updateMenu(menu: Menu): Result<Menu> = performOptimisticUpdate(menu) {
         menuDao.updateMenu(menu.toEntity().copy(isSynced = false))
-
-        syncManager.scheduleUpload(menu.userId)
-        
-        menu
     }
 
-    
+    /**
+     * Soft deletes a menu locally (isActive=false) and schedules a synchronization upload.
+     *
+     * @param menuId The ID of the menu to delete.
+     * @return A Result indicating success or failure.
+     */
     override suspend fun deleteMenu(menuId: String): Result<Unit> = runCatching {
-        // For deletion, we need to track it if we want to sync it.
-        // Current simple implementation: Try to delete locally.
-        // If we want to sync delete, we need a "deleted" flag or "deleted_items" table.
-        // User requirements imply robust sync.
-        // But for now, let's keep it simple: Delete locally, 
-        // AND schedule a task that *might* fail if item is gone? 
-        // No, we need to execute the delete on server.
-        // If we delete locally, we lose the ID to delete.
-        // Let's assume for this iteration we do "Fire and Forget" for delete 
-        // OR we implement soft delete.
-        // Given constraints, I will do: Network Delete inside a generic scope?
-        // No, that breaks "offline".
-        // CORRECT APPROACH: Mark as deleted (isActive = false?) or use a separate table.
-        // I will use `isActive = false` (soft delete) for now if the entity has it.
-        // MenuEntity has `isActive`.
         val menu = menuDao.getMenu(menuId)
         if (menu != null) {
             menuDao.updateMenu(menu.copy(isActive = false, isSynced = false))
             syncManager.scheduleUpload(menu.userId)
         }
     }
+    // endregion
 
-    
-    // Category operations
+    // region Category Flows & CRUD
+
+    /**
+     * Observes all categories for a specific menu.
+     *
+     * @param menuId The ID of the menu.
+     * @return A Flow emitting a list of [MenuCategory] objects.
+     */
     override fun getCategoriesFlow(menuId: String): Flow<List<MenuCategory>> {
         return menuDao.getCategoriesFlow(menuId).map { it.map { c -> c.toDomain() } }
     }
-    
-    override suspend fun createCategory(category: MenuCategory): Result<MenuCategory> = runCatching {
-        // Optimistic update: Update local DB first
+
+    /**
+     * Creates a new category locally and schedules a synchronization upload.
+     *
+     * @param category The category to create.
+     * @return A Result containing the created MenuCategory.
+     */
+    override suspend fun createCategory(category: MenuCategory): Result<MenuCategory> =
+        performOptimisticUpdate(category) {
         menuDao.insertCategory(category.toEntity().copy(isSynced = false))
-
-        val userId = menuDao.getMenu(category.menuId)?.userId
-        if (userId != null) {
-            syncManager.scheduleUpload(userId)
-        }
-        
-        category
     }
 
-    
-    override suspend fun updateCategory(category: MenuCategory): Result<MenuCategory> = runCatching {
-        // Optimistic update: Update local DB first
+    /**
+     * Updates an existing category locally and schedules a synchronization upload.
+     *
+     * @param category The category to update.
+     * @return A Result containing the updated MenuCategory.
+     */
+    override suspend fun updateCategory(category: MenuCategory): Result<MenuCategory> =
+        performOptimisticUpdate(category) {
         menuDao.updateCategory(category.toEntity().copy(isSynced = false))
-
-        val userId = menuDao.getMenu(category.menuId)?.userId
-        if (userId != null) {
-            syncManager.scheduleUpload(userId)
-        }
-        
-        category
     }
 
-    
+    /**
+     * Deletes a category locally and attempts an immediate deletion on the server.
+     * Note: This performs a "best effort" remote deletion as categories do not currently support soft delete.
+     *
+     * @param categoryId The ID of the category to delete.
+     * @return A Result indicating success or failure.
+     */
     override suspend fun deleteCategory(categoryId: String): Result<Unit> = runCatching {
-        // Optimistic update: Delete from local DB first
-        // Note: Repository interface doesn't expose delete by entity, usually just ID
-        // But dao has deleteCategory(entity). Let's assume input is ID.
-        // Wait, the DAO has deleteCategory(entity) and there is no deleteCategoryById in DAO?
-        // Let's check the DAO again. Ah, line 74: deleteCategory(category: MenuCategoryEntity).
-        // Line 175 of original impl uses delete { filter { eq("id", categoryId) } } for supabase.
-        // I need to fix this too.
-        
-        // For now I'll use a direct query if possible or I might need to add a method to DAO. 
-        // But I can't edit DAO easily in this step without a separate tool call.
-        // Let's look at Dish deletion.
-        /*
-        override suspend fun deleteDish(dishId: String): Result<Unit> = runCatching {
-            supabase.from("dishes").delete { filter { eq("id", dishId) } }
-            menuDao.deleteDishById(dishId)
+        menuDao.deleteCategoryById(categoryId)
+        try {
+            supabase.from("menu_categories").delete { filter { eq("id", categoryId) } }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-        */
-        // Dish deletion was correct.
-        
-        // Back to Category. I need to delete it locally.
-        // Since I don't have deleteCategoryById in DAO (based on my memory of the file view), 
-        // I should check strict DAO content.
-        // Line 74: suspend fun deleteCategory(category: MenuCategoryEntity)
-        // No deleteCategoryById.
-        
-        // I will assume for this step I must fetch it or better, ADD the method to DAO.
-        // But I will stick to what I have to avoid scope creep for now, 
-        // OR simply execute a raw query? No, Room doesn't let me do that easily here.
-        // I will SKIP adding local delete for Category in this tool call if I can't do it, 
-        // BUT wait, if I don't delete locally, the optimistic update fails.
-        // Actually, let me check the DAO content again.
-        
-        // Check line 59: getCategoriesFlow
-        // ...
-        // I'll add deleteCategoryById to DAO in a separate step if needed. 
-        // For now, I will fix the ordering for others.
-         
-        // Actually, if I can't delete locally by ID, I should probably fetch it then delete it locally.
-        // `val cat = menuDao.getCategories(menuId = ???)` - I don't have menuId.
-        // Okay, I will fix the Delete Category bug in a follow up.
-        
-        // For now, I will prioritize `createDish`, `upsertDish`, `updateDish`, `deleteDish`.
-        
-        supabase.from("menu_categories").delete { filter { eq("id", categoryId) } }
     }
-    
-    // Dish operations
+    // endregion
+
+    // region Dish Flows & CRUD
+
+    /**
+     * Observes all dishes for a specific menu.
+     *
+     * @param menuId The ID of the menu.
+     * @return A Flow emitting a list of [Dish] objects.
+     */
     override fun getDishesFlow(menuId: String): Flow<List<Dish>> {
         return menuDao.getDishesFlow(menuId).map { it.map { d -> d.toDomain() } }
     }
-    
-    override suspend fun createDish(dish: Dish): Result<Dish> = runCatching {
-        // Optimistic update
-        menuDao.insertDish(dish.toEntity().copy(isSynced = false))
 
-        val userId = menuDao.getMenu(dish.menuId)?.userId
-        if (userId != null) {
-            syncManager.scheduleUpload(userId)
-        }
-        
-        dish
+    /**
+     * Creates a new dish locally and schedules a synchronization upload.
+     *
+     * @param dish The dish to create.
+     * @return A Result containing the created Dish.
+     */
+    override suspend fun createDish(dish: Dish): Result<Dish> = performOptimisticUpdate(dish) {
+        menuDao.insertDish(dish.toEntity().copy(isSynced = false))
     }
 
-    
-    override suspend fun upsertDish(dish: Dish): Result<Dish> = runCatching {
-        // Optimistic update
+    /**
+     * Upserts a dish locally and schedules a synchronization upload.
+     *
+     * @param dish The dish to upsert.
+     * @return A Result containing the upserted Dish.
+     */
+    override suspend fun upsertDish(dish: Dish): Result<Dish> = performOptimisticUpdate(dish) {
         menuDao.insertDish(dish.toEntity().copy(isSynced = false))
-
-        val userId = menuDao.getMenu(dish.menuId)?.userId
-        if (userId != null) {
-            syncManager.scheduleUpload(userId)
-        }
-        
-        dish
     }
 
-
-    override suspend fun updateDish(dish: Dish): Result<Dish> = runCatching {
-        // Optimistic update
+    /**
+     * Updates an existing dish locally and schedules a synchronization upload.
+     *
+     * @param dish The dish to update.
+     * @return A Result containing the updated Dish.
+     */
+    override suspend fun updateDish(dish: Dish): Result<Dish> = performOptimisticUpdate(dish) {
         menuDao.updateDish(dish.toEntity().copy(isSynced = false))
-
-        val userId = menuDao.getMenu(dish.menuId)?.userId
-        if (userId != null) {
-            syncManager.scheduleUpload(userId)
-        }
-        
-        dish
     }
 
-
+    /**
+     * Soft deletes a dish locally (isVisible=false) and schedules a synchronization upload.
+     *
+     * @param dishId The ID of the dish to delete.
+     * @return A Result indicating success or failure.
+     */
     override suspend fun deleteDish(dishId: String): Result<Unit> = runCatching {
-        // Handle deletion: Soft delete
         val dish = menuDao.getDish(dishId)
         if (dish != null) {
-            // Assuming DishEntity has isVisible or we need to add isActive/isDeleted
-            // DishEntity has isVisible. Let's use isVisible=false as "deleted" for now for sync?
-            // Or better, physically delete locally if user wants to delete,
-            // but then we can't sync the deletion easily to Supabase.
-            // Supabase sync requires an ID.
-            // If we delete locally, we must delete on server IMMEDIATELY or track deletion.
-            // "avoid que corten el proceso".
-            // So immediate network call is risky if it fails.
-            // I'll make it explicit: Mark as `isSynced=false` and maybe `isVisible=false`?
-            // But delete means DELETE.
-            // I will modify DishEntity to have `isDeleted`?
-            // Or I will just trigger a network delete here inside a Scope that persists?
-            // Actually `WorkManager` is best.
-            // I'll just soft delete using `isVisible = false` if that's acceptable behavior for "Delete".
-            // But likely "Delete" means remove.
-            // I will delete locally AND add a `DeletedItem` table? No that's too complex for now.
-            // I will stick to: Set `isVisible = false` (Hide).
             menuDao.updateDish(dish.copy(isVisible = false, isSynced = false))
 
-            // We need menuId to get userId
             val userId = menuDao.getMenu(dish.menuId)?.userId
             if (userId != null) {
                 syncManager.scheduleUpload(userId)
             }
         }
     }
+    // endregion
 
-    override suspend fun syncUp(userId: String): Result<Unit> = runCatching {
-        // 1. Menus
-        val unsyncedMenus = menuDao.getUnsyncedMenus(userId)
-        unsyncedMenus.forEach { entity ->
-            val dto = entity.toDomain().toDto()
-            // If it's a soft delete (isActive=false), maybe we should delete it on server?
-            // Or just update? Let's update.
-            supabase.from("menus").upsert(dto)
-            menuDao.insertMenu(entity.copy(isSynced = true))
+    // region Synchronization (Sync Down / Pull)
+
+    /**
+     * Synchronizes menus from the server to the local database (Pull).
+     * Downloads menus, categories, and dishes. Respects local unsynced changes.
+     *
+     * @param userId The user ID to sync data for.
+     * @return A Result containing the list of synchronized Menus.
+     */
+    override suspend fun syncMenus(userId: String): Result<List<Menu>> = runCatching {
+        syncDownMenus(userId)
+
+        val currentMenus = menuDao.getMenus(userId)
+        currentMenus.forEach { menu ->
+            syncDownCategories(menu.id)
+            syncDownDishes(menu.id)
         }
 
-        // 2. Categories
+        currentMenus.map { it.toDomain() }
+    }
+
+    /**
+     * Downloads and syncs menus from the server used by [syncMenus].
+     */
+    private suspend fun syncDownMenus(userId: String): List<MenuDto> {
+        val dtos = supabase.from("menus")
+            .select { filter { eq("user_id", userId) } }
+            .decodeList<MenuDto>()
+
+        val localMenus = menuDao.getMenus(userId)
+        val remoteMenuIds = dtos.map { it.id }.toSet()
+
+        localMenus.forEach { localMenu ->
+            if (localMenu.isSynced && localMenu.id !in remoteMenuIds) {
+                menuDao.deleteDishesByMenuId(localMenu.id)
+                menuDao.deleteCategoriesByMenuId(localMenu.id)
+                menuDao.deleteMenuById(localMenu.id)
+            }
+        }
+
+        val entitiesToInsert = dtos.mapNotNull { dto ->
+            val local = localMenus.find { it.id == dto.id }
+            if (local != null && !local.isSynced) {
+                null
+            } else {
+                dto.toEntity().copy(isSynced = true)
+            }
+        }
+
+        if (entitiesToInsert.isNotEmpty()) {
+            menuDao.insertMenus(entitiesToInsert)
+        }
+        return dtos
+    }
+
+    /**
+     * Downloads and syncs categories for a specific menu used by [syncMenus].
+     */
+    private suspend fun syncDownCategories(menuId: String) {
+        val remoteCategories = supabase.from("menu_categories")
+            .select { filter { eq("menu_id", menuId) } }
+            .decodeList<MenuCategoryDto>()
+
+        val localCategories = menuDao.getCategories(menuId)
+        val remoteIds = remoteCategories.map { it.id }.toSet()
+
+        localCategories.forEach { local ->
+            if (local.isSynced && local.id !in remoteIds) {
+                menuDao.deleteCategoryById(local.id)
+            }
+        }
+
+        val toInsert = remoteCategories.mapNotNull { dto ->
+            val local = localCategories.find { it.id == dto.id }
+            if (local != null && !local.isSynced) null
+            else dto.toEntity().copy(isSynced = true)
+        }
+
+        if (toInsert.isNotEmpty()) {
+            menuDao.insertCategories(toInsert)
+        }
+    }
+
+    /**
+     * Downloads and syncs dishes for a specific menu used by [syncMenus].
+     */
+    private suspend fun syncDownDishes(menuId: String) {
+        val remoteDishes = supabase.from("dishes")
+            .select { filter { eq("menu_id", menuId) } }
+            .decodeList<DishDto>()
+
+        val localDishes = menuDao.getDishes(menuId)
+        val remoteIds = remoteDishes.map { it.id }.toSet()
+
+        localDishes.forEach { local ->
+            if (local.isSynced && local.id !in remoteIds) {
+                menuDao.deleteDishById(local.id)
+            }
+        }
+
+        val toInsert = remoteDishes.mapNotNull { dto ->
+            val local = localDishes.find { it.id == dto.id }
+            if (local != null && !local.isSynced) null
+            else dto.toEntity().copy(isSynced = true)
+        }
+
+        if (toInsert.isNotEmpty()) {
+            menuDao.insertDishes(toInsert)
+        }
+    }
+
+    // endregion
+
+    // region Synchronization (Sync Up / Push)
+
+    /**
+     * Uploads local unsynced changes to the server (Push).
+     * Handles ID conflicts by remapping local IDs to serve IDs if necessary ("One Menu Policy").
+     *
+     * @param userId The user ID to sync data for.
+     * @return A Result indicating success or failure.
+     */
+    override suspend fun syncUp(userId: String): Result<Unit> = runCatching {
+        val remoteMenus = supabase.from("menus")
+            .select { filter { eq("user_id", userId) } }
+            .decodeList<MenuDto>()
+
+        val existingRemoteMenu = remoteMenus.firstOrNull()
+        val idMapping = mutableMapOf<String, String>()
+
+        if (existingRemoteMenu != null) {
+            val allLocalMenus = menuDao.getMenus(userId)
+            allLocalMenus.forEach { localMenu ->
+                if (localMenu.id != existingRemoteMenu.id) {
+                    idMapping[localMenu.id] = existingRemoteMenu.id
+                }
+            }
+        }
+
+        syncLocalMenusWithServer(userId, existingRemoteMenu, idMapping)
+
+        syncLocalCategoriesWithServer(userId, idMapping)
+
+        syncLocalDishesWithServer(userId, idMapping)
+    }
+
+    /**
+     * Syncs local menus with the server, handling ID migration if requested.
+     */
+    private suspend fun syncLocalMenusWithServer(
+        userId: String,
+        existingRemoteMenu: MenuDto?,
+        idMapping: MutableMap<String, String>
+    ) {
+        val unsyncedMenus = menuDao.getUnsyncedMenus(userId)
+
+        unsyncedMenus.forEach { entity ->
+            var dto = entity.toDomain().toDto()
+
+            if (existingRemoteMenu != null && dto.id != existingRemoteMenu.id) {
+                val newMenuId = existingRemoteMenu.id
+                val oldMenuId = entity.id
+
+                idMapping[oldMenuId] = newMenuId
+                dto = dto.copy(id = newMenuId)
+
+                menuDao.insertMenu(entity.copy(id = newMenuId, isSynced = false))
+
+                val categories = menuDao.getCategories(oldMenuId)
+                categories.forEach { menuDao.insertCategory(it.copy(menuId = newMenuId)) }
+                menuDao.deleteCategoriesByMenuId(oldMenuId)
+
+                val dishes = menuDao.getDishes(oldMenuId)
+                dishes.forEach { menuDao.insertDish(it.copy(menuId = newMenuId)) }
+                menuDao.deleteDishesByMenuId(oldMenuId)
+
+                menuDao.deleteMenuById(oldMenuId)
+
+                supabase.from("menus").update(dto) { filter { eq("id", dto.id) } }
+
+                menuDao.updateMenu(entity.copy(id = newMenuId, isSynced = true))
+
+            } else {
+                if (existingRemoteMenu != null) {
+                    supabase.from("menus").update(dto) { filter { eq("id", dto.id) } }
+                } else {
+                    supabase.from("menus").upsert(dto) { onConflict = "id" }
+                }
+                menuDao.insertMenu(entity.copy(isSynced = true))
+            }
+        }
+    }
+
+    /**
+     * Syncs local categories with the server, applying any parent menu ID substitutions.
+     */
+    private suspend fun syncLocalCategoriesWithServer(
+        userId: String,
+        idMapping: Map<String, String>
+    ) {
         val unsyncedCategories = menuDao.getAllUnsyncedCategories()
+
         unsyncedCategories.forEach { entity ->
-            supabase.from("menu_categories").upsert(entity.toDomain().toDto())
+            var dto = entity.toDomain().toDto()
+            idMapping[dto.menuId]?.let { newMenuId ->
+                dto = dto.copy(menuId = newMenuId)
+            }
+
+            supabase.from("menu_categories").upsert(dto) { onConflict = "id" }
             menuDao.insertCategory(entity.copy(isSynced = true))
         }
+    }
 
-        // 3. Dishes
+    /**
+     * Syncs local dishes with the server, applying any parent menu ID substitutions.
+     */
+    private suspend fun syncLocalDishesWithServer(userId: String, idMapping: Map<String, String>) {
         val unsyncedDishes = menuDao.getAllUnsyncedDishes()
+
         unsyncedDishes.forEach { entity ->
-            supabase.from("dishes").upsert(entity.toDomain().toDto())
+            var dto = entity.toDomain().toDto()
+            idMapping[dto.menuId]?.let { newMenuId ->
+                dto = dto.copy(menuId = newMenuId)
+            }
+
+            supabase.from("dishes").upsert(dto) { onConflict = "id" }
             menuDao.insertDish(entity.copy(isSynced = true))
         }
     }
-}
+    // endregion
 
+    // region Helpers
+
+    /**
+     * Executes an optimistic local update and schedules a sync.
+     * Automatically extracts userId from the domain object to trigger sync.
+     *
+     * @param domainObject The object being modified.
+     * @param localOperation A suspend block that executes the local database update.
+     * @return A Result wrapping the domain object.
+     */
+    private suspend fun <T : Any> performOptimisticUpdate(
+        domainObject: T,
+        localOperation: suspend () -> Unit
+    ): Result<T> = runCatching {
+        localOperation()
+
+        val userId = when (domainObject) {
+            is Menu -> domainObject.userId
+            is MenuCategory -> menuDao.getMenu(domainObject.menuId)?.userId
+            is Dish -> menuDao.getMenu(domainObject.menuId)?.userId
+            else -> null
+        }
+
+        if (userId != null) {
+            syncManager.scheduleUpload(userId)
+        }
+
+        domainObject
+    }
+    // endregion
+}

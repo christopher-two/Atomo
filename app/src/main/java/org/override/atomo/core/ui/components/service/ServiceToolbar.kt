@@ -34,12 +34,16 @@ fun ServiceToolbar(
     onCancel: (() -> Unit)? = null,
     onPreview: () -> Unit,
     onDelete: (() -> Unit)? = null,
-    saveEnabled: Boolean = true
+    saveEnabled: Boolean = true,
+    additionalActions: (@Composable () -> Unit)? = null
 ) {
     HorizontalFloatingToolbar(
         expanded = expanded,
         modifier = modifier.padding(16.dp),
     ) {
+        // Additional Actions (Custom)
+        additionalActions?.invoke()
+
         // Cancel Button (Only in edit mode)
         if (isEditing && onCancel != null) {
             IconButton(onClick = onCancel) {

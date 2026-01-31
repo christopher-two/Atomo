@@ -10,10 +10,13 @@
 package org.override.atomo
 
 import android.app.Application
+import androidx.work.Configuration
+import androidx.work.WorkerFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 import org.koin.core.context.startKoin
 import org.koin.core.logger.Level
 import org.override.atomo.di.NavModule
@@ -26,7 +29,7 @@ import org.override.atomo.di.feature.FeaturesModule
 import org.override.atomo.di.libs.LibModule
 import org.override.atomo.di.workerModule
 
-class MainApp : Application(), KoinComponent {
+class MainApp : Application(), KoinComponent, Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         startKoin {
@@ -42,4 +45,9 @@ class MainApp : Application(), KoinComponent {
             workManagerFactory()
         }
     }
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(get<WorkerFactory>())
+            .build()
 }

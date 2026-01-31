@@ -9,18 +9,22 @@
 
 package org.override.atomo.feature.pay.presentation.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoCard
+import org.override.atomo.core.ui.components.ShimmerCircle
 import org.override.atomo.core.ui.components.ShimmerLine
 
 @Composable
@@ -29,46 +33,70 @@ fun PayShimmer() {
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(24.dp)
     ) {
-         // Current Plan Title
-        ShimmerLine(modifier = Modifier.width(150.dp).height(20.dp))
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        // Current Plan Card
-        AtomoCard(
-            modifier = Modifier.fillMaxWidth().height(180.dp)
-        ) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                Column {
-                     ShimmerLine(modifier = Modifier.width(100.dp).height(24.dp))
-                     Spacer(modifier = Modifier.height(16.dp))
-                     ShimmerLine(modifier = Modifier.width(200.dp).height(16.dp))
-                     Spacer(modifier = Modifier.height(8.dp))
-                     ShimmerLine(modifier = Modifier.width(150.dp).height(16.dp))
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Upgrade Title
-        ShimmerLine(modifier = Modifier.width(200.dp).height(28.dp))
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Other Plans
         repeat(2) {
             AtomoCard(
-                modifier = Modifier.fillMaxWidth().height(150.dp)
+                modifier = Modifier
+                    .fillMaxWidth(),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
             ) {
-                 Box(modifier = Modifier.padding(16.dp)) {
-                    Column {
-                         ShimmerLine(modifier = Modifier.width(120.dp).height(24.dp))
-                         Spacer(modifier = Modifier.height(16.dp))
-                         ShimmerLine(modifier = Modifier.fillMaxWidth().height(16.dp))
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Star Icon (Premium)
+                    ShimmerCircle(modifier = Modifier.size(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // App Name
+                    ShimmerLine(modifier = Modifier
+                        .width(120.dp)
+                        .height(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Price
+                    ShimmerLine(modifier = Modifier
+                        .width(100.dp)
+                        .height(40.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Divider
+                    ShimmerLine(modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Features list
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                            16.dp
+                        )
+                    ) {
+                        repeat(4) {
+                            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                                ShimmerCircle(modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(12.dp))
+                                ShimmerLine(modifier = Modifier
+                                    .fillMaxWidth(0.8f)
+                                    .height(16.dp))
+                            }
+                        }
                     }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // Button
+                    ShimmerLine(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                    )
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

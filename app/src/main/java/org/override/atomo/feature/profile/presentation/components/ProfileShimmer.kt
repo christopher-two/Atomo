@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.ShimmerCircle
 import org.override.atomo.core.ui.components.ShimmerLine
 
@@ -31,51 +30,81 @@ fun ProfileShimmer() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Avatar
-        ShimmerCircle(modifier = Modifier.size(120.dp))
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Name and Username
-        ShimmerLine(modifier = Modifier.height(28.dp).width(200.dp))
-        Spacer(modifier = Modifier.height(8.dp))
-        ShimmerLine(modifier = Modifier.height(16.dp).width(120.dp))
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        // Info Cards (Bio, etc)
-        AtomoCard(
-            modifier = Modifier.fillMaxWidth().height(100.dp)
+        // Avatar (matching 200.dp size from ProfileDetailView)
+        // Using a Box to mimic the container padding
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                Column {
-                    ShimmerLine(modifier = Modifier.width(80.dp).height(14.dp))
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ShimmerLine(modifier = Modifier.fillMaxWidth().height(14.dp))
-                    Spacer(modifier = Modifier.height(8.dp))
-                    ShimmerLine(modifier = Modifier.width(200.dp).height(14.dp))
-                }
-            }
+            ShimmerCircle(modifier = Modifier.fillMaxSize())
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-         // Social Links
-        AtomoCard(
-            modifier = Modifier.fillMaxWidth().height(80.dp)
+
+        // Info Section
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            // Display Name
+            ShimmerLine(modifier = Modifier
+                .height(32.dp)
+                .width(240.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            // Username
+            ShimmerLine(modifier = Modifier
+                .height(20.dp)
+                .width(160.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+            // Joined Date
+            ShimmerLine(modifier = Modifier
+                .height(16.dp)
+                .width(120.dp))
+        }
+
+        // Link Sharing Actions Row
+        androidx.compose.foundation.layout.Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                8.dp,
+                Alignment.CenterHorizontally
+            ),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.padding(16.dp)) {
-                Column {
-                    ShimmerLine(modifier = Modifier.width(100.dp).height(14.dp))
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ShimmerLine(modifier = Modifier.width(150.dp).height(14.dp))
-                }
-            }
+            // Sync Button
+            ShimmerCircle(modifier = Modifier.size(40.dp))
+            // Share Button
+            ShimmerCircle(modifier = Modifier.size(40.dp))
+        }
+
+        // Social Links Header
+        ShimmerLine(
+            modifier = Modifier
+                .align(Alignment.Start)
+                .width(100.dp)
+                .height(24.dp)
+        )
+
+        // Social Links List Items
+        repeat(3) {
+            androidx.compose.material3.ListItem(
+                headlineContent = { ShimmerLine(modifier = Modifier
+                    .width(80.dp)
+                    .height(16.dp)) },
+                supportingContent = {
+                    ShimmerLine(
+                        modifier = Modifier
+                            .width(180.dp)
+                            .height(14.dp)
+                    )
+                },
+                colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                leadingContent = { ShimmerCircle(modifier = Modifier.size(40.dp)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
         }
     }
 }

@@ -34,18 +34,31 @@ fun AuthShimmer() {
         verticalArrangement = Arrangement.Center
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        
-        // App Name / Logo placeholder
-        ShimmerLine(modifier = Modifier.width(200.dp).height(60.dp))
-        
+
+        // Logo Placeholder
+        ShimmerCircle(modifier = Modifier.size(208.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // App Name Placeholder
+        ShimmerLine(modifier = Modifier
+            .width(180.dp)
+            .height(50.dp))
+
         Spacer(modifier = Modifier.weight(1f))
-        
-        // Button placeholder
-        ShimmerLine(modifier = Modifier.width(280.dp).height(50.dp))
-        
+
+        // Continue with Google Button Placeholder
+        ShimmerLine(
+            modifier = Modifier
+                .width(280.dp)
+                .height(50.dp),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp) // Button shape
+        )
+
         Spacer(modifier = Modifier.weight(1f))
-        
-        // Terms placeholder
-        ShimmerLine(modifier = Modifier.width(150.dp).height(20.dp))
+
+        // Terms and Conditions Placeholder
+        ShimmerLine(modifier = Modifier
+            .width(160.dp)
+            .height(20.dp))
     }
 }

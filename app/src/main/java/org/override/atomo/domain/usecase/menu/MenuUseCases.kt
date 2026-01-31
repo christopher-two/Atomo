@@ -9,12 +9,18 @@
 
 package org.override.atomo.domain.usecase.menu
 
+import android.net.Uri
 import kotlinx.coroutines.flow.Flow
 import org.override.atomo.domain.model.Dish
 import org.override.atomo.domain.model.Menu
 import org.override.atomo.domain.model.MenuCategory
 import org.override.atomo.domain.repository.MenuRepository
 import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
+import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
+import org.override.atomo.domain.usecase.subscription.CanAddDishUseCase
+import org.override.atomo.domain.usecase.subscription.CanAddItemResult
+import org.override.atomo.libs.image.api.ImageManager
+import java.util.UUID
 
 /**
  * Wrapper for all Menu-related use cases.
@@ -111,9 +117,60 @@ class CreateDishUseCase(private val repository: MenuRepository) {
     suspend operator fun invoke(dish: Dish): Result<Dish> = repository.createDish(dish)
 }
 
-/** Upserts a dish in a menu. */
-class UpsertDishUseCase(private val repository: MenuRepository) {
-    suspend operator fun invoke(dish: Dish): Result<Dish> = repository.upsertDish(dish)
+/** Upserts a dish in a menu, handling limits and image processing. */
+class UpsertDishUseCase(
+    private val repository: MenuRepository,
+    private val canAddDishUseCase: CanAddDishUseCase,
+    private val uploadDishImage: UploadDishImageUseCase,
+    private val imageManager: ImageManager
+) {
+    suspend operator fun invoke(
+        userId: String,
+        menuId: String,
+        name: String,
+        description: String,
+        price: Double,
+        imageUrl: String?,
+        categoryId: String?,
+        existingDish: Dish?
+    ): Result<Dish> = kotlin.runCatching {
+        // 1. Limit Check for NEW dishes
+        if (existingDish == null) {
+            val canAdd = canAddDishUseCase(userId, menuId)
+            if (canAdd is CanAddItemResult.LimitReached) {
+                throw Exception("Limit reached: ${canAdd.limit} dishes.")
+            } else if (canAdd is CanAddItemResult.Error) {
+                throw Exception(canAdd.message)
+            }
+        }
+
+        // 2. Image Processing & Upload
+        val finalImageUrl = if (imageUrl != null && imageUrl.startsWith("content://")) {
+            val uri = Uri.parse(imageUrl)
+            val bytes = imageManager.compressImage(uri).getOrThrow()
+            val dishId = existingDish?.id ?: UUID.randomUUID().toString()
+            uploadDishImage(userId, dishId, bytes).getOrThrow()
+        } else {
+            imageUrl
+        }
+
+        // 3. Entity Building
+        val dishToSave = Dish(
+            id = existingDish?.id ?: UUID.randomUUID().toString(),
+            menuId = menuId,
+            categoryId = categoryId,
+            name = name,
+            description = description,
+            price = price,
+            imageUrl = finalImageUrl,
+            isVisible = true,
+            sortOrder = existingDish?.sortOrder ?: 0,
+            createdAt = existingDish?.createdAt ?: System.currentTimeMillis()
+        )
+
+        // 4. Persistence
+        repository.upsertDish(dishToSave).getOrThrow()
+    }
 }
 
 /** Updates an existing dish. */
@@ -121,7 +178,15 @@ class UpdateDishUseCase(private val repository: MenuRepository) {
     suspend operator fun invoke(dish: Dish): Result<Dish> = repository.updateDish(dish)
 }
 
-/** Deletes a dish by ID. */
-class DeleteDishUseCase(private val repository: MenuRepository) {
-    suspend operator fun invoke(dishId: String): Result<Unit> = repository.deleteDish(dishId)
+/** Deletes a dish by ID, cleaning up its image if it exists. */
+class DeleteDishUseCase(
+    private val repository: MenuRepository,
+    private val deleteDishImageUseCase: DeleteDishImageUseCase
+) {
+    suspend operator fun invoke(dish: Dish): Result<Unit> {
+        if (dish.imageUrl != null) {
+            deleteDishImageUseCase(dish.imageUrl)
+        }
+        return repository.deleteDish(dish.id)
+    }
 }

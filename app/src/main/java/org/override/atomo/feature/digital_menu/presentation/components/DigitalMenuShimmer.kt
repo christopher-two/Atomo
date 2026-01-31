@@ -9,7 +9,6 @@
 
 package org.override.atomo.feature.digital_menu.presentation.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,7 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoCard
-import org.override.atomo.core.ui.components.ShimmerCircle
+import org.override.atomo.core.ui.components.ShimmerItem
 import org.override.atomo.core.ui.components.ShimmerLine
 
 @Composable
@@ -35,38 +34,72 @@ fun DigitalMenuShimmer() {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Sections / Categories
+        // Sections / Categories Chips
         item {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
             ) {
                 repeat(4) {
-                    ShimmerLine(modifier = Modifier.width(80.dp).height(32.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
+                    ShimmerItem(
+                        modifier = Modifier
+                            .width(100.dp)
+                            .height(32.dp),
+                        shape = androidx.compose.foundation.shape.CircleShape // Chip shape
+                    )
                 }
             }
         }
-        
+
         // Menu Items
-        items(5) {
+        items(6) {
             AtomoCard(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).height(100.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
             ) {
                  Row(
-                     modifier = Modifier.padding(16.dp),
-                     verticalAlignment = Alignment.CenterVertically
+                     modifier = Modifier
+                         .padding(12.dp)
+                         .fillMaxWidth(),
+                     verticalAlignment = Alignment.Top
                  ) {
-                     // Image placeholder
-                     ShimmerCircle(modifier = Modifier.size(70.dp))
-                     
-                     Spacer(modifier = Modifier.width(16.dp))
-                     
-                     Column {
-                         ShimmerLine(modifier = Modifier.width(150.dp).height(18.dp))
+                     // Thumbnail (Rounded Rect 64.dp)
+                     ShimmerItem(
+                         modifier = Modifier.size(64.dp),
+                         shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                     )
+
+                     Spacer(modifier = Modifier.width(12.dp))
+
+                     Column(modifier = Modifier.weight(1f)) {
+                         // Title and Price Row
+                         Row(
+                             modifier = Modifier.fillMaxWidth(),
+                             horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                         ) {
+                             ShimmerLine(modifier = Modifier
+                                 .width(120.dp)
+                                 .height(18.dp))
+                             Spacer(modifier = Modifier.width(8.dp))
+                             ShimmerLine(modifier = Modifier
+                                 .width(50.dp)
+                                 .height(18.dp))
+                         }
+                         
                          Spacer(modifier = Modifier.height(8.dp))
-                         ShimmerLine(modifier = Modifier.fillMaxWidth().height(14.dp))
-                         Spacer(modifier = Modifier.height(8.dp))
-                         ShimmerLine(modifier = Modifier.width(60.dp).height(16.dp))
+
+                         // Description Lines
+                         ShimmerLine(modifier = Modifier
+                             .fillMaxWidth(0.9f)
+                             .height(14.dp))
+                         Spacer(modifier = Modifier.height(4.dp))
+                         ShimmerLine(modifier = Modifier
+                             .fillMaxWidth(0.6f)
+                             .height(14.dp))
                      }
                  }
             }

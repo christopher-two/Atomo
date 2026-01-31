@@ -30,6 +30,9 @@ class DataSyncWorker(
             // Grouping sync operations
             // We want to sync all critical data here.
 
+            menuRepository.syncUp(userId)
+                .onFailure { it.printStackTrace() }
+
             menuRepository.syncMenus(userId)
                 .onFailure { it.printStackTrace() }
 

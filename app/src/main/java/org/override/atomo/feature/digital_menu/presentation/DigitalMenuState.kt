@@ -11,6 +11,7 @@ package org.override.atomo.feature.digital_menu.presentation
 
 import org.override.atomo.domain.model.Dish
 import org.override.atomo.domain.model.Menu
+import org.override.atomo.domain.model.MenuCategory
 
 data class DigitalMenuState(
     val isLoading: Boolean = false,
@@ -19,23 +20,19 @@ data class DigitalMenuState(
     val canCreate: Boolean = false,
     val limitReached: Boolean = false,
 
-    // Editor State
+    // Editor
     val isEditing: Boolean = false,
     val editingMenu: Menu? = null,
-    val showPreviewSheet: Boolean = false,
-    
-    // Dish Editor State (kept for dialogs)
-    val isDishDialogVisible: Boolean = false,
-    val dishToEdit: Dish? = null,
-
-    // Category Editor State
-    val isCategoryDialogVisible: Boolean = false,
-    val categoryToEdit: org.override.atomo.domain.model.MenuCategory? = null,
-    
-    // Changes Detection
     val hasUnsavedChanges: Boolean = false,
-    val isDiscardDialogVisible: Boolean = false,
-    
-    // Delete Confirmation
-    val isDeleteDialogVisible: Boolean = false
+
+    // Overlay (Dialogs/Sheets)
+    val activeOverlay: DigitalMenuOverlay? = null
 )
+
+sealed interface DigitalMenuOverlay {
+    data class DishDialog(val dish: Dish? = null) : DigitalMenuOverlay
+    data class CategoryDialog(val category: MenuCategory? = null) : DigitalMenuOverlay
+    data object PreviewSheet : DigitalMenuOverlay
+    data object DiscardConfirmation : DigitalMenuOverlay
+    data object DeleteConfirmation : DigitalMenuOverlay
+}

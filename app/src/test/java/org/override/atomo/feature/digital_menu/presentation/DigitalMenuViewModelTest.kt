@@ -292,4 +292,93 @@ class DigitalMenuViewModelTest {
             assertEquals(true, state.hasUnsavedChanges)
         }
     }
+
+    @Test
+    fun `save menu success should save all dishes and categories`() = runTest {
+        // Arrange
+        val category = org.override.atomo.domain.model.MenuCategory("cat1", testMenu.id, "Drinks", 0, 1000L)
+        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, "cat1", "Pasta", null, 10.0, null, true, 0, 1000L)
+        val menuWithData = testMenu.copy(categories = listOf(category), dishes = listOf(dish))
+        
+        coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithData))
+        coEvery { menuUseCases.updateMenu(any()) } returns Result.success(menuWithData)
+        coEvery { menuUseCases.updateCategory(any()) } returns Result.success(category)
+        coEvery { menuUseCases.upsertDish(any()) } returns Result.success(dish)
+        
+        // Re-init to load new mock data
+        viewModel = DigitalMenuViewModel(
+            sessionRepository, menuUseCases, getServiceLimitsUseCase, 
+            subscriptionUseCases, canCreateServiceUseCase, canAddDishUseCase,
+            uploadDishImageUseCase, deleteDishImageUseCase, imageManager, snackbarManager
+        )
+
+        viewModel.state.test {
+            awaitItem() // Initial load
+            
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // Edit mode enabled
+            
+            viewModel.onAction(DigitalMenuAction.SaveMenu)
+            
+            // Should get: isLoading = true, then isLoading = false with isEditing = false
+            var state = awaitItem()
+            while (!state.isLoading && state.isEditing) {
+                state = awaitItem()
+            }
+            if (state.isLoading) {
+                state = awaitItem() // Get the final state
+            }
+            
+            // Assert
+            assertEquals(false, state.isLoading)
+            assertEquals(false, state.isEditing)
+            assertEquals(false, state.hasUnsavedChanges)
+            assertEquals(null, state.error)
+            
+            // Verify all save methods were called
+            coVerify { menuUseCases.updateMenu(any()) }
+            coVerify { menuUseCases.updateCategory(category) }
+            coVerify { menuUseCases.upsertDish(dish) }
+        }
+    }
+
+    @Test
+    fun `save menu with dish failure should report error`() = runTest {
+        // Arrange
+        val dish = org.override.atomo.domain.model.Dish("dish1", testMenu.id, null, "Pasta", null, 10.0, null, true, 0, 1000L)
+        val menuWithDish = testMenu.copy(dishes = listOf(dish))
+        
+        coEvery { menuUseCases.getMenus("user123") } returns flowOf(listOf(menuWithDish))
+        coEvery { menuUseCases.updateMenu(any()) } returns Result.success(menuWithDish)
+        coEvery { menuUseCases.upsertDish(any()) } returns Result.failure(Exception("Dish save failed"))
+        
+        // Re-init to load new mock data
+        viewModel = DigitalMenuViewModel(
+            sessionRepository, menuUseCases, getServiceLimitsUseCase, 
+            subscriptionUseCases, canCreateServiceUseCase, canAddDishUseCase,
+            uploadDishImageUseCase, deleteDishImageUseCase, imageManager, snackbarManager
+        )
+
+        viewModel.state.test {
+            awaitItem() // Initial load
+            
+            viewModel.onAction(DigitalMenuAction.ToggleEditMode)
+            awaitItem() // Edit mode enabled
+            
+            viewModel.onAction(DigitalMenuAction.SaveMenu)
+            
+            // Should get: isLoading = true, then isLoading = false with error
+            var state = awaitItem()
+            while (!state.isLoading && state.error == null) {
+                state = awaitItem()
+            }
+            if (state.isLoading) {
+                state = awaitItem() // Get the error state
+            }
+            
+            // Assert
+            assertEquals(false, state.isLoading)
+            assert(state.error?.contains("dishes failed to save") == true)
+        }
+    }
 }

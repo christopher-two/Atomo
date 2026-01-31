@@ -184,10 +184,28 @@ class DigitalMenuViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             menuUseCases.updateMenu(menu).onSuccess {
-                menu.categories.forEach { menuUseCases.updateCategory(it) }
-                menu.dishes.forEach { menuUseCases.upsertDish(it) }
-                _state.update { it.copy(isLoading = false, isEditing = false, hasUnsavedChanges = false) }
-                sendEvent(DigitalMenuEvent.MenuSaved)
+                // Save all categories
+                val categoryResults = menu.categories.map { menuUseCases.updateCategory(it) }
+                val categoryFailures = categoryResults.filter { it.isFailure }
+                
+                // Save all dishes
+                val dishResults = menu.dishes.map { menuUseCases.upsertDish(it) }
+                val dishFailures = dishResults.filter { it.isFailure }
+                
+                // Check if all saves succeeded
+                if (categoryFailures.isEmpty() && dishFailures.isEmpty()) {
+                    _state.update { it.copy(isLoading = false, isEditing = false, hasUnsavedChanges = false) }
+                    sendEvent(DigitalMenuEvent.MenuSaved)
+                } else {
+                    val errorMessages = mutableListOf<String>()
+                    if (categoryFailures.isNotEmpty()) {
+                        errorMessages.add("${categoryFailures.size} categories failed to save")
+                    }
+                    if (dishFailures.isNotEmpty()) {
+                        errorMessages.add("${dishFailures.size} dishes failed to save")
+                    }
+                    _state.update { it.copy(isLoading = false, error = errorMessages.joinToString(", ")) }
+                }
             }.onFailure { error ->
                 _state.update { it.copy(isLoading = false, error = error.message) }
             }

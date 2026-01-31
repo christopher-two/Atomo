@@ -13,6 +13,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -184,12 +186,16 @@ class DigitalMenuViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             menuUseCases.updateMenu(menu).onSuccess {
-                // Save all categories
-                val categoryResults = menu.categories.map { menuUseCases.updateCategory(it) }
+                // Save all categories concurrently
+                val categoryResults = menu.categories.map { 
+                    async { menuUseCases.updateCategory(it) } 
+                }.awaitAll()
                 val categoryFailures = categoryResults.filter { it.isFailure }
                 
-                // Save all dishes
-                val dishResults = menu.dishes.map { menuUseCases.upsertDish(it) }
+                // Save all dishes concurrently
+                val dishResults = menu.dishes.map { 
+                    async { menuUseCases.upsertDish(it) } 
+                }.awaitAll()
                 val dishFailures = dishResults.filter { it.isFailure }
                 
                 // Check if all saves succeeded

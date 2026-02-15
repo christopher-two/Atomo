@@ -9,6 +9,22 @@
 
 package org.override.atomo.feature.qr.presentation
 
+import androidx.compose.ui.graphics.Color
+import android.graphics.Bitmap
+
 sealed interface QrAction {
-    object Download : QrAction
+    data object Download : QrAction
+    
+    // Configuration Actions
+    data class UpdatePixelShape(val shape: QrPixelShapeType) : QrAction
+    data class UpdateFrameShape(val shape: QrFrameShapeType) : QrAction
+    data class UpdateBallShape(val shape: QrBallShapeType) : QrAction
+    
+    data class UpdateDarkColor(val color: Color) : QrAction
+    data class UpdateLightColor(val color: Color) : QrAction
+    data class UpdateFrameColor(val color: Color) : QrAction
+    data class UpdateBallColor(val color: Color) : QrAction
+    
+    data class UpdateLogoType(val type: QrLogoType) : QrAction
+    data class SetCustomLogo(val uri: String) : QrAction
 }

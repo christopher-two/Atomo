@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.profile.presentation
 
+import androidx.compose.material3.SnackbarHostState
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,7 +28,7 @@ import org.override.atomo.feature.profile.presentation.components.ProfileShimmer
 fun ProfileScreen(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState,
+    snackbarHostState: SnackbarHostState,
     onShareProfile: () -> Unit = {}
 ) {
     Box(modifier = Modifier.fillMaxSize()) {

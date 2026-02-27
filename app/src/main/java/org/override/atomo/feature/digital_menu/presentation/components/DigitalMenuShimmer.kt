@@ -9,6 +9,10 @@
 
 package org.override.atomo.feature.digital_menu.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,14 +44,14 @@ fun DigitalMenuShimmer() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 repeat(4) {
                     ShimmerItem(
                         modifier = Modifier
                             .width(100.dp)
                             .height(32.dp),
-                        shape = androidx.compose.foundation.shape.CircleShape // Chip shape
+                        shape = CircleShape // Chip shape
                     )
                 }
             }
@@ -59,7 +63,7 @@ fun DigitalMenuShimmer() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(16.dp)
             ) {
                  Row(
                      modifier = Modifier
@@ -70,7 +74,7 @@ fun DigitalMenuShimmer() {
                      // Thumbnail (Rounded Rect 64.dp)
                      ShimmerItem(
                          modifier = Modifier.size(64.dp),
-                         shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                         shape = RoundedCornerShape(12.dp)
                      )
 
                      Spacer(modifier = Modifier.width(12.dp))
@@ -79,7 +83,7 @@ fun DigitalMenuShimmer() {
                          // Title and Price Row
                          Row(
                              modifier = Modifier.fillMaxWidth(),
-                             horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                             horizontalArrangement = Arrangement.SpaceBetween
                          ) {
                              ShimmerLine(modifier = Modifier
                                  .width(120.dp)

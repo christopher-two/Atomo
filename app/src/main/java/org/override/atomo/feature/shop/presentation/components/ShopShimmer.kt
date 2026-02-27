@@ -9,6 +9,10 @@
 
 package org.override.atomo.feature.shop.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.lazy.LazyColumn
+import org.override.atomo.core.ui.components.ShimmerCircle
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -26,11 +30,11 @@ import org.override.atomo.core.ui.components.ShimmerLine
 
 @Composable
 fun ShopShimmer() {
-    androidx.compose.foundation.lazy.LazyColumn(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(6) {
             AtomoCard(
@@ -53,7 +57,7 @@ fun ShopShimmer() {
                         Spacer(modifier = Modifier.height(8.dp))
 
                         // Delete Icon placeholder
-                        org.override.atomo.core.ui.components.ShimmerCircle(
+                        ShimmerCircle(
                             modifier = Modifier.size(
                                 24.dp
                             )

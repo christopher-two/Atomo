@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.invitation.presentation
 
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -97,7 +100,7 @@ fun InvitationRoot(
 fun InvitationContent(
     state: InvitationState,
     onAction: (InvitationAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     BackHandler(enabled = state.editingInvitation != null) {
         onAction(InvitationAction.Back)
@@ -161,7 +164,7 @@ fun InvitationContent(
         val invitation = state.editingInvitation
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                  TopAppBar(title = { Text(if (state.isEditing) "Edit Invitation" else invitation.eventName) })
             },
@@ -287,10 +290,10 @@ fun InvitationContent(
 fun InvitationListScreen(
     state: InvitationState,
     onAction: (InvitationAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(InvitationAction.CreateInvitation) }) {
@@ -364,7 +367,7 @@ private fun Preview() {
         InvitationContent(
             state = InvitationState(),
             onAction = {},
-            snackbarHostState = androidx.compose.material3.SnackbarHostState()
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

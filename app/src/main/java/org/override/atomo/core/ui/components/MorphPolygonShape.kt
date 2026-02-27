@@ -9,6 +9,7 @@
 
 package org.override.atomo.core.ui.components
 
+import android.graphics.Matrix
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
@@ -31,14 +32,14 @@ class MorphPolygonShape(
 ) : Shape {
 
     // Usamos explícitamente la Matrix nativa de Android para tener postScale/postTranslate
-    private val matrix = android.graphics.Matrix()
+    private val matrix = Matrix()
 
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
         density: Density
     ): Outline {
-        // 1. Obtener el Path nativo (android.graphics.Path)
+        // 1. Obtener el Path nativo (Path)
         val path = morph.toPath(percentage)
 
         // 2. Limpiar la matriz

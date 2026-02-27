@@ -9,6 +9,12 @@
 
 package org.override.atomo.feature.profile.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.ui.graphics.Color
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +38,7 @@ fun ProfileShimmer() {
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Avatar (matching 200.dp size from ProfileDetailView)
         // Using a Box to mimic the container padding
@@ -64,9 +70,9 @@ fun ProfileShimmer() {
         }
 
         // Link Sharing Actions Row
-        androidx.compose.foundation.layout.Row(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+            horizontalArrangement = Arrangement.spacedBy(
                 8.dp,
                 Alignment.CenterHorizontally
             ),
@@ -88,7 +94,7 @@ fun ProfileShimmer() {
 
         // Social Links List Items
         repeat(3) {
-            androidx.compose.material3.ListItem(
+            ListItem(
                 headlineContent = { ShimmerLine(modifier = Modifier
                     .width(80.dp)
                     .height(16.dp)) },
@@ -99,7 +105,7 @@ fun ProfileShimmer() {
                             .height(14.dp)
                     )
                 },
-                colors = androidx.compose.material3.ListItemDefaults.colors(containerColor = androidx.compose.ui.graphics.Color.Transparent),
+                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 leadingContent = { ShimmerCircle(modifier = Modifier.size(40.dp)) },
                 modifier = Modifier
                     .fillMaxWidth()

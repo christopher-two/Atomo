@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.portfolio.presentation
 
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 /**
  * Root composable for the Portfolio feature.
  * Collects state from [PortfolioViewModel] and passes it to the content.
@@ -97,7 +100,7 @@ fun PortfolioRoot(
 fun PortfolioContent(
     state: PortfolioState,
     onAction: (PortfolioAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     // Back Handler to ensure we close edit mode/detail view
     BackHandler(enabled = state.editingPortfolio != null) {
@@ -164,7 +167,7 @@ fun PortfolioContent(
         val portfolio = state.editingPortfolio
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 // We use floating toolbar instead, but if AtomoScaffold requires topBar, we can pass generic header
                 // Or just empty
@@ -277,10 +280,10 @@ fun PortfolioContent(
 fun PortfolioListScreen(
     state: PortfolioState,
     onAction: (PortfolioAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(PortfolioAction.CreatePortfolio) }) {
@@ -350,7 +353,7 @@ private fun Preview() {
         PortfolioContent(
             state = PortfolioState(),
             onAction = {},
-            snackbarHostState = androidx.compose.material3.SnackbarHostState()
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

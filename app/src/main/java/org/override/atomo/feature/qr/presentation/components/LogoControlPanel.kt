@@ -7,6 +7,8 @@
 
 package org.override.atomo.feature.qr.presentation.components
 
+import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,7 +30,7 @@ import org.override.atomo.feature.qr.presentation.QrAction
 @Composable
 fun LogoControlPanel(config: QrConfig, onAction: (QrAction) -> Unit) {
     val launcher = androidx.activity.compose.rememberLauncherForActivityResult(
-        contract = androidx.activity.result.contract.ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let { onAction(QrAction.SetCustomLogo(it.toString())) }
     }

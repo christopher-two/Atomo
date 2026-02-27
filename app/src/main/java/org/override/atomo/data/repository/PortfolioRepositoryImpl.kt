@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +36,7 @@ class PortfolioRepositoryImpl(
     private val supabase: SupabaseClient
 ) : PortfolioRepository {
     
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getPortfoliosFlow(userId: String): Flow<List<Portfolio>> {
         return portfolioDao.getPortfoliosFlow(userId).flatMapLatest { portfolioEntities ->
             if (portfolioEntities.isEmpty()) {

@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
@@ -37,7 +39,7 @@ class CvRepositoryImpl(
     private val supabase: SupabaseClient
 ) : CvRepository {
     
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getCvsFlow(userId: String): Flow<List<Cv>> {
         return cvDao.getCvsFlow(userId).flatMapLatest { cvEntities ->
             if (cvEntities.isEmpty()) {

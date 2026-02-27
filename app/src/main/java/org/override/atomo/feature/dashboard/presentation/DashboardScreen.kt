@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.dashboard.presentation
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.MaterialTheme
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -135,7 +138,7 @@ fun DashboardScreen(
                         item(key = "services_title") {
                             Text(
                                 text = "Tus Servicios",
-                                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.titleMedium,
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)
                                     .padding(bottom = 8.dp)
@@ -153,7 +156,7 @@ fun DashboardScreen(
                                      ServiceCard(
                                          title = menu.name,
                                          subtitle = "${module.totalDishes} Platillos",
-                                         icon = androidx.compose.material.icons.Icons.Filled.RestaurantMenu,
+                                         icon = Icons.Filled.RestaurantMenu,
                                          onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.DIGITAL_MENU, menu.id)) },
                                          onShareClick = { onAction(DashboardAction.ShareService(ServiceType.DIGITAL_MENU, menu.id)) },
                                          onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.DIGITAL_MENU, menu.id)) },
@@ -166,7 +169,7 @@ fun DashboardScreen(
                                       ServiceCard(
                                          title = shop.name,
                                          subtitle = "${module.totalProducts} Productos",
-                                         icon = androidx.compose.material.icons.Icons.Filled.ShoppingBag,
+                                         icon = Icons.Filled.ShoppingBag,
                                          onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.SHOP, shop.id)) },
                                          onShareClick = { onAction(DashboardAction.ShareService(ServiceType.SHOP, shop.id)) },
                                          onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.SHOP, shop.id)) },
@@ -179,7 +182,7 @@ fun DashboardScreen(
                                       ServiceCard(
                                          title = cv.title,
                                          subtitle = "${module.totalSkills} Habilidades, ${module.totalExperiences} Exp.",
-                                         icon = androidx.compose.material.icons.Icons.Filled.Description,
+                                         icon = Icons.Filled.Description,
                                          onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.CV, cv.id)) },
                                          onShareClick = { onAction(DashboardAction.ShareService(ServiceType.CV, cv.id)) },
                                          onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.CV, cv.id)) },
@@ -192,7 +195,7 @@ fun DashboardScreen(
                                       ServiceCard(
                                          title = portfolio.title,
                                          subtitle = "${module.totalItems} Proyectos",
-                                         icon = androidx.compose.material.icons.Icons.Filled.Description,
+                                         icon = Icons.Filled.Description,
                                          onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.PORTFOLIO, portfolio.id)) },
                                          onShareClick = { onAction(DashboardAction.ShareService(ServiceType.PORTFOLIO, portfolio.id)) },
                                          onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.PORTFOLIO, portfolio.id)) },
@@ -205,7 +208,7 @@ fun DashboardScreen(
                                      ServiceCard(
                                          title = invitation.eventName,
                                          subtitle = invitation.description ?: "Sin descripción",
-                                         icon = androidx.compose.material.icons.Icons.Filled.Description,
+                                         icon = Icons.Filled.Description,
                                          onPreviewClick = { onAction(DashboardAction.PreviewService(ServiceType.INVITATION, invitation.id)) },
                                          onShareClick = { onAction(DashboardAction.ShareService(ServiceType.INVITATION, invitation.id)) },
                                          onQrClick = { onAction(DashboardAction.ShowQR(ServiceType.INVITATION, invitation.id)) },

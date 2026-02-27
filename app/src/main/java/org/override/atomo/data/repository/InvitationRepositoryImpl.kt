@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +36,7 @@ class InvitationRepositoryImpl(
     private val supabase: SupabaseClient
 ) : InvitationRepository {
     
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getInvitationsFlow(userId: String): Flow<List<Invitation>> {
         return invitationDao.getInvitationsFlow(userId).flatMapLatest { invitationEntities ->
             if (invitationEntities.isEmpty()) {

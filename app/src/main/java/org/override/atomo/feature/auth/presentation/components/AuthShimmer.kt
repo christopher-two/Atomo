@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.auth.presentation.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -51,7 +53,7 @@ fun AuthShimmer() {
             modifier = Modifier
                 .width(280.dp)
                 .height(50.dp),
-            shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp) // Button shape
+            shape = RoundedCornerShape(25.dp) // Button shape
         )
 
         Spacer(modifier = Modifier.weight(1f))

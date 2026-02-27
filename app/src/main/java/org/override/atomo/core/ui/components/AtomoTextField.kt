@@ -9,6 +9,8 @@
 
 package org.override.atomo.core.ui.components
 
+import org.override.atomo.libs.validation.api.ValidationResult
+
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -87,7 +89,7 @@ fun AtomoTextField(
 ) {
     val validationResult = validator?.validate(value)
     val hasError = isError || (validationResult?.isValid == false)
-    val displayError = errorMessage ?: (validationResult as? org.override.atomo.libs.validation.api.ValidationResult.Error)?.message
+    val displayError = errorMessage ?: (validationResult as? ValidationResult.Error)?.message
 
     OutlinedTextField(
         value = value,

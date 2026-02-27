@@ -9,6 +9,10 @@
 
 package org.override.atomo.feature.pay.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,13 +38,13 @@ fun PayShimmer() {
             .fillMaxSize()
             .padding(24.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(24.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         repeat(2) {
             AtomoCard(
                 modifier = Modifier
                     .fillMaxWidth(),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -71,12 +75,12 @@ fun PayShimmer() {
                     // Features list
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(
+                        verticalArrangement = Arrangement.spacedBy(
                             16.dp
                         )
                     ) {
                         repeat(4) {
-                            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 ShimmerCircle(modifier = Modifier.size(20.dp))
                                 Spacer(modifier = Modifier.width(12.dp))
                                 ShimmerLine(modifier = Modifier
@@ -93,7 +97,7 @@ fun PayShimmer() {
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
                 }
             }

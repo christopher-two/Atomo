@@ -9,6 +9,10 @@
 
 package org.override.atomo.feature.settings.presentation.components
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.Dp
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,7 +59,7 @@ fun SettingsShimmer() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp)
+                shape = RoundedCornerShape(25.dp)
             )
         }
 
@@ -69,7 +73,7 @@ fun SettingsShimmer() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(25.dp)
+                shape = RoundedCornerShape(25.dp)
             )
         }
 
@@ -78,7 +82,7 @@ fun SettingsShimmer() {
 }
 
 @Composable
-private fun SettingsSectionShimmer(titleWidth: androidx.compose.ui.unit.Dp, itemCount: Int) {
+private fun SettingsSectionShimmer(titleWidth: Dp, itemCount: Int) {
     Column {
         ShimmerLine(modifier = Modifier
             .width(titleWidth)
@@ -107,7 +111,7 @@ private fun SettingsSectionShimmer(titleWidth: androidx.compose.ui.unit.Dp, item
                             modifier = Modifier
                                 .width(40.dp)
                                 .height(24.dp),
-                            shape = androidx.compose.foundation.shape.CircleShape
+                            shape = CircleShape
                         )
                     }
                     if (index < itemCount - 1) {

@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.dashboard.presentation.components.form
 
+import androidx.compose.material3.Icon
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -58,7 +60,7 @@ fun SwitchTile(
                     .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.Icon(
+                Icon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,

@@ -7,7 +7,6 @@
 
 package org.override.atomo.feature.qr.presentation
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,49 +35,34 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import io.github.alexzhirkevich.qrose.options.QrBallShape
-import io.github.alexzhirkevich.qrose.options.QrBrush
-import io.github.alexzhirkevich.qrose.options.QrCodeShape
-import io.github.alexzhirkevich.qrose.options.QrColors
 import io.github.alexzhirkevich.qrose.options.QrErrorCorrectionLevel
-import io.github.alexzhirkevich.qrose.options.QrFrameShape
 import io.github.alexzhirkevich.qrose.options.QrLogo
 import io.github.alexzhirkevich.qrose.options.QrLogoPadding
 import io.github.alexzhirkevich.qrose.options.QrLogoShape
-import io.github.alexzhirkevich.qrose.options.QrPixelShape
-import io.github.alexzhirkevich.qrose.options.QrShapes
-import io.github.alexzhirkevich.qrose.options.brush
 import io.github.alexzhirkevich.qrose.options.circle
-import io.github.alexzhirkevich.qrose.options.roundCorners
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.override.atomo.R
-import org.override.atomo.feature.qr.domain.model.QrBallShapeType
-import org.override.atomo.feature.qr.domain.model.QrFrameShapeType
-import org.override.atomo.feature.qr.domain.model.QrLogoType
-import org.override.atomo.feature.qr.domain.model.QrPixelShapeType
 import org.override.atomo.feature.qr.presentation.components.ColorsControlPanel
 import org.override.atomo.feature.qr.presentation.components.LogoControlPanel
 import org.override.atomo.feature.qr.presentation.components.ShapesControlPanel
+import org.override.atomo.feature.qr.presentation.mapper.getLogoPainter
+import org.override.atomo.feature.qr.presentation.mapper.toQrColors
+import org.override.atomo.feature.qr.presentation.mapper.toQrShapes
+import org.override.atomo.feature.qr.presentation.util.generateQrBitmap
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,9 +70,9 @@ fun QrRoot(
     viewModel: QrViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var currentPainter: androidx.compose.ui.graphics.painter.Painter? by remember {
+    var currentPainter: Painter? by remember {
         androidx.compose.runtime.mutableStateOf(
             null
         )
@@ -102,60 +86,8 @@ fun QrRoot(
                     IconButton(onClick = {
                         currentPainter?.let { painter ->
                             scope.launch {
-                                withContext(Dispatchers.IO) {
-                                    val width = 1080
-                                    val height = 1350
-                                    val bitmap =
-                                        Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                                    val androidCanvas = android.graphics.Canvas(bitmap)
-                                    androidCanvas.drawColor(android.graphics.Color.WHITE)
-
-                                    val canvas = Canvas(androidCanvas)
-                                    val qrSize = 800f
-                                    val qrX = (width - qrSize) / 2f
-                                    val qrY = 200f
-
-                                    val drawScope = CanvasDrawScope()
-                                    drawScope.draw(
-                                        density = Density(context),
-                                        layoutDirection = LayoutDirection.Ltr,
-                                        canvas = canvas,
-                                        size = Size(width.toFloat(), height.toFloat())
-                                    ) {
-                                        translate(left = qrX, top = qrY) {
-                                            with(painter) {
-                                                draw(Size(qrSize, qrSize))
-                                            }
-                                        }
-                                    }
-
-                                    val text = state.data
-                                    if (!text.isNullOrBlank()) {
-                                        val paint = android.graphics.Paint().apply {
-                                            color = android.graphics.Color.parseColor("#3C1A06")
-                                            textSize = 80f
-                                            typeface = android.graphics.Typeface.create(
-                                                android.graphics.Typeface.SANS_SERIF,
-                                                android.graphics.Typeface.BOLD
-                                            )
-                                            textAlign = android.graphics.Paint.Align.CENTER
-                                            isAntiAlias = true
-                                            letterSpacing = 0.05f
-                                        }
-                                        val textY = qrY + qrSize + 160f
-                                        val displayText =
-                                            text.removePrefix("https://").removePrefix("http://")
-                                                .uppercase()
-                                        androidCanvas.drawText(
-                                            displayText,
-                                            width / 2f,
-                                            textY,
-                                            paint
-                                        )
-                                    }
-
-                                    viewModel.onAction(QrAction.Download(bitmap, state.data))
-                                }
+                                val bitmap = generateQrBitmap(context, painter, state.data)
+                                viewModel.onAction(QrAction.Download(bitmap, state.data))
                             }
                         }
                     }) {
@@ -178,67 +110,14 @@ fun QrRoot(
 fun QrEditorScreen(
     state: QrState,
     onAction: (QrAction) -> Unit,
-    onPainterUpdated: (androidx.compose.ui.graphics.painter.Painter) -> Unit,
+    onPainterUpdated: (Painter) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val config = state.config
 
-    // Mappers for shapes
-    val pixelShape = when (config.pixelShape) {
-        QrPixelShapeType.Square -> QrPixelShape.Default
-        QrPixelShapeType.Circle -> QrPixelShape.circle()
-        QrPixelShapeType.Round -> QrPixelShape.roundCorners()
-    }
-
-    val frameShape = when (config.frameShape) {
-        QrFrameShapeType.Square -> QrFrameShape.Default
-        QrFrameShapeType.Circle -> QrFrameShape.circle()
-        QrFrameShapeType.Round -> QrFrameShape.roundCorners(.25f)
-    }
-
-    val ballShape = when (config.ballShape) {
-        QrBallShapeType.Square -> QrBallShape.Default
-        QrBallShapeType.Circle -> QrBallShape.circle()
-        QrBallShapeType.Round -> QrBallShape.roundCorners(.25f)
-    }
-
-    // Logo Painter Logic
-    val logoPainter = when (config.logoType) {
-        QrLogoType.None -> null
-        QrLogoType.Default -> painterResource(R.drawable.logo_atomo_app_monochrome)
-        QrLogoType.Custom -> {
-            if (config.customLogoUri != null) {
-                coil3.compose.rememberAsyncImagePainter(
-                    model = config.customLogoUri
-                )
-            } else {
-                painterResource(R.drawable.logo_atomo_app_monochrome) // Fallback
-            }
-        }
-    }
-
-    val shapes = QrShapes(
-        code = QrCodeShape.Default,
-        darkPixel = pixelShape,
-        lightPixel = pixelShape,
-        ball = ballShape,
-        frame = frameShape,
-        centralSymmetry = true
-    )
-
-    val colors = QrColors(
-        dark = QrBrush.brush { Brush.linearGradient(listOf(config.darkColor, config.darkColor)) },
-        light = QrBrush.brush {
-            Brush.linearGradient(
-                listOf(
-                    config.lightColor,
-                    config.lightColor
-                )
-            )
-        },
-        ball = QrBrush.brush { Brush.linearGradient(listOf(config.ballColor, config.ballColor)) },
-        frame = QrBrush.brush { Brush.linearGradient(listOf(config.frameColor, config.frameColor)) }
-    )
+    val shapes = config.toQrShapes()
+    val colors = config.toQrColors()
+    val logoPainter = config.getLogoPainter()
 
     val qrPainter = if (logoPainter != null) {
         rememberQrCodePainter(
@@ -262,7 +141,7 @@ fun QrEditorScreen(
         )
     }
 
-    androidx.compose.runtime.LaunchedEffect(qrPainter) {
+    LaunchedEffect(qrPainter) {
         onPainterUpdated(qrPainter)
     }
 
@@ -312,7 +191,7 @@ fun QrEditorScreen(
                                 when (index) {
                                     0 -> Icons.Default.Token
                                     1 -> Icons.Default.Palette
-                                    else -> Icons.Default.Image // Need to import Image
+                                    else -> Icons.Default.Image
                                 },
                                 contentDescription = null
                             )

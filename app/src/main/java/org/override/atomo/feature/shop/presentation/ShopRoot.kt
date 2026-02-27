@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.shop.presentation
 
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 import android.annotation.SuppressLint
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -97,7 +100,7 @@ fun ShopRoot(
 fun ShopContent(
     state: ShopState,
     onAction: (ShopAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     BackHandler(enabled = state.editingShop != null) {
         onAction(ShopAction.Back)
@@ -159,7 +162,7 @@ fun ShopContent(
         val shop = state.editingShop
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                  TopAppBar(title = { Text(if (state.isEditing) "Edit Shop" else shop.name) })
             },
@@ -265,10 +268,10 @@ fun ShopContent(
 fun ShopListScreen(
     state: ShopState,
     onAction: (ShopAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(ShopAction.CreateShop) }) {
@@ -338,7 +341,7 @@ private fun Preview() {
         ShopContent(
             state = ShopState(),
             onAction = {},
-            snackbarHostState = androidx.compose.material3.SnackbarHostState()
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.invitation.presentation.components
 
+import androidx.compose.foundation.layout.Arrangement
+import org.override.atomo.core.ui.components.ShimmerCircle
+
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +34,7 @@ fun InvitationShimmer() {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(5) {
             AtomoCard(
@@ -57,7 +60,7 @@ fun InvitationShimmer() {
 
                          Spacer(modifier = Modifier.height(8.dp))
                          // Delete Icon placeholder
-                         org.override.atomo.core.ui.components.ShimmerCircle(
+                         ShimmerCircle(
                              modifier = Modifier.size(
                                  24.dp
                              )

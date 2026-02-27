@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
@@ -36,7 +38,7 @@ class ShopRepositoryImpl(
     private val supabase: SupabaseClient
 ) : ShopRepository {
     
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getShopsFlow(userId: String): Flow<List<Shop>> {
         return shopDao.getShopsFlow(userId).flatMapLatest { shopEntities ->
             if (shopEntities.isEmpty()) {

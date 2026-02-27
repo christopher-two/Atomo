@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.settings.presentation.components
 
+import java.util.Locale
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -85,7 +87,7 @@ fun SettingsSlider(
                 }
             }
             Text(
-                text = String.format(java.util.Locale.getDefault(), "%.1f", sliderValue),
+                text = String.format(Locale.getDefault(), "%.1f", sliderValue),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.cv.presentation
 
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 // CvItem import removed
 
 /**
@@ -95,7 +98,7 @@ fun CVRoot(
 fun CVContent(
     state: CVState,
     onAction: (CVAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     BackHandler(enabled = state.editingCv != null) {
         onAction(CVAction.Back)
@@ -158,7 +161,7 @@ fun CVContent(
         val cv = state.editingCv
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                  TopAppBar(title = { Text(if (state.isEditing) "Edit CV" else cv.title) })
             },
@@ -266,10 +269,10 @@ fun CVContent(
 fun CVListScreen(
     state: CVState,
     onAction: (CVAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(CVAction.CreateCv) }) {

@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.mapper
 
+import java.time.Instant
+
 import org.override.atomo.data.local.entity.InvitationEntity
 import org.override.atomo.data.local.entity.InvitationResponseEntity
 import org.override.atomo.data.remote.dto.InvitationDto
@@ -67,7 +69,7 @@ fun Invitation.toDto(): InvitationDto = InvitationDto(
     id = id,
     userId = userId,
     eventName = eventName,
-    eventDate = eventDate?.let { java.time.Instant.ofEpochMilli(it).toString() },
+    eventDate = eventDate?.let { Instant.ofEpochMilli(it).toString() },
     location = location,
     description = description,
     isActive = isActive,

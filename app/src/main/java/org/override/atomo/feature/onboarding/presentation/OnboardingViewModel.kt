@@ -9,6 +9,13 @@
 
 package org.override.atomo.feature.onboarding.presentation
 
+import org.override.atomo.domain.repository.CvRepository
+import org.override.atomo.domain.repository.InvitationRepository
+import org.override.atomo.domain.repository.MenuRepository
+import org.override.atomo.domain.repository.PortfolioRepository
+import org.override.atomo.domain.repository.ProfileRepository
+import org.override.atomo.domain.repository.ShopRepository
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -51,12 +58,12 @@ class OnboardingViewModel(
     private val cvUseCases: CvUseCases,
     private val invitationUseCases: InvitationUseCases,
     // Repositories for direct sync
-    private val profileRepository: org.override.atomo.domain.repository.ProfileRepository,
-    private val menuRepository: org.override.atomo.domain.repository.MenuRepository,
-    private val shopRepository: org.override.atomo.domain.repository.ShopRepository,
-    private val portfolioRepository: org.override.atomo.domain.repository.PortfolioRepository,
-    private val cvRepository: org.override.atomo.domain.repository.CvRepository,
-    private val invitationRepository: org.override.atomo.domain.repository.InvitationRepository,
+    private val profileRepository: ProfileRepository,
+    private val menuRepository: MenuRepository,
+    private val shopRepository: ShopRepository,
+    private val portfolioRepository: PortfolioRepository,
+    private val cvRepository: CvRepository,
+    private val invitationRepository: InvitationRepository,
     private val sessionRepository: SessionRepository,
     private val rootNavigation: RootNavigation,
     private val snackbarManager: SnackbarManager

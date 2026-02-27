@@ -9,6 +9,8 @@
 
 package org.override.atomo.libs.auth.impl
 
+import androidx.credentials.exceptions.GetCredentialException
+
 import android.content.Context
 import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
@@ -92,7 +94,7 @@ class GoogleAuthManagerImpl(
                 )
                 Result.failure(Exception("Tipo de credencial no reconocido: ${credential.type}"))
             }
-        } catch (e: androidx.credentials.exceptions.GetCredentialException) {
+        } catch (e: GetCredentialException) {
             Log.e(TAG, "Credential Manager error: ${e.message}", e)
             Result.failure(e)
         } catch (e: Exception) {

@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.profile.presentation.components
 
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -73,7 +76,7 @@ fun ProfileDetailView(
     onEditClick: () -> Unit,
     onSyncClick: () -> Unit,
     onShareClick: () -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     LocalContext.current
@@ -124,7 +127,7 @@ fun ProfileDetailView(
                 Icon(Icons.Default.Edit, contentDescription = "Edit Profile")
             }
         },
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(
             modifier = modifier

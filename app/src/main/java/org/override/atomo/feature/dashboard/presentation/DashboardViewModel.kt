@@ -9,6 +9,11 @@
 
 package org.override.atomo.feature.dashboard.presentation
 
+import java.util.UUID
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.SharingStarted
+import org.override.atomo.data.manager.SyncManager
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -43,7 +48,7 @@ class DashboardViewModel(
     private val syncAllServices: SyncAllServicesUseCase,
     private val rootNavigation: RootNavigation,
     private val homeNavigation: HomeNavigation,
-    private val syncManager: org.override.atomo.data.manager.SyncManager
+    private val syncManager: SyncManager
 ) : ViewModel() {
 
 
@@ -56,11 +61,11 @@ class DashboardViewModel(
     private val _state = MutableStateFlow(DashboardState())
     val state = _state.stateIn(
         scope = viewModelScope,
-        started = kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000),
+        started = SharingStarted.WhileSubscribed(5000),
         initialValue = DashboardState()
     )
 
-    private val _events = kotlinx.coroutines.channels.Channel<DashboardEvent>()
+    private val _events = Channel<DashboardEvent>()
     val events = _events.receiveAsFlow()
 
     init {
@@ -100,7 +105,7 @@ class DashboardViewModel(
             is DashboardAction.UpdateDish -> {
                 updateService {
                     if (action.dish.id.isEmpty()) {
-                        val newDish = action.dish.copy(id = java.util.UUID.randomUUID().toString())
+                        val newDish = action.dish.copy(id = UUID.randomUUID().toString())
                         menuUseCases.createDish(newDish).map { }
                     } else {
                         menuUseCases.updateDish(action.dish).map { }

@@ -9,6 +9,9 @@
 
 package org.override.atomo.data.repository
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.override.atomo.data.manager.SyncManager
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +38,7 @@ import org.override.atomo.domain.repository.MenuRepository
 class MenuRepositoryImpl(
     private val menuDao: MenuDao,
     private val supabase: SupabaseClient,
-    private val syncManager: org.override.atomo.data.manager.SyncManager
+    private val syncManager: SyncManager
 ) : MenuRepository {
 
     // region Menu Flows
@@ -46,7 +49,7 @@ class MenuRepositoryImpl(
      * @param userId The ID of the user whose menus are to be observed.
      * @return A Flow emitting a list of [Menu] objects with their hierarchies populated.
      */
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun getMenusFlow(userId: String): Flow<List<Menu>> {
         return menuDao.getMenusFlow(userId).flatMapLatest { menuEntities ->
             if (menuEntities.isEmpty()) {

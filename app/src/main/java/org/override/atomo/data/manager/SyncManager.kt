@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.manager
 
+import androidx.work.OutOfQuotaPolicy
+
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.Data
@@ -28,7 +30,7 @@ class SyncManager(private val workManager: WorkManager) {
 
         val request = OneTimeWorkRequestBuilder<ProfileSyncWorker>()
             .setInputData(data)
-            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
             .build()
 
         workManager.enqueue(request)

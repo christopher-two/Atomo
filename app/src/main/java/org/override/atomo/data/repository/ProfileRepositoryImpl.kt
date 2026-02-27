@@ -9,6 +9,8 @@
 
 package org.override.atomo.data.repository
 
+import org.override.atomo.data.manager.SyncManager
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Count.EXACT
@@ -28,7 +30,7 @@ import org.override.atomo.domain.repository.ProfileRepository
 class ProfileRepositoryImpl(
     private val profileDao: ProfileDao,
     private val supabase: SupabaseClient,
-    private val syncManager: org.override.atomo.data.manager.SyncManager
+    private val syncManager: SyncManager
 ) : ProfileRepository {
 
     

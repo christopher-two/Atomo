@@ -15,9 +15,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.override.atomo.feature.qr.domain.model.QrLogoType
+import org.override.atomo.feature.qr.domain.usecase.SaveQrUseCase
 
 class QrViewModel(
-    private val param: String
+    private val param: String,
+    private val saveQrUseCase: SaveQrUseCase
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -65,10 +68,10 @@ class QrViewModel(
             is QrAction.SetCustomLogo -> _state.update {
                 it.copy(config = it.config.copy(customLogoUri = action.uri, logoType = QrLogoType.Custom))
             }
-            QrAction.Download -> {
-                // To be implemented in UI layer or via Event
-                // For now, we can just trigger an effect? 
-                // Actually usually the ViewModel prepares data, but View controls the Bitmap capture.
+            is QrAction.Download -> {
+                viewModelScope.launch {
+                    saveQrUseCase(action.bitmap, action.text)
+                }
             }
         }
     }

@@ -1,10 +1,11 @@
 /*
  * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
  * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.qr.presentation.util
+package org.override.atomo.feature.qr.data.repository
 
 import android.content.ContentValues
 import android.content.Context
@@ -13,42 +14,18 @@ import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Canvas
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.override.atomo.feature.qr.domain.repository.QrRepository
 import java.io.OutputStream
 
-object QrSaver {
+class QrRepositoryImpl(
+    private val context: Context
+) : QrRepository {
 
-    suspend fun saveQrToGallery(context: Context, painter: Painter, sizePx: Int = 2048) {
-        withContext(Dispatchers.IO) {
+    override suspend fun saveQrCode(bitmap: Bitmap, text: String?): Result<Unit> {
+        return withContext(Dispatchers.IO) {
             try {
-                // 1. Create Bitmap
-                val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
-                val canvas = Canvas(android.graphics.Canvas(bitmap))
-                
-                // 2. Draw Painter using CanvasDrawScope
-                val size = Size(sizePx.toFloat(), sizePx.toFloat())
-                val drawScope = CanvasDrawScope()
-                
-                drawScope.draw(
-                    density = Density(context),
-                    layoutDirection = LayoutDirection.Ltr,
-                    canvas = canvas,
-                    size = size
-                ) {
-                    with(painter) {
-                        draw(size)
-                    }
-                }
-
-                // 3. Save to MediaStore
                 val filename = "Atomo_QR_${System.currentTimeMillis()}.png"
                 var fos: OutputStream? = null
 
@@ -62,10 +39,6 @@ object QrSaver {
                     if (imageUri != null) {
                         fos = context.contentResolver.openOutputStream(imageUri)
                     }
-                } else {
-                    // For legacy support (not strict requirement but good practice), we'd use File API
-                    // Assuming API 29+ for this project based on modern tech stack usage
-                    // Just in case, simplistic fallback or error
                 }
 
                 fos?.use {
@@ -75,12 +48,14 @@ object QrSaver {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "QR Guardado en Galería", Toast.LENGTH_SHORT).show()
                 }
-
+                
+                Result.success(Unit)
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
                     Toast.makeText(context, "Error al guardar: ${e.message}", Toast.LENGTH_LONG).show()
                 }
+                Result.failure(e)
             }
         }
     }

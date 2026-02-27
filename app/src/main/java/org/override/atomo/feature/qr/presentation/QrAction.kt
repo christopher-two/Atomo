@@ -9,11 +9,15 @@
 
 package org.override.atomo.feature.qr.presentation
 
-import androidx.compose.ui.graphics.Color
 import android.graphics.Bitmap
+import androidx.compose.ui.graphics.Color
+import org.override.atomo.feature.qr.domain.model.QrBallShapeType
+import org.override.atomo.feature.qr.domain.model.QrFrameShapeType
+import org.override.atomo.feature.qr.domain.model.QrLogoType
+import org.override.atomo.feature.qr.domain.model.QrPixelShapeType
 
 sealed interface QrAction {
-    data object Download : QrAction
+    data class Download(val bitmap: Bitmap, val text: String?) : QrAction
     
     // Configuration Actions
     data class UpdatePixelShape(val shape: QrPixelShapeType) : QrAction

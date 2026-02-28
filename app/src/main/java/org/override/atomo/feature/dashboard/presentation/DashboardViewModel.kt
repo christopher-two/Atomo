@@ -32,6 +32,7 @@ import org.override.atomo.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.domain.util.AtomoUrlGenerator
+import org.override.atomo.feature.dashboard.presentation.utils.DashboardHelpers
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation

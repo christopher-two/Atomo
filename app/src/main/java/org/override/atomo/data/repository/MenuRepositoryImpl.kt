@@ -447,12 +447,29 @@ class MenuRepositoryImpl(
                 menuDao.updateMenu(entity.copy(id = newMenuId, isSynced = true))
 
             } else {
-                if (existingRemoteMenu != null) {
-                    supabase.from("menus").update(dto) { filter { eq("id", dto.id) } }
+                if (!entity.isActive) {
+                    try {
+                        supabase.from("menus").delete { filter { eq("id", dto.id) } }
+                        menuDao.deleteDishesByMenuId(entity.id)
+                        menuDao.deleteCategoriesByMenuId(entity.id)
+                        menuDao.deleteMenuById(entity.id)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        if (existingRemoteMenu != null) {
+                            supabase.from("menus").update(dto) { filter { eq("id", dto.id) } }
+                        } else {
+                            supabase.from("menus").upsert(dto) { onConflict = "id" }
+                        }
+                        menuDao.insertMenu(entity.copy(isSynced = true))
+                    }
                 } else {
-                    supabase.from("menus").upsert(dto) { onConflict = "id" }
+                    if (existingRemoteMenu != null) {
+                        supabase.from("menus").update(dto) { filter { eq("id", dto.id) } }
+                    } else {
+                        supabase.from("menus").upsert(dto) { onConflict = "id" }
+                    }
+                    menuDao.insertMenu(entity.copy(isSynced = true))
                 }
-                menuDao.insertMenu(entity.copy(isSynced = true))
             }
         }
     }

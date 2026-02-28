@@ -10,6 +10,21 @@
 package org.override.atomo.domain.model
 
 /**
+ * Serializa los campos de presentación del menú a un JSON string listo para
+ * ser enviado al WebView mediante `updatePreview(json)`.
+ *
+ * Uso: `menu.toPreviewJson()`
+ */
+fun Menu.toPreviewJson(): String = buildString {
+    append("{")
+    append("\"name\":\"${name.replace("\"", "\\\"")}\",")
+    append("\"description\":\"${description?.replace("\"", "\\\"") ?: ""}\",")
+    append("\"primaryColor\":\"$primaryColor\",")
+    append("\"fontFamily\":\"$fontFamily\"")
+    append("}")
+}
+
+/**
  * Represents a digital menu for a restaurant or food service.
  *
  * @property id Unique identifier for the menu.
@@ -25,6 +40,7 @@ package org.override.atomo.domain.model
  * @property categories List of categories in this menu.
  * @property dishes List of dishes in this menu.
  */
+
 data class Menu(
     val id: String,
     val userId: String,

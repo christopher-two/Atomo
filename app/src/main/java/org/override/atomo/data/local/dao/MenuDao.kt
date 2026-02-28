@@ -24,10 +24,10 @@ import org.override.atomo.data.local.entity.MenuEntity
 interface MenuDao {
     
     // Menu operations
-    @Query("SELECT * FROM menus WHERE userId = :userId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM menus WHERE userId = :userId AND isActive = 1 ORDER BY createdAt DESC")
     fun getMenusFlow(userId: String): Flow<List<MenuEntity>>
     
-    @Query("SELECT * FROM menus WHERE userId = :userId ORDER BY createdAt DESC")
+    @Query("SELECT * FROM menus WHERE userId = :userId AND isActive = 1 ORDER BY createdAt DESC")
     suspend fun getMenus(userId: String): List<MenuEntity>
     
     @Query("SELECT * FROM menus WHERE id = :menuId")

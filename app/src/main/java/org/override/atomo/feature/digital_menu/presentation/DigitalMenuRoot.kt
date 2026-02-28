@@ -10,9 +10,6 @@
 package org.override.atomo.feature.digital_menu.presentation
 
 
-import android.annotation.SuppressLint
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,15 +32,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.json.JSONObject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.components.AtomoScaffold
+import org.override.atomo.core.ui.components.AtomoWebView
 import org.override.atomo.core.ui.components.service.ServiceToolbar
-import org.override.atomo.domain.model.Menu
+import org.override.atomo.domain.model.toPreviewJson
 import org.override.atomo.feature.digital_menu.presentation.components.CategoryDialog
 import org.override.atomo.feature.digital_menu.presentation.components.DishDialog
 import org.override.atomo.feature.digital_menu.presentation.sections.DigitalMenuEditor
@@ -77,8 +74,8 @@ fun DigitalMenuRoot(
                         else viewModel.onAction(DigitalMenuAction.ToggleEditMode)
                     },
                     onCancel = { viewModel.onAction(DigitalMenuAction.CancelEdit) },
-                    onPreview = { viewModel.onAction(DigitalMenuAction.TogglePreviewSheet(true)) },
-                    onDelete = { viewModel.onAction(DigitalMenuAction.ShowDeleteConfirmation) },
+                    onPreview = { viewModel.onAction(DigitalMenuAction.SetOverlay(DigitalMenuOverlay.PreviewSheet)) },
+                    onDelete = { viewModel.onAction(DigitalMenuAction.SetOverlay(DigitalMenuOverlay.DeleteConfirmation)) },
                     additionalActions = {
                         if (!state.isEditing) {
                             IconButton(onClick = { viewModel.onAction(DigitalMenuAction.OpenAddDishDialog) }) {
@@ -90,7 +87,7 @@ fun DigitalMenuRoot(
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
+        Box(modifier = Modifier.padding(paddingValues.calculateLeftPadding(layoutDirection = LocalLayoutDirection.current))) {
             DigitalMenuContent(
                 state = state,
                 onAction = viewModel::onAction
@@ -100,7 +97,6 @@ fun DigitalMenuRoot(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun DigitalMenuContent(
     state: DigitalMenuState,
@@ -110,18 +106,8 @@ fun DigitalMenuContent(
         onAction(DigitalMenuAction.Back)
     }
 
-    // Preview Logic
     val previewPageLoaded = remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    fun buildPreviewJson(menu: Menu): String {
-        return JSONObject().apply {
-            put("name", menu.name)
-            put("description", menu.description)
-            put("primaryColor", menu.primaryColor)
-            put("fontFamily", menu.fontFamily)
-        }.toString()
-    }
 
     when {
         state.editingMenu == null -> {
@@ -156,7 +142,15 @@ fun DigitalMenuContent(
                 categories = state.editingMenu?.categories ?: emptyList(),
                 onDismiss = { onAction(DigitalMenuAction.CloseDishDialog) },
                 onSave = { name, desc, price, img, catId ->
-                    onAction(DigitalMenuAction.SaveDish(name, desc, price, img, catId))
+                    onAction(
+                        DigitalMenuAction.SaveDish(
+                            name = name,
+                            description = desc,
+                            price = price,
+                            imageUrl = img,
+                            categoryId = catId
+                        )
+                    )
                 }
             )
         }
@@ -171,39 +165,30 @@ fun DigitalMenuContent(
 
         DigitalMenuOverlay.PreviewSheet -> {
             ModalBottomSheet(
-                onDismissRequest = { onAction(DigitalMenuAction.TogglePreviewSheet(false)) },
+                onDismissRequest = { onAction(DigitalMenuAction.SetOverlay(null)) },
                 sheetState = sheetState
             ) {
-                AndroidView(
-                    factory = { context ->
-                        WebView(context).apply {
-                            settings.javaScriptEnabled = true
-                            settings.domStorageEnabled = true
-                            webViewClient = object : WebViewClient() {
-                                override fun onPageFinished(view: WebView?, url: String?) {
-                                    super.onPageFinished(view, url)
-                                    previewPageLoaded.value = true
-                                }
-                            }
-                            loadUrl("https://atomo.click/preview/elegance")
-                        }
+                AtomoWebView(
+                    url = "https://atomo.click/preview/elegance",
+                    modifier = Modifier.fillMaxSize(),
+                    onPageFinished = { _, _ ->
+                        previewPageLoaded.value = true
                     },
                     update = { wv ->
                         if (previewPageLoaded.value) {
                             state.editingMenu?.let { menu ->
-                                val json = buildPreviewJson(menu)
+                                val json = menu.toPreviewJson()
                                 wv.post { wv.evaluateJavascript("updatePreview($json)", null) }
                             }
                         }
-                    },
-                    modifier = Modifier.fillMaxSize()
+                    }
                 )
             }
         }
 
         DigitalMenuOverlay.DiscardConfirmation -> {
             AlertDialog(
-                onDismissRequest = { onAction(DigitalMenuAction.HideDiscardConfirmation) },
+                onDismissRequest = { onAction(DigitalMenuAction.SetOverlay(null)) },
                 title = { Text("Descartar cambios") },
                 text = { Text("¿Estás seguro de que quieres salir sin guardar los cambios?") },
                 confirmButton = {
@@ -212,7 +197,7 @@ fun DigitalMenuContent(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { onAction(DigitalMenuAction.HideDiscardConfirmation) }) {
+                    TextButton(onClick = { onAction(DigitalMenuAction.SetOverlay(null)) }) {
                         Text("Continuar editando")
                     }
                 }
@@ -221,7 +206,7 @@ fun DigitalMenuContent(
 
         DigitalMenuOverlay.DeleteConfirmation -> {
             AlertDialog(
-                onDismissRequest = { onAction(DigitalMenuAction.HideDeleteConfirmation) },
+                onDismissRequest = { onAction(DigitalMenuAction.SetOverlay(null)) },
                 title = { Text("Delete Menu") },
                 text = { Text("Are you sure you want to delete this menu? This action cannot be undone.") },
                 confirmButton = {
@@ -230,13 +215,13 @@ fun DigitalMenuContent(
                     }
                 },
                 dismissButton = {
-                    TextButton(onClick = { onAction(DigitalMenuAction.HideDeleteConfirmation) }) {
+                    TextButton(onClick = { onAction(DigitalMenuAction.SetOverlay(null)) }) {
                         Text("Cancel")
                     }
                 }
             )
         }
 
-        null -> Unit // No overlay
+        null -> Unit
     }
 }

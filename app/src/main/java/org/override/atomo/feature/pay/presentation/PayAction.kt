@@ -9,7 +9,8 @@
 
 package org.override.atomo.feature.pay.presentation
 
-import org.override.atomo.domain.model.Plan
+import org.override.atomo.feature.subscription.domain.model.Plan
+
 
 /**
  * Represents the intent/actions that can be performed on the Pay/Subscription screen.

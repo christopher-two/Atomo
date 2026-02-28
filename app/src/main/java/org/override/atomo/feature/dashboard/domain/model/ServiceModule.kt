@@ -9,14 +9,14 @@
 
 package org.override.atomo.feature.dashboard.domain.model
 
-import org.override.atomo.domain.model.Cv
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Invitation
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.Portfolio
-import org.override.atomo.domain.model.PortfolioItem
-import org.override.atomo.domain.model.Product
-import org.override.atomo.domain.model.Shop
+import org.override.atomo.feature.cv.domain.model.Cv
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.invitation.domain.model.Invitation
+import org.override.atomo.feature.portfolio.domain.model.Portfolio
+import org.override.atomo.feature.portfolio.domain.model.PortfolioItem
+import org.override.atomo.feature.shop.domain.model.Product
+import org.override.atomo.feature.shop.domain.model.Shop
 
 sealed interface ServiceModule {
     val isActive: Boolean

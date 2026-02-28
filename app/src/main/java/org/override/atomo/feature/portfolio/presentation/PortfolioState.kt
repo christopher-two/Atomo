@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.portfolio.presentation
 
-import org.override.atomo.domain.model.Portfolio
+import org.override.atomo.feature.portfolio.domain.model.Portfolio
 
 /**
  * Represents the UI state for the Portfolio feature.

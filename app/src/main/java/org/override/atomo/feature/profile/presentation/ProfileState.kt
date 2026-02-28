@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.profile.presentation
 
-import org.override.atomo.domain.model.Profile
+import org.override.atomo.feature.profile.domain.model.Profile
 
 /**
  * Represents the UI state for the Profile feature.

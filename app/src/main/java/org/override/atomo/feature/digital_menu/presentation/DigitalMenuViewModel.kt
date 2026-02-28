@@ -24,13 +24,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.SnackbarManager
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.MenuCategory
 import org.override.atomo.domain.model.ServiceType
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.subscription.CanCreateResult
-import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateResult
+import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 

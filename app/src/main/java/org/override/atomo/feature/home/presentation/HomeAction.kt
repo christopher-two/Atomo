@@ -9,8 +9,9 @@
 
 package org.override.atomo.feature.home.presentation
 
-import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.domain.model.ServiceType
+
+import org.override.atomo.feature.navigation.AppTab
 
 sealed interface HomeAction {
     data object ToggleFab : HomeAction

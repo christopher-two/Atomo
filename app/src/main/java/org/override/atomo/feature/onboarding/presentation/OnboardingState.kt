@@ -9,8 +9,9 @@
 
 package org.override.atomo.feature.onboarding.presentation
 
-import org.override.atomo.domain.model.Profile
 import org.override.atomo.domain.model.ServiceType
+
+import org.override.atomo.feature.profile.domain.model.Profile
 
 /**
  * Represents the UI state for the Onboarding feature.

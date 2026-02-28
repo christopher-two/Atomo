@@ -14,8 +14,8 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.override.atomo.domain.repository.MenuRepository
-import org.override.atomo.domain.repository.ProfileRepository
+import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
+import org.override.atomo.feature.profile.domain.repository.ProfileRepository
 
 /**
  * Worker to upload local changes to the server.

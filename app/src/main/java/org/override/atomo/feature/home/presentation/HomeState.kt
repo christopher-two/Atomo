@@ -9,10 +9,10 @@
 
 package org.override.atomo.feature.home.presentation
 
-import org.override.atomo.domain.model.Plan
-import org.override.atomo.domain.model.Subscription
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.navigation.AppTab
+import org.override.atomo.feature.subscription.domain.model.Plan
+import org.override.atomo.feature.subscription.domain.model.Subscription
 
 data class HomeState(
     val isFabExpanded: Boolean = false,

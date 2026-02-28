@@ -12,9 +12,6 @@ package org.override.atomo.feature.home.presentation
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.firstOrNull
@@ -22,17 +19,15 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
-import org.override.atomo.domain.usecase.subscription.GetExistingServicesUseCase
-import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
-import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
+import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.subscription.domain.usecase.subscription.GetExistingServicesUseCase
+import org.override.atomo.feature.subscription.domain.usecase.subscription.GetServiceLimitsUseCase
+import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
+import org.override.atomo.feature.sync.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.libs.session.api.SessionRepository
-import org.override.atomo.domain.model.ServiceType
-import kotlin.io.path.Path
-
-import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
 
 class HomeViewModel(
     private val homeNavigation: HomeNavigation,

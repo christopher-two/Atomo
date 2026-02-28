@@ -40,7 +40,7 @@ import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.AtomoWebView
 import org.override.atomo.core.ui.components.service.ServiceToolbar
-import org.override.atomo.domain.model.toPreviewJson
+import org.override.atomo.feature.digital_menu.domain.model.toPreviewJson
 import org.override.atomo.feature.digital_menu.presentation.components.CategoryDialog
 import org.override.atomo.feature.digital_menu.presentation.components.DishDialog
 import org.override.atomo.feature.digital_menu.presentation.sections.DigitalMenuEditor

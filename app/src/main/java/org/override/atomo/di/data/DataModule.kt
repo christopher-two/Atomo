@@ -18,7 +18,7 @@ import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import org.override.atomo.data.manager.SyncManager
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import org.override.atomo.libs.biometric.BiometricHelper
 import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.libs.session.impl.DataStoreSessionRepository

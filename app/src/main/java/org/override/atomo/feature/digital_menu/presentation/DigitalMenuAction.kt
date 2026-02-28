@@ -9,9 +9,9 @@
 
 package org.override.atomo.feature.digital_menu.presentation
 
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 
 sealed interface DigitalMenuAction {
     data object CreateMenu : DigitalMenuAction

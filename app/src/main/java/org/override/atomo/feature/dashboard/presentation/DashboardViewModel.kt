@@ -9,37 +9,35 @@
 
 package org.override.atomo.feature.dashboard.presentation
 
-import java.util.UUID
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.SharingStarted
-import org.override.atomo.data.manager.SyncManager
-
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.override.atomo.domain.usecase.cv.CvUseCases
-import org.override.atomo.domain.usecase.invitation.InvitationUseCases
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
-import org.override.atomo.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.domain.usecase.shop.ShopUseCases
-import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.domain.util.AtomoUrlGenerator
+import org.override.atomo.feature.cv.domain.usecase.cv.CvUseCases
 import org.override.atomo.feature.dashboard.domain.model.DashboardSheet
 import org.override.atomo.feature.dashboard.domain.model.DashboardStatistics
 import org.override.atomo.feature.dashboard.domain.model.ServiceModule
 import org.override.atomo.feature.dashboard.presentation.utils.DashboardHelpers
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.invitation.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUseCases
+import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import org.override.atomo.libs.session.api.SessionRepository
+import java.util.UUID
 
 class DashboardViewModel(
     private val sessionRepository: SessionRepository,
@@ -49,16 +47,10 @@ class DashboardViewModel(
     private val cvUseCases: CvUseCases,
     private val shopUseCases: ShopUseCases,
     private val invitationUseCases: InvitationUseCases,
-    private val syncAllServices: SyncAllServicesUseCase,
     private val rootNavigation: RootNavigation,
     private val homeNavigation: HomeNavigation,
     private val syncManager: SyncManager
 ) : ViewModel() {
-
-
-    companion object {
-        private const val TAG = "DashboardViewModel"
-    }
 
     private var hasAutoRefreshed = false
 
@@ -90,22 +82,87 @@ class DashboardViewModel(
             DashboardAction.Refresh -> refreshDashboard()
 
             /* Edit actions */
-            is DashboardAction.EditMenu -> _state.update { it.copy(activeSheet = DashboardSheet.EditMenu(action.menuId)) }
-            is DashboardAction.EditPortfolio -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolio(action.portfolioId)) }
-            is DashboardAction.EditCv -> _state.update { it.copy(activeSheet = DashboardSheet.EditCv(action.cvId)) }
-            is DashboardAction.EditShop -> _state.update { it.copy(activeSheet = DashboardSheet.EditShop(action.shopId)) }
-            is DashboardAction.EditInvitation -> _state.update { it.copy(activeSheet = DashboardSheet.EditInvitation(action.invitationId)) }
+            is DashboardAction.EditMenu -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditMenu(
+                        action.menuId
+                    )
+                )
+            }
+
+            is DashboardAction.EditPortfolio -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditPortfolio(
+                        action.portfolioId
+                    )
+                )
+            }
+
+            is DashboardAction.EditCv -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditCv(
+                        action.cvId
+                    )
+                )
+            }
+
+            is DashboardAction.EditShop -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditShop(
+                        action.shopId
+                    )
+                )
+            }
+
+            is DashboardAction.EditInvitation -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditInvitation(
+                        action.invitationId
+                    )
+                )
+            }
 
             /* Update actions */
-            is DashboardAction.UpdateMenu -> updateService { menuUseCases.updateMenu(action.menu).map { } }
-            is DashboardAction.UpdatePortfolio -> updateService { portfolioUseCases.updatePortfolio(action.portfolio).map { } }
+            is DashboardAction.UpdateMenu -> updateService {
+                menuUseCases.updateMenu(action.menu).map { }
+            }
+
+            is DashboardAction.UpdatePortfolio -> updateService {
+                portfolioUseCases.updatePortfolio(
+                    action.portfolio
+                ).map { }
+            }
+
             is DashboardAction.UpdateCv -> updateService { cvUseCases.updateCv(action.cv).map { } }
-            is DashboardAction.UpdateShop -> updateService { shopUseCases.updateShop(action.shop).map { } }
-            is DashboardAction.UpdateInvitation -> updateService { invitationUseCases.updateInvitation(action.invitation).map { } }
+            is DashboardAction.UpdateShop -> updateService {
+                shopUseCases.updateShop(action.shop).map { }
+            }
+
+            is DashboardAction.UpdateInvitation -> updateService {
+                invitationUseCases.updateInvitation(
+                    action.invitation
+                ).map { }
+            }
 
             /* Sub-item actions */
-            is DashboardAction.AddDish -> _state.update { it.copy(activeSheet = DashboardSheet.EditDish(null, action.menuId)) }
-            is DashboardAction.EditDish -> _state.update { it.copy(activeSheet = DashboardSheet.EditDish(action.dish, action.dish.menuId)) }
+            is DashboardAction.AddDish -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditDish(
+                        null,
+                        action.menuId
+                    )
+                )
+            }
+
+            is DashboardAction.EditDish -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditDish(
+                        action.dish,
+                        action.dish.menuId
+                    )
+                )
+            }
+
             is DashboardAction.UpdateDish -> {
                 updateService {
                     if (action.dish.id.isEmpty()) {
@@ -117,8 +174,23 @@ class DashboardViewModel(
                 }
             }
 
-            is DashboardAction.AddPortfolioItem -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolioItem(null, action.portfolioId)) }
-            is DashboardAction.EditPortfolioItem -> _state.update { it.copy(activeSheet = DashboardSheet.EditPortfolioItem(action.item, action.item.portfolioId)) }
+            is DashboardAction.AddPortfolioItem -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditPortfolioItem(
+                        null,
+                        action.portfolioId
+                    )
+                )
+            }
+
+            is DashboardAction.EditPortfolioItem -> _state.update {
+                it.copy(
+                    activeSheet = DashboardSheet.EditPortfolioItem(
+                        action.item,
+                        action.item.portfolioId
+                    )
+                )
+            }
 
             DashboardAction.DismissSheet -> _state.update { it.copy(activeSheet = null) }
 
@@ -136,6 +208,7 @@ class DashboardViewModel(
                     }
                 }
             }
+
             is DashboardAction.ShowQR -> {
                 val username = _state.value.profile?.username
                 if (username != null) {
@@ -145,15 +218,21 @@ class DashboardViewModel(
                     )
                 }
             }
+
             is DashboardAction.ShareService -> {
                 val username = _state.value.profile?.username
                 if (username != null) {
                     val url = AtomoUrlGenerator.generateServiceUrl(username, action.type)
                     viewModelScope.launch {
-                        _events.send(DashboardEvent.ShareUrl(url, "Mira mi ${action.type.name.lowercase().replace("_", " ")} en Atomo"))
+                        _events.send(
+                            DashboardEvent.ShareUrl(
+                                url,
+                                "Mira mi ${action.type.name.lowercase().replace("_", " ")} en Atomo"
+                            )
+                        )
                     }
                 } else {
-                     viewModelScope.launch {
+                    viewModelScope.launch {
                         _events.send(DashboardEvent.ShowSnackbar("No se pudo obtener el nombre de usuario"))
                     }
                 }
@@ -165,7 +244,6 @@ class DashboardViewModel(
             DashboardAction.CreateCv -> homeNavigation.switchTab(AppTab.CV)
             DashboardAction.CreateShop -> homeNavigation.switchTab(AppTab.SHOP)
             DashboardAction.CreateInvitation -> homeNavigation.switchTab(AppTab.INVITATION)
-            else -> {}
         }
     }
 
@@ -178,7 +256,12 @@ class DashboardViewModel(
                 _state.update { it.copy(activeSheet = null, isOperationLoading = false) }
                 _events.send(DashboardEvent.ShowSnackbar("Cambios guardados correctamente"))
             }.onFailure { error ->
-                _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
+                _state.update {
+                    it.copy(
+                        isOperationLoading = false,
+                        error = "Error al actualizar: ${error.message}"
+                    )
+                }
                 _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
             }
         }
@@ -188,7 +271,7 @@ class DashboardViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
-            
+
             profileUseCases.getProfile(userId).collect { profile ->
                 _state.update { it.copy(profile = profile) }
             }
@@ -204,26 +287,62 @@ class DashboardViewModel(
                 invitationUseCases.getInvitations(userId)
             ) { menus, portfolios, cvs, shops, invitations ->
                 val services = mutableListOf<ServiceModule>()
-                
+
                 val allDishes = menus.flatMap { it.dishes }
-                services.add(ServiceModule.MenuModule(menus, allDishes.size, allDishes.sortedByDescending { it.createdAt }.take(5)))
-                
+                services.add(
+                    ServiceModule.MenuModule(
+                        menus,
+                        allDishes.size,
+                        allDishes.sortedByDescending { it.createdAt }.take(5)
+                    )
+                )
+
                 val allItems = portfolios.flatMap { it.items }
-                services.add(ServiceModule.PortfolioModule(portfolios, allItems.size, allItems.sortedByDescending { it.createdAt }.take(5)))
-                
-                services.add(ServiceModule.CvModule(cvs, cvs.sumOf { it.skills.size }, cvs.sumOf { it.experience.size }))
-                
+                services.add(
+                    ServiceModule.PortfolioModule(
+                        portfolios,
+                        allItems.size,
+                        allItems.sortedByDescending { it.createdAt }.take(5)
+                    )
+                )
+
+                services.add(
+                    ServiceModule.CvModule(
+                        cvs,
+                        cvs.sumOf { it.skills.size },
+                        cvs.sumOf { it.experience.size })
+                )
+
                 val allProducts = shops.flatMap { it.products }
-                services.add(ServiceModule.ShopModule(shops, allProducts.size, allProducts.sortedByDescending { it.createdAt }.take(5)))
-                
-                services.add(ServiceModule.InvitationModule(invitations, invitations.count { it.isActive }, invitations.filter { (it.eventDate ?: 0) > System.currentTimeMillis() }.minByOrNull { it.eventDate ?: Long.MAX_VALUE }))
+                services.add(
+                    ServiceModule.ShopModule(
+                        shops,
+                        allProducts.size,
+                        allProducts.sortedByDescending { it.createdAt }.take(5)
+                    )
+                )
+
+                services.add(
+                    ServiceModule.InvitationModule(
+                        invitations,
+                        invitations.count { it.isActive },
+                        invitations.filter { (it.eventDate ?: 0) > System.currentTimeMillis() }
+                            .minByOrNull { it.eventDate ?: Long.MAX_VALUE })
+                )
 
                 services
             }.collect { services ->
                 val stats = DashboardStatistics(services.count { it.isActive }, 0, 0)
                 val shortcuts = DashboardHelpers.generateShortcuts(services)
-                _state.update { it.copy(isLoading = false, services = services, statistics = stats, shortcuts = shortcuts) }
-                
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        services = services,
+                        statistics = stats,
+                        shortcuts = shortcuts
+                    )
+                }
+
                 if (services.none { it.isActive } && !hasAutoRefreshed) {
                     hasAutoRefreshed = true
                     refreshDashboard()
@@ -237,11 +356,7 @@ class DashboardViewModel(
             _state.update { it.copy(isRefreshing = true) }
             val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
             syncManager.scheduleDataSync(userId)
-
-            // For UX, wait a bit or just let it finish. 
-            // In a real app we would observe WorkInfo.
-            // For now, simple delay to show spinner or remove spinner immediately and let loading flow handle it.
-            kotlinx.coroutines.delay(1000) 
+            delay(1000)
             _state.update { it.copy(isRefreshing = false) }
         }
     }

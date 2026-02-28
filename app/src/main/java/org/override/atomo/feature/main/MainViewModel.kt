@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.override.atomo.domain.usecase.session.CheckSessionUseCase
+import org.override.atomo.feature.auth.domain.usecase.session.CheckSessionUseCase
 import org.override.atomo.feature.navigation.RootNavigation
 import org.override.atomo.feature.settings.domain.usecase.GetSettingsUseCase
 

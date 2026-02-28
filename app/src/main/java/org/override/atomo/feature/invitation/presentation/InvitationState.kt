@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.invitation.presentation
 
-import org.override.atomo.domain.model.Invitation
+import org.override.atomo.feature.invitation.domain.model.Invitation
 
 /**
  * Represents the UI state for the Invitation feature.

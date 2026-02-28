@@ -9,8 +9,8 @@
 
 package org.override.atomo.feature.dashboard.domain.model
 
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.PortfolioItem
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.portfolio.domain.model.PortfolioItem
 
 sealed interface DashboardSheet {
     data class EditMenu(val menuId: String) : DashboardSheet

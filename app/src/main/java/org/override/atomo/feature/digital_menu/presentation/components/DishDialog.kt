@@ -51,8 +51,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.override.atomo.core.ui.components.AtomoTextField
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 import org.override.atomo.libs.validation.api.CommonValidators
 
 @Composable

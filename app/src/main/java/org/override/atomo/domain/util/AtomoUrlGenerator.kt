@@ -11,6 +11,7 @@ package org.override.atomo.domain.util
 
 import org.override.atomo.domain.model.ServiceType
 
+
 object AtomoUrlGenerator {
 
     private const val BASE_URL = "https://atomo.click"

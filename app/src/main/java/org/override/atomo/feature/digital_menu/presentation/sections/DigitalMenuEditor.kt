@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.core.ui.components.service.EditableSection
-import org.override.atomo.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.presentation.DigitalMenuAction
 
 @Composable

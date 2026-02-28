@@ -10,9 +10,9 @@
 package org.override.atomo.feature.digital_menu.presentation
 
 import androidx.compose.runtime.Stable
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 
 @Stable
 data class DigitalMenuState(

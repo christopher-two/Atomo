@@ -9,13 +9,6 @@
 
 package org.override.atomo.feature.onboarding.presentation
 
-import org.override.atomo.domain.repository.CvRepository
-import org.override.atomo.domain.repository.InvitationRepository
-import org.override.atomo.domain.repository.MenuRepository
-import org.override.atomo.domain.repository.PortfolioRepository
-import org.override.atomo.domain.repository.ProfileRepository
-import org.override.atomo.domain.repository.ShopRepository
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
@@ -29,20 +22,26 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.core.common.SnackbarManager
-import org.override.atomo.domain.model.Cv
-import org.override.atomo.domain.model.Invitation
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.domain.model.ServiceType
-import org.override.atomo.domain.model.Shop
-import org.override.atomo.domain.usecase.cv.CvUseCases
-import org.override.atomo.domain.usecase.invitation.InvitationUseCases
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
-import org.override.atomo.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.domain.usecase.shop.ShopUseCases
+import org.override.atomo.feature.cv.domain.model.Cv
+import org.override.atomo.feature.cv.domain.repository.CvRepository
+import org.override.atomo.feature.cv.domain.usecase.cv.CvUseCases
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.invitation.domain.model.Invitation
+import org.override.atomo.feature.invitation.domain.repository.InvitationRepository
+import org.override.atomo.feature.invitation.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.portfolio.domain.model.Portfolio
+import org.override.atomo.feature.portfolio.domain.repository.PortfolioRepository
+import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUseCases
 import org.override.atomo.feature.profile.domain.ProfileValidator
+import org.override.atomo.feature.profile.domain.repository.ProfileRepository
+import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.feature.shop.domain.model.Shop
+import org.override.atomo.feature.shop.domain.repository.ShopRepository
+import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 

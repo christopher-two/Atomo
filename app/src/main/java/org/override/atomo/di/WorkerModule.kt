@@ -11,9 +11,9 @@ package org.override.atomo.di
 
 import org.koin.androidx.workmanager.dsl.workerOf
 import org.koin.dsl.module
-import org.override.atomo.data.worker.DataSyncWorker
-import org.override.atomo.data.worker.ProfileSyncWorker
 import org.override.atomo.data.worker.UploadWorker
+import org.override.atomo.feature.profile.data.worker.ProfileSyncWorker
+import org.override.atomo.feature.sync.data.worker.DataSyncWorker
 
 val workerModule = module {
     workerOf(::UploadWorker)

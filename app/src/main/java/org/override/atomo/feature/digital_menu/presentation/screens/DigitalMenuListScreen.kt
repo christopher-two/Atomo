@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.AtomoScaffold
 import org.override.atomo.core.ui.components.UpgradePlanScreen
-import org.override.atomo.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.presentation.DigitalMenuAction
 import org.override.atomo.feature.digital_menu.presentation.DigitalMenuState
 import org.override.atomo.feature.digital_menu.presentation.components.DigitalMenuShimmer

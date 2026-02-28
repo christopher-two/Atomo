@@ -37,7 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import org.override.atomo.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.presentation.DigitalMenuAction
 import org.override.atomo.feature.digital_menu.presentation.components.DishItemRow
 

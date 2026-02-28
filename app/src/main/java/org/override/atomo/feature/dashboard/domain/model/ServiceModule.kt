@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.dashboard.presentation
+package org.override.atomo.feature.dashboard.domain.model
 
 import org.override.atomo.domain.model.Cv
 import org.override.atomo.domain.model.Dish

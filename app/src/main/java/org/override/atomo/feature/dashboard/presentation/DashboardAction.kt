@@ -46,30 +46,12 @@ sealed interface DashboardAction {
     // Sheet actions
     data object DismissSheet : DashboardAction
     
-    // Delete confirmation actions
-    data class ConfirmDeleteMenu(val menu: Menu) : DashboardAction
-    data class ConfirmDeletePortfolio(val portfolio: Portfolio) : DashboardAction
-    data class ConfirmDeleteCv(val cv: Cv) : DashboardAction
-    data class ConfirmDeleteShop(val shop: Shop) : DashboardAction
-    data class ConfirmDeleteInvitation(val invitation: Invitation) : DashboardAction
-    
-    // Share/Preview actions
-    data class ShareMenu(val menuId: String) : DashboardAction
-    data class SharePortfolio(val portfolioId: String) : DashboardAction
-    data class ShareCv(val cvId: String) : DashboardAction
-    data class ShareShop(val shopId: String) : DashboardAction
-    data class ShareInvitation(val invitationId: String) : DashboardAction
-    
     // Create actions (from FAB or empty state)
     data object CreateMenu : DashboardAction
     data object CreatePortfolio : DashboardAction
     data object CreateCv : DashboardAction
     data object CreateShop : DashboardAction
     data object CreateInvitation : DashboardAction
-    
-    // Dialog dismiss
-    data object DismissDeleteDialog : DashboardAction
-    data object ConfirmDelete : DashboardAction
     
     // Generic Service Actions (Card Actions)
     data class PreviewService(val type: ServiceType, val id: String) : DashboardAction

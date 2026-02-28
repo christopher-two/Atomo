@@ -14,8 +14,8 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.RestaurantMenu
 import androidx.compose.material.icons.filled.ShoppingBag
 import org.override.atomo.feature.dashboard.presentation.DashboardAction
-import org.override.atomo.feature.dashboard.presentation.DashboardShortcut
-import org.override.atomo.feature.dashboard.presentation.ServiceModule
+import org.override.atomo.feature.dashboard.domain.model.DashboardShortcut
+import org.override.atomo.feature.dashboard.domain.model.ServiceModule
 
 object DashboardHelpers {
     fun generateShortcuts(services: List<ServiceModule>): List<DashboardShortcut> {

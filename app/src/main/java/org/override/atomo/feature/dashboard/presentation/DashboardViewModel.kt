@@ -32,6 +32,9 @@ import org.override.atomo.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.domain.usecase.shop.ShopUseCases
 import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.domain.util.AtomoUrlGenerator
+import org.override.atomo.feature.dashboard.domain.model.DashboardSheet
+import org.override.atomo.feature.dashboard.domain.model.DashboardStatistics
+import org.override.atomo.feature.dashboard.domain.model.ServiceModule
 import org.override.atomo.feature.dashboard.presentation.utils.DashboardHelpers
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
@@ -119,16 +122,6 @@ class DashboardViewModel(
 
             DashboardAction.DismissSheet -> _state.update { it.copy(activeSheet = null) }
 
-            /* Delete confirmation */
-            is DashboardAction.ConfirmDeleteMenu -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteMenu(action.menu)) }
-            is DashboardAction.ConfirmDeletePortfolio -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeletePortfolio(action.portfolio)) }
-            is DashboardAction.ConfirmDeleteCv -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteCv(action.cv)) }
-            is DashboardAction.ConfirmDeleteShop -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteShop(action.shop)) }
-            is DashboardAction.ConfirmDeleteInvitation -> _state.update { it.copy(deleteDialog = DeleteDialogState.DeleteInvitation(action.invitation)) }
-
-            DashboardAction.DismissDeleteDialog -> _state.update { it.copy(deleteDialog = null) }
-            DashboardAction.ConfirmDelete -> deleteService()
-
             /* Service Card Actions */
             is DashboardAction.PreviewService -> {
                 val username = _state.value.profile?.username
@@ -185,38 +178,9 @@ class DashboardViewModel(
                 _state.update { it.copy(activeSheet = null, isOperationLoading = false) }
                 _events.send(DashboardEvent.ShowSnackbar("Cambios guardados correctamente"))
             }.onFailure { error ->
-                    _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
-                    _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
-                }
-        }
-    }
-
-    private fun deleteService() {
-        val currentState = _state.value
-        val dialogState = currentState.deleteDialog ?: return
-
-        viewModelScope.launch {
-            _state.update { it.copy(isOperationLoading = true, deleteDialog = null) }
-
-            val result = when (dialogState) {
-                is DeleteDialogState.DeleteMenu -> menuUseCases.deleteMenu(dialogState.menu.id)
-                is DeleteDialogState.DeletePortfolio -> portfolioUseCases.deletePortfolio(dialogState.portfolio.id)
-                is DeleteDialogState.DeleteCv -> cvUseCases.deleteCv(dialogState.cv.id)
-                is DeleteDialogState.DeleteShop -> shopUseCases.deleteShop(dialogState.shop.id)
-                is DeleteDialogState.DeleteInvitation -> invitationUseCases.deleteInvitation(dialogState.invitation.id)
+                _state.update { it.copy(isOperationLoading = false, error = "Error al actualizar: ${error.message}") }
+                _events.send(DashboardEvent.ShowSnackbar("Error: ${error.message}"))
             }
-
-            result
-                .onSuccess {
-                    Log.d(TAG, "Service deleted successfully")
-                    _state.update { it.copy(isOperationLoading = false) }
-                    _events.send(DashboardEvent.ShowSnackbar("Servicio eliminado correctamente"))
-                }
-                .onFailure { error ->
-                    Log.e(TAG, "Failed to delete service", error)
-                    _state.update { it.copy(isOperationLoading = false, error = "Error al eliminar: ${error.message}") }
-                    _events.send(DashboardEvent.ShowSnackbar("Error al eliminar: ${error.message}"))
-                }
         }
     }
 

@@ -7,10 +7,14 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.feature.dashboard.presentation
+package org.override.atomo.feature.dashboard.domain.model
 
-data class DashboardStatistics(
-    val activeServices: Int = 0,
-    val totalViews: Int = 0,
-    val totalInteractions: Int = 0
+import androidx.compose.ui.graphics.vector.ImageVector
+import org.override.atomo.feature.dashboard.presentation.DashboardAction
+
+data class DashboardShortcut(
+    val id: String,
+    val title: String,
+    val icon: ImageVector,
+    val action: DashboardAction
 )

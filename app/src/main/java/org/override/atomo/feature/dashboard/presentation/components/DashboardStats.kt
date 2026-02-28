@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import org.override.atomo.core.ui.components.AtomoCard
-import org.override.atomo.feature.dashboard.presentation.DashboardStatistics
+import org.override.atomo.feature.dashboard.domain.model.DashboardStatistics
 
 @Composable
 fun DashboardStats(

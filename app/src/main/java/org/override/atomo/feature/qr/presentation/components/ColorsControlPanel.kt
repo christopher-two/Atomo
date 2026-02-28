@@ -31,13 +31,7 @@ import org.override.atomo.feature.qr.presentation.QrAction
 
 @Composable
 fun ColorsControlPanel(config: QrConfig, onAction: (QrAction) -> Unit) {
-    ColorPickerItem("Color de Datos", config.darkColor) { onAction(QrAction.UpdateDarkColor(it)) }
-    Spacer(modifier = Modifier.height(12.dp))
-    ColorPickerItem("Fondo", config.lightColor) { onAction(QrAction.UpdateLightColor(it)) }
-    Spacer(modifier = Modifier.height(12.dp))
-    ColorPickerItem("Color de Ojos (Marco)", config.frameColor) { onAction(QrAction.UpdateFrameColor(it)) }
-    Spacer(modifier = Modifier.height(12.dp))
-    ColorPickerItem("Color de Ojos (Centro)", config.ballColor) { onAction(QrAction.UpdateBallColor(it)) }
+    ColorPickerItem("Color de Código", config.darkColor) { onAction(QrAction.UpdateForegroundColor(it)) }
 }
 
 @Composable

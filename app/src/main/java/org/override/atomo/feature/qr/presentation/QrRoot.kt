@@ -9,6 +9,7 @@ package org.override.atomo.feature.qr.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +21,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Token
 import androidx.compose.material3.Card
@@ -30,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -50,16 +51,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.alexzhirkevich.qrose.options.QrErrorCorrectionLevel
-import io.github.alexzhirkevich.qrose.options.QrLogo
-import io.github.alexzhirkevich.qrose.options.QrLogoPadding
-import io.github.alexzhirkevich.qrose.options.QrLogoShape
-import io.github.alexzhirkevich.qrose.options.circle
 import io.github.alexzhirkevich.qrose.rememberQrCodePainter
 import kotlinx.coroutines.launch
 import org.override.atomo.feature.qr.presentation.components.ColorsControlPanel
-import org.override.atomo.feature.qr.presentation.components.LogoControlPanel
 import org.override.atomo.feature.qr.presentation.components.ShapesControlPanel
-import org.override.atomo.feature.qr.presentation.mapper.getLogoPainter
 import org.override.atomo.feature.qr.presentation.mapper.toQrColors
 import org.override.atomo.feature.qr.presentation.mapper.toQrShapes
 import org.override.atomo.feature.qr.presentation.util.generateQrBitmap
@@ -71,12 +66,8 @@ fun QrRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
-    var currentPainter: Painter? by remember {
-        androidx.compose.runtime.mutableStateOf(
-            null
-        )
-    }
+    val scope = rememberCoroutineScope()
+    var currentPainter: Painter? by remember { mutableStateOf(null) }
 
     Scaffold(
         topBar = {
@@ -86,7 +77,7 @@ fun QrRoot(
                     IconButton(onClick = {
                         currentPainter?.let { painter ->
                             scope.launch {
-                                val bitmap = generateQrBitmap(context, painter, state.data)
+                                val bitmap = generateQrBitmap(context, painter, state.data, state.config.lightColor)
                                 viewModel.onAction(QrAction.Download(bitmap, state.data))
                             }
                         }
@@ -117,36 +108,22 @@ fun QrEditorScreen(
 
     val shapes = config.toQrShapes()
     val colors = config.toQrColors()
-    val logoPainter = config.getLogoPainter()
 
-    val qrPainter = if (logoPainter != null) {
-        rememberQrCodePainter(
-            data = state.data ?: "",
-            errorCorrectionLevel = QrErrorCorrectionLevel.High,
-            shapes = shapes,
-            logo = QrLogo(
-                painter = logoPainter,
-                size = 0.2f,
-                padding = QrLogoPadding.Accurate(.1f),
-                shape = QrLogoShape.circle(),
-            ),
-            colors = colors
-        )
-    } else {
-        rememberQrCodePainter(
-            data = state.data ?: "",
-            errorCorrectionLevel = QrErrorCorrectionLevel.High,
-            shapes = shapes,
-            colors = colors
-        )
-    }
+    val qrPainter = rememberQrCodePainter(
+        data = state.data ?: "",
+        errorCorrectionLevel = QrErrorCorrectionLevel.High,
+        shapes = shapes,
+        colors = colors
+    )
 
     LaunchedEffect(qrPainter) {
         onPainterUpdated(qrPainter)
     }
 
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Preview Area
         Box(
@@ -157,9 +134,10 @@ fun QrEditorScreen(
             contentAlignment = Alignment.Center
         ) {
             Card(
+                modifier = Modifier.padding(16.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = config.lightColor)
             ) {
                 Image(
                     painter = qrPainter,
@@ -173,32 +151,35 @@ fun QrEditorScreen(
 
         // Control Panel
         var selectedTabIndex by remember { mutableIntStateOf(0) }
-        val tabs = listOf("Formas", "Colores", "Iconos")
+        val tabs = listOf("Formas", "Colores")
 
         Column(
             modifier = Modifier
                 .weight(1f)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            TabRow(selectedTabIndex = selectedTabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index },
-                        text = { Text(title) },
-                        icon = {
-                            Icon(
-                                when (index) {
-                                    0 -> Icons.Default.Token
-                                    1 -> Icons.Default.Palette
-                                    else -> Icons.Default.Image
-                                },
-                                contentDescription = null
-                            )
-                        }
-                    )
+            SecondaryTabRow(
+                selectedTabIndex = selectedTabIndex,
+                modifier = Modifier.fillMaxWidth(),
+                tabs = {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) },
+                            icon = {
+                                Icon(
+                                    when (index) {
+                                        0 -> Icons.Default.Token
+                                        else -> Icons.Default.Palette
+                                    },
+                                    contentDescription = null
+                                )
+                            }
+                        )
+                    }
                 }
-            }
+            )
 
             Column(
                 modifier = Modifier
@@ -209,7 +190,6 @@ fun QrEditorScreen(
                 when (selectedTabIndex) {
                     0 -> ShapesControlPanel(state.config, onAction)
                     1 -> ColorsControlPanel(state.config, onAction)
-                    2 -> LogoControlPanel(state.config, onAction)
                 }
             }
         }

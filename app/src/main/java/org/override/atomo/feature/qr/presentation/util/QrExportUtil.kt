@@ -20,10 +20,15 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.luminance
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.toColorInt
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.override.atomo.R
 
 /**
  * Encapsulates the logic of drawing a Compose Painter
@@ -32,13 +37,14 @@ import kotlinx.coroutines.withContext
 suspend fun generateQrBitmap(
     context: Context,
     painter: Painter,
-    dataText: String?
+    dataText: String?,
+    backgroundColor: androidx.compose.ui.graphics.Color
 ): Bitmap = withContext(Dispatchers.IO) {
     val width = 1080
     val height = 1350
     val bitmap = createBitmap(width, height)
     val androidCanvas = AndroidCanvas(bitmap)
-    androidCanvas.drawColor(AndroidColor.WHITE)
+    androidCanvas.drawColor(backgroundColor.toArgb())
 
     val canvas = Canvas(androidCanvas)
     val qrSize = 800f
@@ -59,18 +65,28 @@ suspend fun generateQrBitmap(
         }
     }
 
-    if (!dataText.isNullOrBlank()) {
+    val paintColor = if (backgroundColor.luminance() < 0.5f) AndroidColor.WHITE else "#3C1A06".toColorInt()
+    val drawable = ContextCompat.getDrawable(context, R.drawable.logo_atomo_app_monochrome)
+    
+    if (drawable != null) {
+        val logoSize = 140
+        val logoLeft = ((width - logoSize) / 2f).toInt()
+        val logoTop = (qrY + qrSize + 100f).toInt()
+        
+        drawable.setBounds(logoLeft, logoTop, logoLeft + logoSize, logoTop + logoSize)
+        DrawableCompat.setTint(drawable, paintColor)
+        drawable.draw(androidCanvas)
+        
         val paint = Paint().apply {
-            color = "#3C1A06".toColorInt()
-            textSize = 80f
+            color = paintColor
+            textSize = 65f
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
             isAntiAlias = true
             letterSpacing = 0.05f
         }
-        val textY = qrY + qrSize + 160f
-        val displayText = dataText.removePrefix("https://").removePrefix("http://").uppercase()
-        androidCanvas.drawText(displayText, width / 2f, textY, paint)
+        val textY = logoTop + logoSize + 85f
+        androidCanvas.drawText("Atomo", width / 2f, textY, paint)
     }
 
     bitmap

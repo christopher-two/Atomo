@@ -9,6 +9,8 @@ package org.override.atomo.feature.qr.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -50,17 +52,17 @@ class QrViewModel(
             is QrAction.UpdateBallShape -> _state.update { 
                 it.copy(config = it.config.copy(ballShape = action.shape)) 
             }
-            is QrAction.UpdateDarkColor -> _state.update { 
-                it.copy(config = it.config.copy(darkColor = action.color)) 
-            }
-            is QrAction.UpdateLightColor -> _state.update { 
-                it.copy(config = it.config.copy(lightColor = action.color)) 
-            }
-            is QrAction.UpdateFrameColor -> _state.update { 
-                it.copy(config = it.config.copy(frameColor = action.color)) 
-            }
-            is QrAction.UpdateBallColor -> _state.update { 
-                it.copy(config = it.config.copy(ballColor = action.color)) 
+            is QrAction.UpdateForegroundColor -> _state.update {
+                val isLight = action.color.luminance() > 0.5f
+                val backgroundColor = if (isLight) Color.Black else Color.White
+                it.copy(
+                    config = it.config.copy(
+                        darkColor = action.color,
+                        frameColor = action.color,
+                        ballColor = action.color,
+                        lightColor = backgroundColor
+                    )
+                )
             }
             is QrAction.UpdateLogoType -> _state.update {
                 it.copy(config = it.config.copy(logoType = action.type))

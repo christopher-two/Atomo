@@ -24,10 +24,7 @@ sealed interface QrAction {
     data class UpdateFrameShape(val shape: QrFrameShapeType) : QrAction
     data class UpdateBallShape(val shape: QrBallShapeType) : QrAction
     
-    data class UpdateDarkColor(val color: Color) : QrAction
-    data class UpdateLightColor(val color: Color) : QrAction
-    data class UpdateFrameColor(val color: Color) : QrAction
-    data class UpdateBallColor(val color: Color) : QrAction
+    data class UpdateForegroundColor(val color: Color) : QrAction
     
     data class UpdateLogoType(val type: QrLogoType) : QrAction
     data class SetCustomLogo(val uri: String) : QrAction

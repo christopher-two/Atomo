@@ -8,13 +8,17 @@
 package org.override.atomo.feature.qr.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,10 +35,14 @@ fun ShapesControlPanel(config: QrConfig, onAction: (QrAction) -> Unit) {
         current = config.pixelShape,
         onSelect = { onAction(QrAction.UpdatePixelShape(it)) }
     )
-    
+
     Spacer(modifier = Modifier.height(16.dp))
 
-    Text("Marcos (Ojos)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+    Text(
+        "Marcos (Ojos)",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold
+    )
     ShapeSelector(
         current = config.frameShape,
         onSelect = { onAction(QrAction.UpdateFrameShape(it)) }
@@ -49,19 +57,35 @@ fun ShapesControlPanel(config: QrConfig, onAction: (QrAction) -> Unit) {
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun <T : Enum<T>> ShapeSelector(current: T, onSelect: (T) -> Unit) {
     val items = current::class.java.enumConstants ?: return
-    
+
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-       items.forEach { shape ->
-           Column(horizontalAlignment = Alignment.CenterHorizontally) {
-               RadioButton(
-                   selected = shape == current,
-                   onClick = { onSelect(shape) }
-               )
-               Text(shape.name, style = MaterialTheme.typography.bodySmall)
-           }
-       }
+        ButtonGroup(
+            overflowIndicator = {
+                Icon(
+                    imageVector = Icons.Default.MoreHoriz,
+                    contentDescription = "More",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            items.forEach { shape ->
+                toggleableItem(
+                    checked = shape == current,
+                    label = shape.name,
+                    weight = 2f,
+                    onCheckedChange = {
+                        onSelect(shape)
+                    }
+                )
+            }
+        }
     }
 }

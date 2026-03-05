@@ -11,7 +11,7 @@ package org.override.atomo.di.domain
 
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
-import org.override.atomo.feature.auth.domain.usecase.session.CheckSessionUseCase
+import org.override.atomo.feature.auth.domain.usecase.CheckSessionUseCase
 import org.override.atomo.feature.cv.domain.usecase.cv.AddEducationUseCase
 import org.override.atomo.feature.cv.domain.usecase.cv.AddExperienceUseCase
 import org.override.atomo.feature.cv.domain.usecase.cv.AddSkillUseCase

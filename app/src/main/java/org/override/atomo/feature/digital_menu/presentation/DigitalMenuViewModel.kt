@@ -296,9 +296,14 @@ class DigitalMenuViewModel(
 
     private fun deleteDish(dish: Dish) {
         viewModelScope.launch {
-            menuUseCases.deleteDish(dish).onFailure { error ->
-                updateLocal { it.copy(error = error.message) }
-            }
+            menuUseCases.deleteDish(dish)
+                .onSuccess {
+                    updateLocal { it.copy(error = null) }
+                    snackbarManager.showMessage("Dish deleted successfully")
+                }
+                .onFailure { error ->
+                    updateLocal { it.copy(error = error.message) }
+                }
         }
     }
 

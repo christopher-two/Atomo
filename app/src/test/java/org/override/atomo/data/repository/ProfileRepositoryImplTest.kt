@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.data.repository
+package org.override.atomo.feature.profile.data.repository
 
 import app.cash.turbine.test
 import io.github.jan.supabase.SupabaseClient
@@ -19,9 +19,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.override.atomo.data.local.dao.ProfileDao
-import org.override.atomo.data.local.entity.ProfileEntity
-import org.override.atomo.data.manager.SyncManager
+import org.override.atomo.feature.profile.data.local.dao.ProfileDao
+import org.override.atomo.feature.profile.data.local.entity.ProfileEntity
+import org.override.atomo.feature.sync.data.manager.SyncManager
 
 class ProfileRepositoryImplTest {
 

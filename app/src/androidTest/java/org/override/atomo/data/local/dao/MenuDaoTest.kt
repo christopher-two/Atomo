@@ -13,7 +13,6 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -22,9 +21,10 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.data.local.entity.DishEntity
-import org.override.atomo.data.local.entity.MenuCategoryEntity
-import org.override.atomo.data.local.entity.MenuEntity
+import org.override.atomo.feature.digital_menu.data.local.dao.MenuDao
+import org.override.atomo.feature.digital_menu.data.local.entity.DishEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuCategoryEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuEntity
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -101,22 +101,24 @@ class MenuDaoTest {
         createdAt = System.currentTimeMillis()
     )
 
-    private fun createCategory(id: String, menuId: String, name: String, sortOrder: Int) = MenuCategoryEntity(
-        id = id,
-        menuId = menuId,
-        name = name,
-        sortOrder = sortOrder,
-        createdAt = System.currentTimeMillis()
-    )
+    private fun createCategory(id: String, menuId: String, name: String, sortOrder: Int) =
+        MenuCategoryEntity(
+            id = id,
+            menuId = menuId,
+            name = name,
+            sortOrder = sortOrder,
+            createdAt = System.currentTimeMillis()
+        )
 
-    private fun createDish(id: String, menuId: String, categoryId: String, name: String, price: Double) = DishEntity(
-        id = id,
-        menuId = menuId,
-        categoryId = categoryId,
-        name = name,
-        description = "Delicious $name",
-        price = price,
-        imageUrl = null,
-        createdAt = System.currentTimeMillis()
-    )
+    private fun createDish(id: String, menuId: String, categoryId: String, name: String, price: Double) =
+        DishEntity(
+            id = id,
+            menuId = menuId,
+            categoryId = categoryId,
+            name = name,
+            description = "Delicious $name",
+            price = price,
+            imageUrl = null,
+            createdAt = System.currentTimeMillis()
+        )
 }

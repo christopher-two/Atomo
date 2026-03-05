@@ -20,9 +20,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.data.local.entity.InvitationEntity
-import org.override.atomo.data.local.entity.InvitationResponseEntity
-import org.override.atomo.data.local.entity.ProfileEntity
+import org.override.atomo.feature.invitation.data.local.dao.InvitationDao
+import org.override.atomo.feature.invitation.data.local.entity.InvitationEntity
+import org.override.atomo.feature.invitation.data.local.entity.InvitationResponseEntity
+import org.override.atomo.feature.profile.data.local.dao.ProfileDao
+import org.override.atomo.feature.profile.data.local.entity.ProfileEntity
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -98,12 +100,13 @@ class InvitationDaoTest {
         createdAt = System.currentTimeMillis()
     )
 
-    private fun createResponse(id: String, invitationId: String, guest: String, status: String) = InvitationResponseEntity(
-        id = id,
-        invitationId = invitationId,
-        guestName = guest,
-        status = status,
-        dietaryNotes = null,
-        createdAt = System.currentTimeMillis()
-    )
+    private fun createResponse(id: String, invitationId: String, guest: String, status: String) =
+        InvitationResponseEntity(
+            id = id,
+            invitationId = invitationId,
+            guestName = guest,
+            status = status,
+            dietaryNotes = null,
+            createdAt = System.currentTimeMillis()
+        )
 }

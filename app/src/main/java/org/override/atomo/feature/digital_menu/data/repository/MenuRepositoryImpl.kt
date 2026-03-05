@@ -41,8 +41,6 @@ class MenuRepositoryImpl(
     private val syncManager: SyncManager
 ) : MenuRepository {
 
-    // region Menu Flows
-
     /**
      * Observes all menus for a specific user, combining them with their related categories and dishes.
      *
@@ -113,9 +111,6 @@ class MenuRepositoryImpl(
             )
         }
     }
-    // endregion
-
-    // region Menu CRUD
 
     /**
      * Creates a new menu locally and schedules a synchronization upload.
@@ -150,9 +145,6 @@ class MenuRepositoryImpl(
             syncManager.scheduleUpload(menu.userId)
         }
     }
-    // endregion
-
-    // region Category Flows & CRUD
 
     /**
      * Observes all categories for a specific menu.
@@ -201,9 +193,6 @@ class MenuRepositoryImpl(
             e.printStackTrace()
         }
     }
-    // endregion
-
-    // region Dish Flows & CRUD
 
     /**
      * Observes all dishes for a specific menu.
@@ -246,25 +235,21 @@ class MenuRepositoryImpl(
     }
 
     /**
-     * Soft deletes a dish locally (isVisible=false) and schedules a synchronization upload.
+     * Deletes a dish physically from the local database and attempts an immediate deletion
+     * on the remote server (best-effort). If the remote call fails (e.g. no network),
+     * the record is already gone locally; the next syncDown will reconcile any orphans.
      *
      * @param dishId The ID of the dish to delete.
      * @return A Result indicating success or failure.
      */
     override suspend fun deleteDish(dishId: String): Result<Unit> = runCatching {
-        val dish = menuDao.getDish(dishId)
-        if (dish != null) {
-            menuDao.updateDish(dish.copy(isVisible = false, isSynced = false))
-
-            val userId = menuDao.getMenu(dish.menuId)?.userId
-            if (userId != null) {
-                syncManager.scheduleUpload(userId)
-            }
+        menuDao.deleteDishById(dishId)
+        try {
+            supabase.from("dishes").delete { filter { eq("id", dishId) } }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
-    // endregion
-
-    // region Synchronization (Sync Down / Pull)
 
     /**
      * Synchronizes menus from the server to the local database (Pull).
@@ -510,9 +495,6 @@ class MenuRepositoryImpl(
             menuDao.insertDish(entity.copy(isSynced = true))
         }
     }
-    // endregion
-
-    // region Helpers
 
     /**
      * Executes an optimistic local update and schedules a sync.
@@ -541,5 +523,4 @@ class MenuRepositoryImpl(
 
         domainObject
     }
-    // endregion
 }

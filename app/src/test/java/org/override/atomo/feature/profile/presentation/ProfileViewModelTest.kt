@@ -21,12 +21,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.override.atomo.core.common.SnackbarManager
-import org.override.atomo.domain.model.Profile
-import org.override.atomo.domain.usecase.profile.CheckUsernameAvailabilityUseCase
-import org.override.atomo.domain.usecase.profile.GetProfileUseCase
-import org.override.atomo.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.domain.usecase.profile.SyncProfileUseCase
-import org.override.atomo.domain.usecase.profile.UpdateProfileUseCase
+import org.override.atomo.feature.profile.domain.model.Profile
+import org.override.atomo.feature.profile.domain.usecase.profile.CheckUsernameAvailabilityUseCase
+import org.override.atomo.feature.profile.domain.usecase.profile.GetProfileUseCase
+import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.feature.profile.domain.usecase.profile.SyncProfileUseCase
+import org.override.atomo.feature.profile.domain.usecase.profile.UpdateProfileUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.util.MainDispatcherRule
 

@@ -18,12 +18,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.override.atomo.domain.usecase.subscription.GetExistingServicesUseCase
-import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
-import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
-import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.subscription.domain.usecase.subscription.GetExistingServicesUseCase
+import org.override.atomo.feature.subscription.domain.usecase.subscription.GetServiceLimitsUseCase
+import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
+import org.override.atomo.feature.sync.domain.usecase.sync.SyncAllServicesUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.util.MainDispatcherRule
 

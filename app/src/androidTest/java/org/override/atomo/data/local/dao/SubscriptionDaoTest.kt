@@ -21,9 +21,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.data.local.entity.PlanEntity
-import org.override.atomo.data.local.entity.ProfileEntity
-import org.override.atomo.data.local.entity.SubscriptionEntity
+import org.override.atomo.feature.profile.data.local.dao.ProfileDao
+import org.override.atomo.feature.profile.data.local.entity.ProfileEntity
+import org.override.atomo.feature.subscription.data.local.dao.SubscriptionDao
+import org.override.atomo.feature.subscription.data.local.entity.PlanEntity
+import org.override.atomo.feature.subscription.data.local.entity.SubscriptionEntity
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -53,7 +55,7 @@ class SubscriptionDaoTest {
     fun insertAndGetPlan() = runTest {
         val plan = createPlan("plan_pro")
         subscriptionDao.insertPlan(plan)
-        
+
         val loaded = subscriptionDao.getPlan("plan_pro")
         assertEquals(plan, loaded)
     }
@@ -63,13 +65,13 @@ class SubscriptionDaoTest {
         // Must insert Profile and Plan first due to Foreign Keys
         val profile = createProfile("user_1")
         profileDao.insertProfile(profile)
-        
+
         val plan = createPlan("plan_free")
         subscriptionDao.insertPlan(plan)
-        
+
         val subscription = createSubscription("sub_1", "user_1", "plan_free")
         subscriptionDao.insertSubscription(subscription)
-        
+
         val loaded = subscriptionDao.getSubscription("user_1")
         assertEquals(subscription, loaded)
     }
@@ -78,15 +80,15 @@ class SubscriptionDaoTest {
     fun deleteSubscriptionByUser() = runTest {
         val profile = createProfile("user_2")
         profileDao.insertProfile(profile)
-        
+
         val plan = createPlan("plan_basic")
         subscriptionDao.insertPlan(plan)
-        
+
         val subscription = createSubscription("sub_2", "user_2", "plan_basic")
         subscriptionDao.insertSubscription(subscription)
-        
+
         subscriptionDao.deleteSubscriptionByUser("user_2")
-        
+
         val loaded = subscriptionDao.getSubscription("user_2")
         assertNull(loaded)
     }

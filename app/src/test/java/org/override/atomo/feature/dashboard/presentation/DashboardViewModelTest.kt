@@ -21,16 +21,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.override.atomo.data.manager.SyncManager
-import org.override.atomo.domain.usecase.cv.CvUseCases
-import org.override.atomo.domain.usecase.invitation.InvitationUseCases
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
-import org.override.atomo.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.domain.usecase.shop.ShopUseCases
-import org.override.atomo.domain.usecase.sync.SyncAllServicesUseCase
+import org.override.atomo.feature.cv.domain.usecase.cv.CvUseCases
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.invitation.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUseCases
+import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.util.MainDispatcherRule
 
@@ -47,7 +46,6 @@ class DashboardViewModelTest {
     private val cvUseCases: CvUseCases = mockk()
     private val shopUseCases: ShopUseCases = mockk()
     private val invitationUseCases: InvitationUseCases = mockk()
-    private val syncAllServices: SyncAllServicesUseCase = mockk()
     private val rootNavigation: RootNavigation = mockk()
     private val homeNavigation: HomeNavigation = mockk()
     private val syncManager: SyncManager = mockk(relaxed = true)
@@ -66,12 +64,10 @@ class DashboardViewModelTest {
         coEvery { cvUseCases.getCvs("user123") } returns flowOf(emptyList())
         coEvery { shopUseCases.getShops("user123") } returns flowOf(emptyList())
         coEvery { invitationUseCases.getInvitations("user123") } returns flowOf(emptyList())
-        coEvery { syncAllServices(any()) } returns Result.success(Unit)
         
         viewModel = DashboardViewModel(
             sessionRepository, profileUseCases, menuUseCases, portfolioUseCases,
-            cvUseCases, shopUseCases, invitationUseCases, syncAllServices,
-            rootNavigation, homeNavigation, syncManager
+            cvUseCases, shopUseCases, invitationUseCases, rootNavigation, homeNavigation, syncManager
         )
     }
 

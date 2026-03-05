@@ -20,10 +20,12 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.data.local.entity.ProductCategoryEntity
-import org.override.atomo.data.local.entity.ProductEntity
-import org.override.atomo.data.local.entity.ProfileEntity
-import org.override.atomo.data.local.entity.ShopEntity
+import org.override.atomo.feature.profile.data.local.dao.ProfileDao
+import org.override.atomo.feature.profile.data.local.entity.ProfileEntity
+import org.override.atomo.feature.shop.data.local.dao.ShopDao
+import org.override.atomo.feature.shop.data.local.entity.ProductCategoryEntity
+import org.override.atomo.feature.shop.data.local.entity.ProductEntity
+import org.override.atomo.feature.shop.data.local.entity.ShopEntity
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -105,14 +107,15 @@ class ShopDaoTest {
         createdAt = System.currentTimeMillis()
     )
 
-    private fun createProduct(id: String, shopId: String, categoryId: String, name: String, price: Double) = ProductEntity(
-        id = id,
-        shopId = shopId,
-        categoryId = categoryId,
-        name = name,
-        description = "Excellent $name",
-        price = price,
-        imageUrl = null,
-        createdAt = System.currentTimeMillis()
-    )
+    private fun createProduct(id: String, shopId: String, categoryId: String, name: String, price: Double) =
+        ProductEntity(
+            id = id,
+            shopId = shopId,
+            categoryId = categoryId,
+            name = name,
+            description = "Excellent $name",
+            price = price,
+            imageUrl = null,
+            createdAt = System.currentTimeMillis()
+        )
 }

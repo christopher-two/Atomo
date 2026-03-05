@@ -21,13 +21,13 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.override.atomo.core.common.RouteApp
-import org.override.atomo.data.manager.SyncManager
-import org.override.atomo.domain.usecase.onboarding.ShouldShowOnboardingUseCase
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.auth.presentation.AuthAction
 import org.override.atomo.feature.auth.presentation.AuthViewModel
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.onboarding.domain.usecase.onboarding.ShouldShowOnboardingUseCase
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import org.override.atomo.libs.auth.api.ExternalAuthResult
 import org.override.atomo.util.MainDispatcherRule
 

@@ -1,4 +1,13 @@
-package org.override.atomo.domain.usecase.subscription
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
+package org.override.atomo.feature.subscription.domain.usecase.subscription
 
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -6,12 +15,12 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.Plan
-import org.override.atomo.domain.model.Subscription
-import org.override.atomo.domain.model.SubscriptionStatus
-import org.override.atomo.domain.repository.MenuRepository
-import org.override.atomo.domain.repository.SubscriptionRepository
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
+import org.override.atomo.feature.subscription.domain.model.Plan
+import org.override.atomo.feature.subscription.domain.model.Subscription
+import org.override.atomo.feature.subscription.domain.model.SubscriptionStatus
+import org.override.atomo.feature.subscription.domain.repository.SubscriptionRepository
 
 class CanAddDishUseCaseTest {
 
@@ -37,7 +46,7 @@ class CanAddDishUseCaseTest {
         coEvery { subscriptionRepository.getPlan("p1") } returns freePlan
         
         // Mock menu with 10 dishes
-        val dishes = List(10) { mockk<org.override.atomo.domain.model.Dish>() }
+        val dishes = List(10) { mockk<org.override.atomo.feature.digital_menu.domain.model.Dish>() }
         val menu = mockk<Menu> {
             coEvery { this@mockk.dishes } returns dishes
         }
@@ -62,7 +71,7 @@ class CanAddDishUseCaseTest {
         coEvery { subscriptionRepository.getSubscription(userId) } returns subscription
         coEvery { subscriptionRepository.getPlan("p1") } returns freePlan
         
-        val dishes = List(5) { mockk<org.override.atomo.domain.model.Dish>() }
+        val dishes = List(5) { mockk<org.override.atomo.feature.digital_menu.domain.model.Dish>() }
         val menu = mockk<Menu> {
             coEvery { this@mockk.dishes } returns dishes
         }

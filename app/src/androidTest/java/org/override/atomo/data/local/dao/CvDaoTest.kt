@@ -20,11 +20,13 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.data.local.entity.CvEducationEntity
-import org.override.atomo.data.local.entity.CvEntity
-import org.override.atomo.data.local.entity.CvExperienceEntity
-import org.override.atomo.data.local.entity.CvSkillEntity
-import org.override.atomo.data.local.entity.ProfileEntity
+import org.override.atomo.feature.cv.data.local.dao.CvDao
+import org.override.atomo.feature.cv.data.local.entity.CvEducationEntity
+import org.override.atomo.feature.cv.data.local.entity.CvEntity
+import org.override.atomo.feature.cv.data.local.entity.CvExperienceEntity
+import org.override.atomo.feature.cv.data.local.entity.CvSkillEntity
+import org.override.atomo.feature.profile.data.local.dao.ProfileDao
+import org.override.atomo.feature.profile.data.local.entity.ProfileEntity
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)

@@ -1,4 +1,13 @@
-package org.override.atomo.domain.usecase.menu
+/*
+ * Copyright (c) 2026 Christopher Alejandro Maldonado Chávez.
+ * Override. Todos los derechos reservados.
+ * Este código fuente y sus archivos relacionados son propiedad intelectual de Override.
+ * Queda estrictamente prohibida la reproducción, distribución o modificación
+ * total o parcial de este material sin el consentimiento previo por escrito.
+ * Uruapan, Michoacán, México. | atomo.click
+ */
+
+package org.override.atomo.feature.digital_menu.domain.usecase.menu
 
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -7,10 +16,10 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.repository.MenuRepository
-import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
+import org.override.atomo.feature.storage.domain.usecase.storage.DeleteDishImageUseCase
 
 class DeleteMenuUseCaseTest {
 

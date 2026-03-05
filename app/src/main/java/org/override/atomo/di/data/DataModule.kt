@@ -13,11 +13,12 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.work.WorkManager
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import org.override.atomo.data.manager.SyncManager
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import org.override.atomo.libs.biometric.BiometricHelper
 import org.override.atomo.libs.session.api.SessionRepository
 import org.override.atomo.libs.session.impl.DataStoreSessionRepository
@@ -31,6 +32,9 @@ val DataModule: Module
     get() = module {
         // Proporcionar DataStore
         single<DataStore<Preferences>> { get<Context>().dataStore }
+
+        // Proporcionar WorkManager
+        single { WorkManager.getInstance(get()) }
         
         singleOf(::DataStoreSessionRepository) bind SessionRepository::class
         singleOf(::DataStoreSettingsRepository) bind SettingsRepository::class

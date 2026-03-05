@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.auth.presentation
 
+import android.content.Context
+
 import android.content.Intent
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
@@ -110,7 +112,7 @@ fun AuthScreen(
 }
 
 @Composable
-fun ColumnScope.Content(onAction: (AuthAction) -> Unit, context: android.content.Context) {
+fun ColumnScope.Content(onAction: (AuthAction) -> Unit, context: Context) {
     Spacer(modifier = Modifier.weight(1f))
     Icon(
         painter = painterResource(id = R.drawable.logo_atomo_app_monochrome),

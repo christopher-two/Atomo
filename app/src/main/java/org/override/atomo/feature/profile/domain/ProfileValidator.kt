@@ -9,6 +9,8 @@
 
 package org.override.atomo.feature.profile.domain
 
+import java.net.URL
+
 object ProfileValidator {
 
     private val USERNAME_REGEX = Regex("^[a-z0-9_-]+$")
@@ -28,7 +30,7 @@ object ProfileValidator {
             } else {
                 url
             }
-            java.net.URL(validUrl).toURI()
+            URL(validUrl).toURI()
             true
         } catch (e: Exception) {
             false

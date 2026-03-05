@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.cv.presentation
 
-import org.override.atomo.domain.model.Cv
+import org.override.atomo.feature.cv.domain.model.Cv
 
 /**
  * Represents the UI state for the CV feature.

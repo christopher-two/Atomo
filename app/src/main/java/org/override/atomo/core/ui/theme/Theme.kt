@@ -9,7 +9,6 @@
 
 package org.override.atomo.core.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -24,16 +23,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.materialkolor.DynamicMaterialTheme
-import com.materialkolor.PaletteStyle
-import com.materialkolor.dynamiccolor.ColorSpec
-import org.override.atomo.R
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import com.materialkolor.DynamicMaterialExpressiveTheme
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
+import org.override.atomo.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -194,14 +193,13 @@ fun AtomoTheme(
             }
         )
     } else {
-        DynamicMaterialTheme(
+        DynamicMaterialExpressiveTheme(
             seedColor = seedColor,
             isDark = darkTheme,
+            motionScheme = MotionScheme.expressive(),
+            animate = true,
             specVersion = ColorSpec.SpecVersion.SPEC_2025,
             style = PaletteStyle.Expressive,
-            shapes = MaterialTheme.shapes,
-            animate = true,
-            animationSpec = MaterialTheme.motionScheme.slowSpatialSpec(),
             typography = typography,
             content = {
                 Surface(

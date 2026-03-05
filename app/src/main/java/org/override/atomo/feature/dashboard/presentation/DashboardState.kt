@@ -9,7 +9,11 @@
 
 package org.override.atomo.feature.dashboard.presentation
 
-import org.override.atomo.domain.model.Profile
+import org.override.atomo.feature.dashboard.domain.model.DashboardSheet
+import org.override.atomo.feature.dashboard.domain.model.DashboardShortcut
+import org.override.atomo.feature.dashboard.domain.model.DashboardStatistics
+import org.override.atomo.feature.dashboard.domain.model.ServiceModule
+import org.override.atomo.feature.profile.domain.model.Profile
 
 data class DashboardState(
     val isLoading: Boolean = true,
@@ -19,7 +23,6 @@ data class DashboardState(
     val profile: Profile? = null,
     val services: List<ServiceModule> = emptyList(),
     val activeSheet: DashboardSheet? = null,
-    val deleteDialog: DeleteDialogState? = null,
     val statistics: DashboardStatistics = DashboardStatistics(),
     val shortcuts: List<DashboardShortcut> = emptyList()
 ) {

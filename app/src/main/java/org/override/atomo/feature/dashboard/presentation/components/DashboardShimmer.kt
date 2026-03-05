@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoCard
 import org.override.atomo.core.ui.components.ShimmerCircle
+import org.override.atomo.core.ui.components.ShimmerItem
 import org.override.atomo.core.ui.components.ShimmerLine
 
 @Composable
@@ -35,41 +36,118 @@ fun DashboardShimmer() {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         // Header
         item {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column {
-                    ShimmerLine(modifier = Modifier.width(150.dp).height(24.dp))
-                    Spacer(modifier = Modifier.height(4.dp))
-                    ShimmerLine(modifier = Modifier.width(100.dp).height(16.dp))
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                ShimmerCircle(modifier = Modifier.size(40.dp))
+            Column {
+                ShimmerLine(modifier = Modifier
+                    .width(180.dp)
+                    .height(28.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                ShimmerLine(modifier = Modifier
+                    .width(120.dp)
+                    .height(16.dp))
             }
         }
-        
-        // Modules (simulate 3-4 modules)
+
+        // Stats
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                repeat(3) {
+                    AtomoCard(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(80.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            ShimmerLine(modifier = Modifier
+                                .width(30.dp)
+                                .height(20.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ShimmerLine(modifier = Modifier
+                                .width(50.dp)
+                                .height(12.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        // Shortcuts
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                repeat(4) {
+                    ShimmerItem(
+                        modifier = Modifier.size(60.dp),
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                }
+            }
+        }
+
+        // Ad
+        item {
+            ShimmerItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(140.dp),
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+
+        // Services Title
+        item {
+            ShimmerLine(modifier = Modifier
+                .width(120.dp)
+                .height(20.dp))
+        }
+
+        // Service Cards
         items(4) {
             AtomoCard(
-                modifier = Modifier.fillMaxWidth().height(120.dp),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp)
             ) {
-               Row(
-                   modifier = Modifier.padding(16.dp),
-                   verticalAlignment = Alignment.CenterVertically
-               ) {
-                   ShimmerCircle(modifier = Modifier.size(60.dp))
-                   Spacer(modifier = Modifier.width(16.dp))
-                   Column {
-                       ShimmerLine(modifier = Modifier.width(120.dp).height(20.dp))
-                       Spacer(modifier = Modifier.height(8.dp))
-                       ShimmerLine(modifier = Modifier.width(200.dp).height(14.dp))
-                       Spacer(modifier = Modifier.height(4.dp))
-                       ShimmerLine(modifier = Modifier.width(100.dp).height(14.dp))
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        ShimmerCircle(modifier = Modifier.size(40.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column {
+                            ShimmerLine(modifier = Modifier
+                                .width(150.dp)
+                                .height(18.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
+                            ShimmerLine(modifier = Modifier
+                                .width(100.dp)
+                                .height(14.dp))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    // Actions Row
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        repeat(3) {
+                            ShimmerItem(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(36.dp),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                        }
                    }
                }
             }

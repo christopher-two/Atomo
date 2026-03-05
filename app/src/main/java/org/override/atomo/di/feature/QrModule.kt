@@ -14,21 +14,31 @@ package org.override.atomo.di.feature
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.factoryOf
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModel
 import org.koin.core.parameter.parametersOf
+import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 import org.override.atomo.core.common.RouteApp
+import org.override.atomo.feature.qr.data.repository.QrRepositoryImpl
+import org.override.atomo.feature.qr.domain.repository.QrRepository
+import org.override.atomo.feature.qr.domain.usecase.SaveQrUseCase
 import org.override.atomo.feature.qr.presentation.QrRoot
 import org.override.atomo.feature.qr.presentation.QrViewModel
 
 
 val QrModule: Module
     get() = module {
+        singleOf(::QrRepositoryImpl) bind QrRepository::class
+        factoryOf(::SaveQrUseCase)
+        
         viewModel { parametersHolder ->
             val param: String = parametersHolder.get()
             QrViewModel(
-                param = param
+                param = param,
+                saveQrUseCase = get()
             )
         }
 

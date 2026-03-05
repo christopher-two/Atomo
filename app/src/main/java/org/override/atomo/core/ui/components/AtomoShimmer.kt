@@ -17,11 +17,11 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
@@ -44,17 +44,17 @@ import androidx.compose.ui.unit.dp
 fun Modifier.shimmerEffect(
     widthOfShadowBrush: Int = 500,
     angleOfAxisY: Float = 270f,
-    durationMillis: Int = 1000,
+    durationMillis: Int = 1300,
 ): Modifier = composed {
     val shimmerColors = listOf(
-        colorScheme.surfaceContainerLow.copy(alpha = 0.3f),
-        colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
-        colorScheme.surfaceContainerLow.copy(alpha = 1.0f),
-        colorScheme.surfaceContainerLow.copy(alpha = 0.5f),
-        colorScheme.surfaceContainerLow.copy(alpha = 0.3f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.4f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.7f),
+        colorScheme.surfaceContainerHigh.copy(alpha = 1.0f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.7f),
+        colorScheme.surfaceContainerLow.copy(alpha = 0.4f),
     )
 
-    val transition = rememberInfiniteTransition(label = "")
+    val transition = rememberInfiniteTransition(label = "ShimmerTransition")
 
     val translateAnimation = transition.animateFloat(
         initialValue = 0f,
@@ -66,14 +66,14 @@ fun Modifier.shimmerEffect(
             ),
             repeatMode = RepeatMode.Restart,
         ),
-        label = "Shimmer loading animation",
+        label = "ShimmerAnimation",
     )
 
     this.background(
         brush = Brush.linearGradient(
             colors = shimmerColors,
-            start = Offset(x = translateAnimation.value - widthOfShadowBrush, y = 0.0f),
-            end = Offset(x = translateAnimation.value, y = angleOfAxisY),
+            start = Offset(x = translateAnimation.value - widthOfShadowBrush, y = translateAnimation.value - widthOfShadowBrush),
+            end = Offset(x = translateAnimation.value, y = translateAnimation.value),
         ),
     )
 }
@@ -90,12 +90,23 @@ fun Modifier.shimmerEffect(
 fun ShimmerItem(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(4.dp),
-    color: Color = colorScheme.surfaceContainerLowest.copy(alpha = 0.8f)
+    color: Color = colorScheme.surfaceContainerLowest
 ) {
+    val transition = rememberInfiniteTransition(label = "PulseTransition")
+    val alpha by transition.animateFloat(
+        initialValue = 0.6f,
+        targetValue = 0.9f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "PulseAnimation"
+    )
+
     Box(
         modifier = modifier
             .clip(shape)
-            .background(color)
+            .background(color.copy(alpha = alpha))
             .shimmerEffect()
     )
 }

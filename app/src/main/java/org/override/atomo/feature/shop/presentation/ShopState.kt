@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.shop.presentation
 
-import org.override.atomo.domain.model.Shop
+import org.override.atomo.feature.shop.domain.model.Shop
 
 /**
  * Represents the UI state for the Shop feature.

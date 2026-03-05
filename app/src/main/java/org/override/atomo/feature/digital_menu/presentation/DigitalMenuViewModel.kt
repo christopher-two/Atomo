@@ -9,13 +9,13 @@
 
 package org.override.atomo.feature.digital_menu.presentation
 
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -24,303 +24,351 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.SnackbarManager
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.MenuCategory
 import org.override.atomo.domain.model.ServiceType
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.storage.DeleteDishImageUseCase
-import org.override.atomo.domain.usecase.storage.UploadDishImageUseCase
-import org.override.atomo.domain.usecase.subscription.CanAddDishUseCase
-import org.override.atomo.domain.usecase.subscription.CanAddItemResult
-import org.override.atomo.domain.usecase.subscription.CanCreateResult
-import org.override.atomo.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.domain.usecase.subscription.GetServiceLimitsUseCase
-import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
-import org.override.atomo.libs.image.api.ImageManager
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateResult
+import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
 class DigitalMenuViewModel(
     private val sessionRepository: SessionRepository,
     private val menuUseCases: MenuUseCases,
-    private val getServiceLimitsUseCase: GetServiceLimitsUseCase,
-    private val subscriptionUseCases: SubscriptionUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
-    private val canAddDishUseCase: CanAddDishUseCase,
-    private val uploadDishImage: UploadDishImageUseCase,
-    private val deleteDishImage: DeleteDishImageUseCase,
-    private val imageManager: ImageManager,
     private val snackbarManager: SnackbarManager
 ) : ViewModel() {
 
-    private var menuBeforeEdit: Menu? = null
-
     private val _state = MutableStateFlow(DigitalMenuState())
-    val state = _state
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000L),
-            initialValue = DigitalMenuState(),
-        )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val menusFlow = sessionRepository.getCurrentUserId()
+        .filterNotNull()
+        .flatMapLatest { userId ->
+            checkCreationLimit(userId)
+            menuUseCases.getMenus(userId)
+        }
+
+    val state = combine(menusFlow, _state) { menus, local ->
+        local.withLiveMenus(menus)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000L),
+        initialValue = DigitalMenuState(isLoading = true)
+    )
 
     private val _events = Channel<DigitalMenuEvent>()
     val events = _events.receiveAsFlow()
-
-    init {
-        loadMenus()
-    }
 
     fun onAction(action: DigitalMenuAction) {
         when (action) {
             is DigitalMenuAction.CreateMenu -> createMenu()
             is DigitalMenuAction.DeleteMenu -> deleteMenu(action.id)
             is DigitalMenuAction.OpenMenu -> openMenu(action.id)
-            is DigitalMenuAction.UpgradePlan -> {}
-            DigitalMenuAction.ToggleEditMode -> toggleEditMode()
-            is DigitalMenuAction.UpdateEditingMenu -> updateEditingMenu(action.menu)
-            DigitalMenuAction.SaveMenu -> saveMenu()
-            DigitalMenuAction.CancelEdit -> handleCancelEdit()
-            is DigitalMenuAction.TogglePreviewSheet -> _state.update { it.copy(showPreviewSheet = action.show) }
+            is DigitalMenuAction.UpgradePlan -> Unit
+
+            is DigitalMenuAction.SetOverlay -> updateLocal { it.copy(activeOverlay = action.overlay) }
+
             DigitalMenuAction.Back -> handleBack()
 
-            // Dish Actions
-            DigitalMenuAction.OpenAddDishDialog -> _state.update { it.copy(isDishDialogVisible = true, dishToEdit = null) }
-            is DigitalMenuAction.OpenEditDishDialog -> _state.update { it.copy(isDishDialogVisible = true, dishToEdit = action.dish) }
-            DigitalMenuAction.CloseDishDialog -> _state.update { it.copy(isDishDialogVisible = false, dishToEdit = null) }
-            is DigitalMenuAction.SaveDish -> saveDish(action)
-            is DigitalMenuAction.DeleteDish -> deleteDish(action.dish)
+            DigitalMenuAction.ToggleEditMode -> toggleEditMode()
+            is DigitalMenuAction.UpdateEditingMenu -> updateLocal { it.copy(editingMenu = action.menu) }
+            DigitalMenuAction.SaveMenu -> saveMenu()
+            DigitalMenuAction.CancelEdit -> handleCancelEdit()
 
-            // Category Actions
-            DigitalMenuAction.OpenAddCategoryDialog -> _state.update { it.copy(isCategoryDialogVisible = true, categoryToEdit = null) }
-            is DigitalMenuAction.OpenEditCategoryDialog -> _state.update { it.copy(isCategoryDialogVisible = true, categoryToEdit = action.category) }
-            DigitalMenuAction.CloseCategoryDialog -> _state.update { it.copy(isCategoryDialogVisible = false, categoryToEdit = null) }
-            is DigitalMenuAction.SaveCategory -> saveCategory(action.name)
-            is DigitalMenuAction.DeleteCategory -> deleteCategory(action.category)
-
-            // Delete Confirmation
-            DigitalMenuAction.ShowDeleteConfirmation -> _state.update { it.copy(isDeleteDialogVisible = true) }
-            DigitalMenuAction.HideDeleteConfirmation -> _state.update { it.copy(isDeleteDialogVisible = false) }
             DigitalMenuAction.ConfirmDelete -> confirmDeleteMenu()
-
-            // Discard Changes Confirmation
-            DigitalMenuAction.ShowDiscardConfirmation -> _state.update { it.copy(isDiscardDialogVisible = true) }
-            DigitalMenuAction.HideDiscardConfirmation -> _state.update { it.copy(isDiscardDialogVisible = false) }
             DigitalMenuAction.ConfirmDiscard -> confirmDiscard()
+
+            is DigitalMenuAction.OpenAddDishDialog,
+            is DigitalMenuAction.OpenEditDishDialog,
+            DigitalMenuAction.CloseDishDialog,
+            is DigitalMenuAction.SaveDish,
+            is DigitalMenuAction.DeleteDish -> handleDishAction(action)
+
+            is DigitalMenuAction.OpenAddCategoryDialog,
+            is DigitalMenuAction.OpenEditCategoryDialog,
+            DigitalMenuAction.CloseCategoryDialog,
+            is DigitalMenuAction.SaveCategory,
+            is DigitalMenuAction.DeleteCategory -> handleCategoryAction(action)
         }
     }
 
-    private fun updateEditingMenu(menu: Menu) {
-        _state.update { 
-            it.copy(
-                editingMenu = menu,
-                hasUnsavedChanges = menu != menuBeforeEdit
+    private fun handleDishAction(action: DigitalMenuAction) {
+        when (action) {
+            DigitalMenuAction.OpenAddDishDialog -> updateLocal {
+                it.copy(activeOverlay = DigitalMenuOverlay.DishDialog(null))
+            }
+
+            is DigitalMenuAction.OpenEditDishDialog -> updateLocal {
+                it.copy(activeOverlay = DigitalMenuOverlay.DishDialog(action.dish))
+            }
+
+            DigitalMenuAction.CloseDishDialog -> updateLocal { it.copy(activeOverlay = null) }
+            is DigitalMenuAction.SaveDish -> saveDish(action)
+            is DigitalMenuAction.DeleteDish -> deleteDish(action.dish)
+            else -> Unit
+        }
+    }
+
+    private fun handleCategoryAction(action: DigitalMenuAction) {
+        when (action) {
+            DigitalMenuAction.OpenAddCategoryDialog -> updateLocal {
+                it.copy(activeOverlay = DigitalMenuOverlay.CategoryDialog(null))
+            }
+
+            is DigitalMenuAction.OpenEditCategoryDialog -> updateLocal {
+                it.copy(activeOverlay = DigitalMenuOverlay.CategoryDialog(action.category))
+            }
+
+            DigitalMenuAction.CloseCategoryDialog -> updateLocal { it.copy(activeOverlay = null) }
+            is DigitalMenuAction.SaveCategory -> saveCategory(action.name)
+            is DigitalMenuAction.DeleteCategory -> deleteCategory(action.category)
+            else -> Unit
+        }
+    }
+
+    private fun createMenu() {
+        viewModelScope.launch {
+            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
+            updateLocal { it.copy(isLoading = true) }
+
+            if (
+                canCreateServiceUseCase(
+                    userId,
+                    ServiceType.DIGITAL_MENU
+                ) !is CanCreateResult.Success
+            ) {
+                updateLocal { it.copy(isLoading = false) }
+                return@launch
+            }
+
+            val newMenu = Menu(
+                id = UUID.randomUUID().toString(),
+                userId = userId,
+                name = "My New Menu",
+                description = "Digital Menu Description",
+                isActive = true,
+                templateId = "minimalist",
+                primaryColor = "#000000",
+                fontFamily = "Inter",
+                logoUrl = null,
+                createdAt = System.currentTimeMillis()
             )
+
+            menuUseCases.createMenu(newMenu)
+                .onSuccess {
+                    updateLocal {
+                        it.copy(
+                            isLoading = false,
+                            isEditing = true,
+                            editingMenu = newMenu,
+                            menuSnapshot = newMenu
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    updateLocal { it.copy(isLoading = false, error = error.message) }
+                }
+        }
+    }
+
+    private fun saveMenu() {
+        val menu = state.value.editingMenu
+        if (menu == null) {
+            updateLocal { it.copy(error = "No hay un menú en edición para guardar") }
+            return
+        }
+        viewModelScope.launch {
+            updateLocal { it.copy(isLoading = true) }
+            menuUseCases.updateMenu(menu)
+                .onSuccess {
+                    updateLocal {
+                        it.copy(isLoading = false, isEditing = false, menuSnapshot = null)
+                    }
+                    sendEvent(DigitalMenuEvent.MenuSaved)
+                }
+                .onFailure { error ->
+                    updateLocal { it.copy(isLoading = false, error = error.message) }
+                }
+        }
+    }
+
+    private fun deleteMenu(id: String) {
+        viewModelScope.launch {
+            updateLocal { it.copy(isLoading = true) }
+            menuUseCases.deleteMenu(id)
+                .onSuccess {
+                    updateLocal {
+                        it.copy(
+                            isLoading = false,
+                            isEditing = false,
+                            editingMenu = null,
+                            menuSnapshot = null
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    updateLocal { it.copy(isLoading = false, error = error.message) }
+                    snackbarManager.showMessage(error.message ?: "Error deleting menu")
+                }
+        }
+    }
+
+    private fun toggleEditMode() {
+        if (!_state.value.isEditing) {
+            val active = state.value.editingMenu
+            updateLocal { it.copy(isEditing = true, editingMenu = active, menuSnapshot = active) }
+        } else {
+            handleCancelEdit()
         }
     }
 
     private fun handleCancelEdit() {
-        if (_state.value.hasUnsavedChanges) {
-            _state.update { it.copy(isDiscardDialogVisible = true) }
+        if (state.value.hasUnsavedChanges) {
+            updateLocal { it.copy(activeOverlay = DigitalMenuOverlay.DiscardConfirmation) }
         } else {
             confirmDiscard()
         }
     }
 
     private fun confirmDiscard() {
-        _state.update { 
+        updateLocal {
             it.copy(
                 isEditing = false,
-                editingMenu = menuBeforeEdit,
-                hasUnsavedChanges = false,
-                isDiscardDialogVisible = false
+                editingMenu = null,
+                menuSnapshot = null,
+                activeOverlay = null
             )
         }
-        menuBeforeEdit = null
     }
 
-    private suspend fun sendEvent(event: DigitalMenuEvent) {
-        _events.send(event)
+    private fun confirmDeleteMenu() {
+        val menuId = state.value.editingMenu?.id
+        if (menuId == null) {
+            updateLocal { it.copy(error = "No hay un menú seleccionado para eliminar") }
+            return
+        }
+        updateLocal { it.copy(activeOverlay = null) }
+        deleteMenu(menuId)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private fun loadMenus() {
+    private fun openMenu(id: String) {
+        val menu = state.value.menus.find { it.id == id } ?: return
+        updateLocal { it.copy(editingMenu = menu, isEditing = false) }
+    }
+
+    private fun handleBack() {
+        if (_state.value.isEditing) handleCancelEdit()
+        else updateLocal { it.copy(editingMenu = null, isEditing = false) }
+    }
+
+    private fun saveDish(action: DigitalMenuAction.SaveDish) {
+        val menu = state.value.editingMenu
+        if (menu == null) {
+            updateLocal { it.copy(error = "No hay un menú activo para agregar el plato") }
+            return
+        }
+        val existingDish = (state.value.activeOverlay as? DigitalMenuOverlay.DishDialog)?.dish
+
         viewModelScope.launch {
-            sessionRepository.getCurrentUserId()
-                .filterNotNull()
-                .flatMapLatest { userId ->
-                    checkCreationLimit(userId)
-                    menuUseCases.getMenus(userId)
+            updateLocal { it.copy(isLoading = true) }
+            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
+
+            menuUseCases.upsertDish(
+                userId = userId,
+                menuId = menu.id,
+                name = action.name,
+                description = action.description,
+                price = action.price,
+                imageUrl = action.imageUrl,
+                categoryId = action.categoryId,
+                existingDish = existingDish
+            )
+                .onSuccess { updateLocal { it.copy(isLoading = false, activeOverlay = null) } }
+                .onFailure { error ->
+                    updateLocal { it.copy(isLoading = false, error = error.message) }
+                    snackbarManager.showMessage(error.message ?: "Error saving dish")
                 }
-                .collect { list ->
-                    val existingMenu = list.firstOrNull()
-                    _state.update { state ->
-                        val currentId = state.editingMenu?.id
-                        val updatedEditing = if (currentId != null) {
-                            list.find { it.id == currentId } ?: (if (state.isEditing) state.editingMenu else existingMenu)
-                        } else {
-                            existingMenu
-                        }
-                        // Ensure isLoading is disabled once data arrives
-                        state.copy(menus = list, editingMenu = updatedEditing, isLoading = false)
+        }
+    }
+
+    private fun deleteDish(dish: Dish) {
+        viewModelScope.launch {
+            menuUseCases.deleteDish(dish)
+                .onSuccess {
+                    updateLocal { it.copy(error = null) }
+                    snackbarManager.showMessage("Dish deleted successfully")
+                }
+                .onFailure { error ->
+                    updateLocal { it.copy(error = error.message) }
+                }
+        }
+    }
+
+    private fun saveCategory(name: String) {
+        val menu = state.value.editingMenu
+        if (menu == null) {
+            updateLocal { it.copy(error = "No hay un menú activo para agregar la categoría") }
+            return
+        }
+        val editing = (state.value.activeOverlay as? DigitalMenuOverlay.CategoryDialog)?.category
+
+        viewModelScope.launch {
+            updateLocal { it.copy(isLoading = true) }
+
+            val result = if (editing != null) {
+                menuUseCases.updateCategory(editing.copy(name = name))
+            } else {
+                menuUseCases.createCategory(
+                    MenuCategory(
+                        id = UUID.randomUUID().toString(),
+                        menuId = menu.id,
+                        name = name,
+                        sortOrder = 0,
+                        createdAt = System.currentTimeMillis()
+                    )
+                )
+            }
+
+            result
+                .onSuccess { updateLocal { it.copy(isLoading = false, activeOverlay = null) } }
+                .onFailure { error ->
+                    updateLocal {
+                        it.copy(
+                            isLoading = false,
+                            error = error.message
+                        )
                     }
                 }
         }
     }
 
+    private fun deleteCategory(category: MenuCategory) {
+        viewModelScope.launch {
+            menuUseCases.deleteCategory(category.id).onFailure { error ->
+                updateLocal { it.copy(error = error.message) }
+            }
+        }
+    }
+
     private suspend fun checkCreationLimit(userId: String) {
         val result = canCreateServiceUseCase(userId, ServiceType.DIGITAL_MENU)
-        _state.update {
+        updateLocal {
             it.copy(
-                isLoading = false,
                 canCreate = result is CanCreateResult.Success,
-                limitReached = result is CanCreateResult.TotalLimitReached || result is CanCreateResult.ServiceTypeExists
+                limitReached = result is CanCreateResult.TotalLimitReached ||
+                        result is CanCreateResult.ServiceTypeExists
             )
         }
     }
 
-    private fun saveMenu() {
-        val menu = _state.value.editingMenu ?: return
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            menuUseCases.updateMenu(menu).onSuccess {
-                menu.categories.forEach { menuUseCases.updateCategory(it) }
-                menu.dishes.forEach { menuUseCases.upsertDish(it) }
-                _state.update { it.copy(isLoading = false, isEditing = false, hasUnsavedChanges = false) }
-                sendEvent(DigitalMenuEvent.MenuSaved)
-            }.onFailure { error ->
-                _state.update { it.copy(isLoading = false, error = error.message) }
-            }
-        }
+    private fun updateLocal(update: (DigitalMenuState) -> DigitalMenuState) {
+        _state.update(update)
     }
 
-    private fun saveDish(action: DigitalMenuAction.SaveDish) {
-        val menu = _state.value.editingMenu ?: return
-        val editingDish = _state.value.dishToEdit
-
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
-
-            if (editingDish == null) {
-                val canAdd = canAddDishUseCase(userId, menu.id)
-                if (canAdd is CanAddItemResult.LimitReached) {
-                    _state.update { it.copy(isLoading = false) }
-                    snackbarManager.showMessage("Limit reached: ${canAdd.limit} dishes.")
-                    return@launch
-                }
-            }
-
-            val imageUrlResult = try {
-                if (action.imageUrl != null && action.imageUrl.startsWith("content://")) {
-                    val uri = action.imageUrl.toUri()
-                    val bytes = imageManager.compressImage(uri).getOrThrow()
-                    uploadDishImage(userId, editingDish?.id ?: UUID.randomUUID().toString(), bytes).getOrThrow()
-                } else action.imageUrl
-            } catch (e: Exception) {
-                _state.update { it.copy(isLoading = false) }
-                snackbarManager.showMessage("Image error: ${e.message}")
-                return@launch
-            }
-
-            val currentDishes = menu.dishes.toMutableList()
-            if (editingDish != null) {
-                val index = currentDishes.indexOfFirst { it.id == editingDish.id }
-                if (index != -1) currentDishes[index] = editingDish.copy(name = action.name, description = action.description, price = action.price, imageUrl = imageUrlResult, categoryId = action.categoryId)
-            } else {
-                currentDishes.add(Dish(UUID.randomUUID().toString(), menu.id, action.categoryId, action.name, action.description, action.price, imageUrlResult, true, currentDishes.size, System.currentTimeMillis()))
-            }
-
-            _state.update { it.copy(editingMenu = menu.copy(dishes = currentDishes), isDishDialogVisible = false, dishToEdit = null, isLoading = false) }
-        }
-    }
-
-    private fun deleteDish(dish: Dish) {
-        val menu = _state.value.editingMenu ?: return
-        val currentDishes = menu.dishes.toMutableList().apply { remove(dish) }
-        _state.update { it.copy(editingMenu = menu.copy(dishes = currentDishes)) }
-        viewModelScope.launch {
-            if (dish.imageUrl != null) deleteDishImage(dish.imageUrl)
-            menuUseCases.deleteDish(dish.id)
-        }
-    }
-
-    private fun saveCategory(name: String) {
-        val menu = _state.value.editingMenu ?: return
-        val currentCategories = menu.categories.toMutableList()
-        val editingCategory = _state.value.categoryToEdit
-
-        if (editingCategory != null) {
-            val index = currentCategories.indexOfFirst { it.id == editingCategory.id }
-            if (index != -1) currentCategories[index] = editingCategory.copy(name = name)
-        } else {
-            currentCategories.add(MenuCategory(UUID.randomUUID().toString(), menu.id, name, currentCategories.size, System.currentTimeMillis()))
-        }
-
-        _state.update { it.copy(editingMenu = menu.copy(categories = currentCategories), isCategoryDialogVisible = false, categoryToEdit = null) }
-    }
-
-    private fun deleteCategory(category: MenuCategory) {
-        val menu = _state.value.editingMenu ?: return
-        val currentCategories = menu.categories.toMutableList().apply { remove(category) }
-        val currentDishes = menu.dishes.map { if (it.categoryId == category.id) it.copy(categoryId = null) else it }
-        _state.update { it.copy(editingMenu = menu.copy(categories = currentCategories, dishes = currentDishes)) }
-        viewModelScope.launch { menuUseCases.deleteCategory(category.id) }
-    }
-
-    private fun createMenu() {
-        viewModelScope.launch {
-            val userId = sessionRepository.getCurrentUserId().first() ?: return@launch
-            _state.update { it.copy(isLoading = true) }
-            if (canCreateServiceUseCase(userId, ServiceType.DIGITAL_MENU) !is CanCreateResult.Success) {
-                _state.update { it.copy(isLoading = false) }
-                return@launch
-            }
-
-            val newMenu = Menu(UUID.randomUUID().toString(), userId, "My New Menu", "Digital Menu Description", true, "minimalist", "#000000", "Inter", null, System.currentTimeMillis())
-            menuUseCases.createMenu(newMenu).onSuccess {
-                _state.update { it.copy(editingMenu = newMenu, isEditing = true, isLoading = false) }
-            }.onFailure { error ->
-                _state.update { it.copy(isLoading = false, error = error.message) }
-            }
-        }
-    }
-
-    private fun deleteMenu(id: String) {
-        viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
-            menuUseCases.deleteMenu(id).onSuccess {
-                _state.update { it.copy(isLoading = false, editingMenu = null) }
-            }.onFailure { error ->
-                _state.update { it.copy(isLoading = false, error = error.message) }
-            }
-        }
-    }
-
-    private fun confirmDeleteMenu() {
-        val menuId = _state.value.editingMenu?.id ?: return
-        _state.update { it.copy(isDeleteDialogVisible = false) }
-        deleteMenu(menuId)
-    }
-
-    private fun handleBack() {
-        if (_state.value.isEditing) cancelEdit()
-        else if (_state.value.editingMenu != null) _state.update { it.copy(editingMenu = null, isEditing = false) }
-    }
-
-    private fun openMenu(id: String) {
-        val menu = _state.value.menus.find { it.id == id } ?: return
-        _state.update { it.copy(editingMenu = menu, isEditing = false) }
-    }
-
-    private fun toggleEditMode() {
-        menuBeforeEdit = _state.value.editingMenu
-        _state.update { it.copy(isEditing = !it.isEditing, hasUnsavedChanges = false) }
-    }
-
-    private fun cancelEdit() {
-        val currentId = _state.value.editingMenu?.id ?: return
-        val original = _state.value.menus.find { it.id == currentId }
-        _state.update { it.copy(isEditing = false, editingMenu = original) }
+    private suspend fun sendEvent(event: DigitalMenuEvent) {
+        _events.send(event)
     }
 }

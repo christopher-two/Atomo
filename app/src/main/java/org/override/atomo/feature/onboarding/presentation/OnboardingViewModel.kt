@@ -22,20 +22,26 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.core.common.SnackbarManager
-import org.override.atomo.domain.model.Cv
-import org.override.atomo.domain.model.Invitation
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.Portfolio
 import org.override.atomo.domain.model.ServiceType
-import org.override.atomo.domain.model.Shop
-import org.override.atomo.domain.usecase.cv.CvUseCases
-import org.override.atomo.domain.usecase.invitation.InvitationUseCases
-import org.override.atomo.domain.usecase.menu.MenuUseCases
-import org.override.atomo.domain.usecase.portfolio.PortfolioUseCases
-import org.override.atomo.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.domain.usecase.shop.ShopUseCases
+import org.override.atomo.feature.cv.domain.model.Cv
+import org.override.atomo.feature.cv.domain.repository.CvRepository
+import org.override.atomo.feature.cv.domain.usecase.cv.CvUseCases
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.invitation.domain.model.Invitation
+import org.override.atomo.feature.invitation.domain.repository.InvitationRepository
+import org.override.atomo.feature.invitation.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.portfolio.domain.model.Portfolio
+import org.override.atomo.feature.portfolio.domain.repository.PortfolioRepository
+import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUseCases
 import org.override.atomo.feature.profile.domain.ProfileValidator
+import org.override.atomo.feature.profile.domain.repository.ProfileRepository
+import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.feature.shop.domain.model.Shop
+import org.override.atomo.feature.shop.domain.repository.ShopRepository
+import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
@@ -50,6 +56,13 @@ class OnboardingViewModel(
     private val portfolioUseCases: PortfolioUseCases,
     private val cvUseCases: CvUseCases,
     private val invitationUseCases: InvitationUseCases,
+    // Repositories for direct sync
+    private val profileRepository: ProfileRepository,
+    private val menuRepository: MenuRepository,
+    private val shopRepository: ShopRepository,
+    private val portfolioRepository: PortfolioRepository,
+    private val cvRepository: CvRepository,
+    private val invitationRepository: InvitationRepository,
     private val sessionRepository: SessionRepository,
     private val rootNavigation: RootNavigation,
     private val snackbarManager: SnackbarManager
@@ -189,7 +202,9 @@ class OnboardingViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            // 1. Update profile
+            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+
+            // 1. Update profile locally
             val updatedProfile = currentProfile.copy(
                 displayName = currentState.displayName,
                 username = currentState.username,
@@ -208,10 +223,8 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 2. Create service
-            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+            // 2. Create service locally
             val serviceResult = createService(userId, currentState)
-
             if (serviceResult.isFailure) {
                 _state.update {
                     it.copy(
@@ -223,10 +236,45 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 3. Navigate to Home
+            // 3. Sync profile to remote immediately
+            val profileSyncResult = profileRepository.syncUp(userId)
+            if (profileSyncResult.isFailure) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Error al sincronizar perfil: ${profileSyncResult.exceptionOrNull()?.message}"
+                    )
+                }
+                return@launch
+            }
+
+            // 4. Sync service to remote immediately
+            val serviceSyncResult = syncService(userId, currentState.selectedServiceType)
+            if (serviceSyncResult.isFailure) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Error al sincronizar servicio: ${serviceSyncResult.exceptionOrNull()?.message}"
+                    )
+                }
+                return@launch
+            }
+
+            // 5. Navigate to Home
             _state.update { it.copy(isLoading = false) }
             snackbarManager.showMessage("¡Bienvenido a Átomo!")
             rootNavigation.replaceWith(RouteApp.Home)
+        }
+    }
+
+    private suspend fun syncService(userId: String, serviceType: ServiceType?): Result<Unit> {
+        return when (serviceType) {
+            ServiceType.SHOP -> shopRepository.syncUp(userId)
+            ServiceType.DIGITAL_MENU -> menuRepository.syncUp(userId)
+            ServiceType.PORTFOLIO -> portfolioRepository.syncUp(userId)
+            ServiceType.CV -> cvRepository.syncUp(userId)
+            ServiceType.INVITATION -> invitationRepository.syncUp(userId)
+            null -> Result.failure(Exception("No service type selected"))
         }
     }
 

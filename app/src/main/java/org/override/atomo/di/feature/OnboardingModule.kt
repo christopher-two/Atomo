@@ -18,7 +18,7 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import org.koin.dsl.navigation3.navigation
 import org.override.atomo.core.common.RouteApp
-import org.override.atomo.domain.usecase.onboarding.ShouldShowOnboardingUseCase
+import org.override.atomo.feature.onboarding.domain.usecase.onboarding.ShouldShowOnboardingUseCase
 import org.override.atomo.feature.onboarding.presentation.OnboardingRoot
 import org.override.atomo.feature.onboarding.presentation.OnboardingViewModel
 

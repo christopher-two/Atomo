@@ -35,6 +35,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -62,7 +64,7 @@ import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.core.ui.components.service.EditableSection
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
-import org.override.atomo.domain.model.Shop
+import org.override.atomo.feature.shop.domain.model.Shop
 import org.override.atomo.feature.shop.presentation.components.ShopShimmer
 
 /**
@@ -97,7 +99,7 @@ fun ShopRoot(
 fun ShopContent(
     state: ShopState,
     onAction: (ShopAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     BackHandler(enabled = state.editingShop != null) {
         onAction(ShopAction.Back)
@@ -159,7 +161,7 @@ fun ShopContent(
         val shop = state.editingShop
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                  TopAppBar(title = { Text(if (state.isEditing) "Edit Shop" else shop.name) })
             },
@@ -265,10 +267,10 @@ fun ShopContent(
 fun ShopListScreen(
     state: ShopState,
     onAction: (ShopAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(ShopAction.CreateShop) }) {
@@ -338,7 +340,7 @@ private fun Preview() {
         ShopContent(
             state = ShopState(),
             onAction = {},
-            snackbarHostState = androidx.compose.material3.SnackbarHostState()
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

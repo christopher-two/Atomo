@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.profile.presentation.components
 
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,7 +52,7 @@ import org.override.atomo.feature.profile.presentation.ProfileState
 fun ProfileEditView(
     state: ProfileState,
     onAction: (ProfileAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -78,7 +81,7 @@ fun ProfileEditView(
                 }
             }
         },
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButtonPosition = FabPosition.End,
         modifier = Modifier.fillMaxSize()
     ){ padding ->

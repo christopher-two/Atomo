@@ -18,10 +18,10 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.override.atomo.domain.model.Subscription
-import org.override.atomo.domain.model.SubscriptionStatus
-import org.override.atomo.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.subscription.domain.model.Subscription
+import org.override.atomo.feature.subscription.domain.model.SubscriptionStatus
+import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 

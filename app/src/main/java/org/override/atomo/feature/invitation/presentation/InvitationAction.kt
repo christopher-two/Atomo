@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.invitation.presentation
 
-import org.override.atomo.domain.model.Invitation
+import org.override.atomo.feature.invitation.domain.model.Invitation
 
 /**
  * Represents the intent/actions that can be performed on the Invitation screen.

@@ -9,6 +9,7 @@
 
 package org.override.atomo.feature.auth.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.channels.Channel
@@ -20,10 +21,11 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
-import org.override.atomo.domain.usecase.onboarding.ShouldShowOnboardingUseCase
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.onboarding.domain.usecase.onboarding.ShouldShowOnboardingUseCase
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import org.override.atomo.libs.auth.api.ExternalAuthResult
 
 class AuthViewModel(
@@ -31,7 +33,7 @@ class AuthViewModel(
     private val saveUserSessionUseCase: SaveUserSessionUseCase,
     private val shouldShowOnboardingUseCase: ShouldShowOnboardingUseCase,
     private val rootNavigation: RootNavigation,
-    private val syncManager: org.override.atomo.data.manager.SyncManager
+    private val syncManager: SyncManager
 ) : ViewModel() {
 
 
@@ -69,7 +71,7 @@ class AuthViewModel(
         }
     }
 
-    private fun continueWithGoogle(context: android.content.Context) {
+    private fun continueWithGoogle(context: Context) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
             continueWithGoogleUseCase(context)

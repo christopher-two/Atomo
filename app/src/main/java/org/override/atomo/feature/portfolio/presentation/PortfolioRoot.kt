@@ -39,6 +39,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -66,7 +68,7 @@ import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.core.ui.components.service.EditableSection
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
-import org.override.atomo.domain.model.Portfolio
+import org.override.atomo.feature.portfolio.domain.model.Portfolio
 import org.override.atomo.feature.portfolio.presentation.components.PortfolioShimmer
 
 @Composable
@@ -97,7 +99,7 @@ fun PortfolioRoot(
 fun PortfolioContent(
     state: PortfolioState,
     onAction: (PortfolioAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     // Back Handler to ensure we close edit mode/detail view
     BackHandler(enabled = state.editingPortfolio != null) {
@@ -164,7 +166,7 @@ fun PortfolioContent(
         val portfolio = state.editingPortfolio
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 // We use floating toolbar instead, but if AtomoScaffold requires topBar, we can pass generic header
                 // Or just empty
@@ -277,10 +279,10 @@ fun PortfolioContent(
 fun PortfolioListScreen(
     state: PortfolioState,
     onAction: (PortfolioAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(PortfolioAction.CreatePortfolio) }) {
@@ -350,7 +352,7 @@ private fun Preview() {
         PortfolioContent(
             state = PortfolioState(),
             onAction = {},
-            snackbarHostState = androidx.compose.material3.SnackbarHostState()
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

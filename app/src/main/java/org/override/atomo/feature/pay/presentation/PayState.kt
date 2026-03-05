@@ -9,8 +9,9 @@
 
 package org.override.atomo.feature.pay.presentation
 
-import org.override.atomo.domain.model.Plan
-import org.override.atomo.domain.model.Subscription
+import org.override.atomo.feature.subscription.domain.model.Plan
+
+import org.override.atomo.feature.subscription.domain.model.Subscription
 
 /**
  * Represents the UI state for the Pay/Subscription feature.

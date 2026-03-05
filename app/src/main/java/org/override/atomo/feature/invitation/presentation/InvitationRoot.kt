@@ -35,6 +35,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -62,7 +64,7 @@ import org.override.atomo.core.ui.components.UpgradePlanScreen
 import org.override.atomo.core.ui.components.service.EditableSection
 import org.override.atomo.core.ui.components.service.ServiceToolbar
 import org.override.atomo.core.ui.theme.AtomoTheme
-import org.override.atomo.domain.model.Invitation
+import org.override.atomo.feature.invitation.domain.model.Invitation
 import org.override.atomo.feature.invitation.presentation.components.InvitationShimmer
 
 /**
@@ -97,7 +99,7 @@ fun InvitationRoot(
 fun InvitationContent(
     state: InvitationState,
     onAction: (InvitationAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     BackHandler(enabled = state.editingInvitation != null) {
         onAction(InvitationAction.Back)
@@ -161,7 +163,7 @@ fun InvitationContent(
         val invitation = state.editingInvitation
         
         AtomoScaffold(
-            snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                  TopAppBar(title = { Text(if (state.isEditing) "Edit Invitation" else invitation.eventName) })
             },
@@ -287,10 +289,10 @@ fun InvitationContent(
 fun InvitationListScreen(
     state: InvitationState,
     onAction: (InvitationAction) -> Unit,
-    snackbarHostState: androidx.compose.material3.SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     AtomoScaffold(
-        snackbarHost = { androidx.compose.material3.SnackbarHost(snackbarHostState) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             if (state.canCreate && !state.limitReached) {
                 FloatingActionButton(onClick = { onAction(InvitationAction.CreateInvitation) }) {
@@ -364,7 +366,7 @@ private fun Preview() {
         InvitationContent(
             state = InvitationState(),
             onAction = {},
-            snackbarHostState = androidx.compose.material3.SnackbarHostState()
+            snackbarHostState = SnackbarHostState()
         )
     }
 }

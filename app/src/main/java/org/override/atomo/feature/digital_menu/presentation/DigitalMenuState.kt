@@ -9,33 +9,52 @@
 
 package org.override.atomo.feature.digital_menu.presentation
 
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
+import androidx.compose.runtime.Stable
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 
+@Stable
 data class DigitalMenuState(
     val isLoading: Boolean = false,
     val menus: List<Menu> = emptyList(),
     val error: String? = null,
     val canCreate: Boolean = false,
     val limitReached: Boolean = false,
-
-    // Editor State
     val isEditing: Boolean = false,
     val editingMenu: Menu? = null,
-    val showPreviewSheet: Boolean = false,
-    
-    // Dish Editor State (kept for dialogs)
-    val isDishDialogVisible: Boolean = false,
-    val dishToEdit: Dish? = null,
+    /** Snapshot del menú al iniciar la edición. Usado para detectar cambios sin guardar. */
+    val menuSnapshot: Menu? = null,
+    val activeOverlay: DigitalMenuOverlay? = null
+) {
+    /** True si los campos de presentación difieren del snapshot capturado al abrir el editor. */
+    val hasUnsavedChanges: Boolean
+        get() = isEditing && editingMenu != null && menuSnapshot != null &&
+            (editingMenu.name         != menuSnapshot.name         ||
+             editingMenu.description  != menuSnapshot.description  ||
+             editingMenu.primaryColor != menuSnapshot.primaryColor ||
+             editingMenu.fontFamily   != menuSnapshot.fontFamily)
+}
 
-    // Category Editor State
-    val isCategoryDialogVisible: Boolean = false,
-    val categoryToEdit: org.override.atomo.domain.model.MenuCategory? = null,
-    
-    // Changes Detection
-    val hasUnsavedChanges: Boolean = false,
-    val isDiscardDialogVisible: Boolean = false,
-    
-    // Delete Confirmation
-    val isDeleteDialogVisible: Boolean = false
-)
+/**
+ * Fusiona el estado local con los menús provenientes del Flow reactivo.
+ * Conserva los cambios del usuario en edición; actualiza solo categories/dishes
+ * desde la fuente de verdad.
+ */
+fun DigitalMenuState.withLiveMenus(menus: List<Menu>): DigitalMenuState {
+    val activeMenu = if (isEditing && editingMenu != null) {
+        val liveMenu = menus.find { it.id == editingMenu.id } ?: editingMenu
+        editingMenu.copy(categories = liveMenu.categories, dishes = liveMenu.dishes)
+    } else {
+        menus.firstOrNull()
+    }
+    return copy(menus = menus, editingMenu = activeMenu)
+}
+
+sealed interface DigitalMenuOverlay {
+    data class DishDialog(val dish: Dish? = null) : DigitalMenuOverlay
+    data class CategoryDialog(val category: MenuCategory? = null) : DigitalMenuOverlay
+    data object PreviewSheet : DigitalMenuOverlay
+    data object DiscardConfirmation : DigitalMenuOverlay
+    data object DeleteConfirmation : DigitalMenuOverlay
+}

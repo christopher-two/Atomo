@@ -95,8 +95,7 @@ fun HomeScaffold(
             } else {
                 listOf(
                     AppTab.DASHBOARD, AppTab.PROFILE, AppTab.PAY,
-                    AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV,
-                    AppTab.PORTFOLIO, AppTab.INVITATION
+                    AppTab.DIGITAL_MENU,
                 )
             }
 
@@ -176,8 +175,7 @@ private fun BottomMenu(
 
                 val menuItems = listOf(
                     AppTab.PROFILE, AppTab.PAY,
-                    AppTab.DIGITAL_MENU, AppTab.SHOP, AppTab.CV,
-                    AppTab.PORTFOLIO, AppTab.INVITATION
+                    AppTab.DIGITAL_MENU,
                 )
 
                 menuItems.forEach { tab ->

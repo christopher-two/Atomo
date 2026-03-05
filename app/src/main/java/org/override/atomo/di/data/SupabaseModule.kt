@@ -9,6 +9,8 @@
 
 package org.override.atomo.di.data
 
+
+
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient

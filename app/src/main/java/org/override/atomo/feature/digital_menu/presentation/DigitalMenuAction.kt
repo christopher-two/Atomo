@@ -9,25 +9,30 @@
 
 package org.override.atomo.feature.digital_menu.presentation
 
-import org.override.atomo.domain.model.Dish
-import org.override.atomo.domain.model.Menu
-import org.override.atomo.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.Dish
+import org.override.atomo.feature.digital_menu.domain.model.Menu
+import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 
 sealed interface DigitalMenuAction {
     data object CreateMenu : DigitalMenuAction
     data class DeleteMenu(val id: String) : DigitalMenuAction
     data class OpenMenu(val id: String) : DigitalMenuAction
     data object UpgradePlan : DigitalMenuAction
+    data object Back : DigitalMenuAction
 
     // Editor Actions
     data object ToggleEditMode : DigitalMenuAction
     data class UpdateEditingMenu(val menu: Menu) : DigitalMenuAction
     data object SaveMenu : DigitalMenuAction
     data object CancelEdit : DigitalMenuAction
-    data class TogglePreviewSheet(val show: Boolean) : DigitalMenuAction
-    data object Back : DigitalMenuAction
 
-    // Dish Actions (Sub-actions for editing menu)
+    /** Abre o cierra cualquier overlay (dialog/sheet). Pasar null para cerrar. */
+    data class SetOverlay(val overlay: DigitalMenuOverlay?) : DigitalMenuAction
+
+    data object ConfirmDelete : DigitalMenuAction
+    data object ConfirmDiscard : DigitalMenuAction
+
+    // Dish Actions
     data object OpenAddDishDialog : DigitalMenuAction
     data class OpenEditDishDialog(val dish: Dish) : DigitalMenuAction
     data object CloseDishDialog : DigitalMenuAction
@@ -46,14 +51,4 @@ sealed interface DigitalMenuAction {
     data object CloseCategoryDialog : DigitalMenuAction
     data class SaveCategory(val name: String) : DigitalMenuAction
     data class DeleteCategory(val category: MenuCategory) : DigitalMenuAction
-
-    // Delete Confirmation
-    data object ShowDeleteConfirmation : DigitalMenuAction
-    data object HideDeleteConfirmation : DigitalMenuAction
-    data object ConfirmDelete : DigitalMenuAction
-
-    // Discard Changes Confirmation
-    data object ShowDiscardConfirmation : DigitalMenuAction
-    data object HideDiscardConfirmation : DigitalMenuAction
-    data object ConfirmDiscard : DigitalMenuAction
 }

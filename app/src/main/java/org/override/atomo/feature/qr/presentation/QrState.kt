@@ -9,6 +9,9 @@
 
 package org.override.atomo.feature.qr.presentation
 
+import org.override.atomo.feature.qr.domain.model.QrConfig
+
 data class QrState(
-    val data: String? = null
+    val data: String? = null,
+    val config: QrConfig = QrConfig()
 )

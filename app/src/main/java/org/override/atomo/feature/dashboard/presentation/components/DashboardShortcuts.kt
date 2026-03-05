@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoCard
-import org.override.atomo.feature.dashboard.presentation.DashboardShortcut
+import org.override.atomo.feature.dashboard.domain.model.DashboardShortcut
 import org.override.atomo.feature.dashboard.presentation.DashboardAction
 
 @Composable

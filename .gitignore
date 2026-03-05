@@ -20,3 +20,4 @@ keystore.properties
 /Keys.jks
 /app/release/output-metadata.json
 /app/schemas/org.override.atomo.data.local.AtomoDatabase/2.json
+/gradle/gradle-daemon-jvm.properties

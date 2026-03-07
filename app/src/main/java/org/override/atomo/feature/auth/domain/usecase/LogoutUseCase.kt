@@ -9,11 +9,11 @@
 
 package org.override.atomo.feature.auth.domain.usecase
 
-import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.libs.auth.api.GoogleAuthManager
-import org.override.atomo.libs.session.api.SessionRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.override.atomo.data.local.AtomoDatabase
+import org.override.atomo.feature.auth.domain.repository.GoogleAuthManager
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class LogoutUseCase(
     private val sessionRepository: SessionRepository,

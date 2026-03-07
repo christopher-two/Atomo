@@ -24,7 +24,7 @@ import org.override.atomo.feature.cv.domain.model.Cv
 import org.override.atomo.feature.cv.domain.usecase.cv.CvUseCases
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 import java.util.UUID
 
 

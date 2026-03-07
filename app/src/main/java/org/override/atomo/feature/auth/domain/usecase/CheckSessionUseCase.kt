@@ -10,7 +10,7 @@
 package org.override.atomo.feature.auth.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class CheckSessionUseCase(
     private val sessionRepository: SessionRepository

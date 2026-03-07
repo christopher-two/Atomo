@@ -17,7 +17,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class SaveUserSessionUseCaseTest {
 

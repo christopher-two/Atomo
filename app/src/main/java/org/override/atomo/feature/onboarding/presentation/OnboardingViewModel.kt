@@ -39,10 +39,10 @@ import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUs
 import org.override.atomo.feature.profile.domain.ProfileValidator
 import org.override.atomo.feature.profile.domain.repository.ProfileRepository
 import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 import org.override.atomo.feature.shop.domain.model.Shop
 import org.override.atomo.feature.shop.domain.repository.ShopRepository
 import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
-import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
 /**

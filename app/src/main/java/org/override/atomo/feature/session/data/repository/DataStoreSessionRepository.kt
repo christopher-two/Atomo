@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.session.impl
+package org.override.atomo.feature.session.data.repository
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -15,7 +15,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class DataStoreSessionRepository(
     private val dataStore: DataStore<Preferences>

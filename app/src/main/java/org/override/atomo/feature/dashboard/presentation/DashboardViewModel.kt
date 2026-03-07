@@ -36,7 +36,7 @@ import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUs
 import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
 import org.override.atomo.feature.sync.data.manager.SyncManager
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 import java.util.UUID
 
 class DashboardViewModel(

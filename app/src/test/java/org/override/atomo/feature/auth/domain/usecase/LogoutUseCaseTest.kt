@@ -19,8 +19,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.override.atomo.data.local.AtomoDatabase
-import org.override.atomo.libs.auth.api.GoogleAuthManager
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.auth.domain.repository.GoogleAuthManager
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class LogoutUseCaseTest {
 

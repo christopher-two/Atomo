@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.session.api
+package org.override.atomo.feature.session.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 

@@ -19,11 +19,11 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import org.override.atomo.feature.sync.data.manager.SyncManager
-import org.override.atomo.libs.biometric.BiometricHelper
-import org.override.atomo.libs.session.api.SessionRepository
-import org.override.atomo.libs.session.impl.DataStoreSessionRepository
-import org.override.atomo.libs.settings.api.SettingsRepository
-import org.override.atomo.libs.settings.impl.DataStoreSettingsRepository
+import org.override.atomo.feature.biometric.presentation.BiometricHelper
+import org.override.atomo.feature.session.domain.repository.SessionRepository
+import org.override.atomo.feature.session.data.repository.DataStoreSessionRepository
+import org.override.atomo.feature.settings.domain.repository.SettingsRepository
+import org.override.atomo.feature.settings.data.repository.DataStoreSettingsRepository
 
 // Extensión para crear el DataStore de preferencias
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "atomo_preferences")

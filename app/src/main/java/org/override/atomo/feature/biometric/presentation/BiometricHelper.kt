@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.biometric
+package org.override.atomo.feature.biometric.presentation
 
 import android.content.Context
 import androidx.biometric.BiometricManager

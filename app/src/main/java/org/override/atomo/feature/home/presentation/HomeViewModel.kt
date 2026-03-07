@@ -23,11 +23,11 @@ import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.RootNavigation
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 import org.override.atomo.feature.subscription.domain.usecase.subscription.GetExistingServicesUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.GetServiceLimitsUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.feature.sync.domain.usecase.sync.SyncAllServicesUseCase
-import org.override.atomo.libs.session.api.SessionRepository
 
 class HomeViewModel(
     private val homeNavigation: HomeNavigation,

@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.image.api
+package org.override.atomo.feature.image.domain.repository
 
 import android.net.Uri
 

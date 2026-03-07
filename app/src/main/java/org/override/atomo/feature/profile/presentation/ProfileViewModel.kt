@@ -29,7 +29,7 @@ import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.util.AtomoUrlGenerator
 import org.override.atomo.feature.profile.domain.ProfileValidator
 import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class ProfileViewModel(
     private val useCases: ProfileUseCases,

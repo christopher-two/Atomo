@@ -10,7 +10,6 @@
 package org.override.atomo.feature.dashboard.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -36,28 +35,33 @@ fun DashboardContent(
     onAction: (DashboardAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isServices = !state.hasAnyServices && !state.isLoading
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        /* Header con saludo */
-        item(key = "header") {
-            DashboardHeader(
-                displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+        if (!isServices) {
+            /* Header con saludo */
+            item(key = "header") {
+                DashboardHeader(
+                    displayName = state.profile?.displayName?.trim()?.substringBefore(' '),
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
 
-        /* Estadísticas */
-        item(key = "stats") {
-            DashboardStats(
-                statistics = state.statistics,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
+        if (!isServices) {
+            /* Estadísticas */
+            item(key = "stats") {
+                DashboardStats(
+                    statistics = state.statistics,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
         }
 
         /* Atajos rápidos */
-        if (state.shortcuts.isNotEmpty()) {
+        if (state.shortcuts.isNotEmpty() && !isServices) {
             item(key = "shortcuts") {
                 DashboardShortcuts(
                     shortcuts = state.shortcuts,
@@ -68,7 +72,7 @@ fun DashboardContent(
         }
 
         /* Título de servicios */
-        if (state.hasAnyServices) {
+        if (state.hasAnyServices && !isServices) {
             item(key = "services_title") {
                 Text(
                     text = "Tus Servicios",
@@ -78,11 +82,17 @@ fun DashboardContent(
             }
         }
 
-        /* Tarjetas de servicio dinámicas */
-        dashboardServiceItems(
-            services = state.services,
-            onAction = onAction
-        )
+        /* Tarjetas de servicio dinámicas o Empty State */
+        if (isServices) {
+            item(key = "empty_state") {
+                DashboardEmptyState(onAction = onAction)
+            }
+        } else {
+            dashboardServiceItems(
+                services = state.services,
+                onAction = onAction
+            )
+        }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
     }

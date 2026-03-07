@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.validation.api
+package org.override.atomo.feature.validation.domain
 
 interface Validator<T> {
     fun validate(input: T): ValidationResult

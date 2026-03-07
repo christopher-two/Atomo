@@ -7,9 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.auth.impl
-
-import androidx.credentials.exceptions.GetCredentialException
+package org.override.atomo.feature.auth.data.repository
 
 import android.content.Context
 import android.util.Log
@@ -17,6 +15,7 @@ import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
@@ -25,8 +24,8 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import org.override.atomo.R
-import org.override.atomo.libs.auth.api.ExternalAuthResult
-import org.override.atomo.libs.auth.api.GoogleAuthManager
+import org.override.atomo.feature.auth.domain.model.ExternalAuthResult
+import org.override.atomo.feature.auth.domain.repository.GoogleAuthManager
 import java.security.MessageDigest
 import java.util.UUID
 

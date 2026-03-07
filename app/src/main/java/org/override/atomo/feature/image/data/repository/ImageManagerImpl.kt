@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.image.impl
+package org.override.atomo.feature.image.data.repository
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -19,7 +19,7 @@ import id.zelory.compressor.constraint.quality
 import id.zelory.compressor.constraint.resolution
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.override.atomo.libs.image.api.ImageManager
+import org.override.atomo.feature.image.domain.repository.ImageManager
 import java.io.File
 import java.io.FileOutputStream
 

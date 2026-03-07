@@ -22,7 +22,7 @@ import org.override.atomo.feature.settings.domain.model.AppearanceSettings
 import org.override.atomo.feature.settings.domain.model.NotificationSettings
 import org.override.atomo.feature.settings.domain.model.PrivacySettings
 import org.override.atomo.feature.settings.domain.model.Settings
-import org.override.atomo.libs.settings.api.SettingsRepository
+import org.override.atomo.feature.settings.domain.repository.SettingsRepository
 
 class SettingsUseCasesTest {
 

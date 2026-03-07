@@ -9,24 +9,6 @@
 
 package org.override.atomo.core.ui.components
 
-import org.override.atomo.libs.validation.api.ValidationResult
-
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.TextFieldColors
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.VisualTransformation
-
 /**
  * A custom text field component for the Atomo design system.
  * Wraps [OutlinedTextField] with default styling and behaviors.
@@ -55,8 +37,24 @@ import androidx.compose.ui.text.input.VisualTransformation
  * @param shape Shape of the text field.
  * @param colors Colors for the text field.
  */
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import org.override.atomo.libs.validation.api.Validator
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.VisualTransformation
+import org.override.atomo.feature.validation.domain.ValidationResult
+import org.override.atomo.feature.validation.domain.Validator
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

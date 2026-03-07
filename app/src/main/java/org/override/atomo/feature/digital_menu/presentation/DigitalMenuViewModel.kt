@@ -29,9 +29,9 @@ import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
 class DigitalMenuViewModel(

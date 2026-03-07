@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.settings.domain.usecase
 
-import org.override.atomo.libs.settings.api.SettingsRepository
+import org.override.atomo.feature.settings.domain.repository.SettingsRepository
 
 class UpdateAppearanceUseCase(
     private val repository: SettingsRepository

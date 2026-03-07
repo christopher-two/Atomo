@@ -10,8 +10,8 @@
 package org.override.atomo.feature.auth.domain.usecase
 
 import android.content.Context
-import org.override.atomo.libs.auth.api.ExternalAuthResult
-import org.override.atomo.libs.auth.api.GoogleAuthManager
+import org.override.atomo.feature.auth.domain.model.ExternalAuthResult
+import org.override.atomo.feature.auth.domain.repository.GoogleAuthManager
 
 class ContinueWithGoogleUseCase(
     private val repository: GoogleAuthManager,

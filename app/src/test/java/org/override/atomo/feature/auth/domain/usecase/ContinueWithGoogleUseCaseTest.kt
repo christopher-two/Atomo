@@ -18,8 +18,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.override.atomo.libs.auth.api.ExternalAuthResult
-import org.override.atomo.libs.auth.api.GoogleAuthManager
+import org.override.atomo.feature.auth.domain.model.ExternalAuthResult
+import org.override.atomo.feature.auth.domain.repository.GoogleAuthManager
 
 class ContinueWithGoogleUseCaseTest {
 

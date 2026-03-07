@@ -24,11 +24,11 @@ import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
+import org.override.atomo.feature.image.domain.repository.ImageManager
 import org.override.atomo.feature.storage.domain.usecase.storage.DeleteDishImageUseCase
 import org.override.atomo.feature.storage.domain.usecase.storage.UploadDishImageUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanAddDishUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanAddItemResult
-import org.override.atomo.libs.image.api.ImageManager
 
 class MenuUseCasesTest {
 

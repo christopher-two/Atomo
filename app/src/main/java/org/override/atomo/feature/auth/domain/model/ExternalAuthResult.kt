@@ -7,7 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.auth.api
+package org.override.atomo.feature.auth.domain.model
 
 sealed class ExternalAuthResult {
     data class Success(val userId: String) : ExternalAuthResult()

@@ -7,9 +7,10 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
-package org.override.atomo.libs.auth.api
+package org.override.atomo.feature.auth.domain.repository
 
 import android.content.Context
+import org.override.atomo.feature.auth.domain.model.ExternalAuthResult
 
 interface GoogleAuthManager {
     /**

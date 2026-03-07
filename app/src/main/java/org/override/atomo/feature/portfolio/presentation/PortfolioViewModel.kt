@@ -26,9 +26,9 @@ import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.portfolio.domain.model.Portfolio
 import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUseCases
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
-import org.override.atomo.libs.session.api.SessionRepository
 import java.util.UUID
 
 class PortfolioViewModel(

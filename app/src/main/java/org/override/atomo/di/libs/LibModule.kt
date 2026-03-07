@@ -12,8 +12,8 @@ package org.override.atomo.di.libs
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
-import org.override.atomo.libs.image.api.ImageManager
-import org.override.atomo.libs.image.impl.ImageManagerImpl
+import org.override.atomo.feature.image.data.repository.ImageManagerImpl
+import org.override.atomo.feature.image.domain.repository.ImageManager
 
 val LibModule = module {
     singleOf(::ImageManagerImpl) bind ImageManager::class

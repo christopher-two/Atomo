@@ -7,6 +7,7 @@
  * Uruapan, Michoacán, México. | atomo.click
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -18,15 +19,15 @@ plugins {
     alias(libs.plugins.google.devtools.ksp)
 }
 
-val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystorePropertiesFile: File? = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
-if (keystorePropertiesFile.exists()) {
+if (keystorePropertiesFile?.exists() ?: false) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 val localProperties = Properties()
-val localPropertiesFile = rootProject.file("local.properties")
-if (localPropertiesFile.exists()) {
+val localPropertiesFile: File? = rootProject.file("local.properties")
+if (localPropertiesFile?.exists() ?: false) {
     localProperties.load(localPropertiesFile.inputStream())
 }
 
@@ -36,7 +37,7 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesFile.exists()) {
+            if (keystorePropertiesFile?.exists() ?: false) {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
                 storeFile = file(keystoreProperties["storeFile"] as String)
@@ -80,7 +81,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.JVM_11)
         freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }

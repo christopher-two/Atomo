@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import org.override.atomo.core.ui.components.AtomoTextField
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 
-import org.override.atomo.libs.validation.api.CommonValidators
+import org.override.atomo.feature.validation.domain.CommonValidators
 
 @Composable
 fun CategoryDialog(

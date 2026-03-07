@@ -9,7 +9,7 @@
 
 package org.override.atomo.feature.auth.domain.usecase
 
-import org.override.atomo.libs.session.api.SessionRepository
+import org.override.atomo.feature.session.domain.repository.SessionRepository
 
 class SaveUserSessionUseCase(
     private val sessionRepository: SessionRepository

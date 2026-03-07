@@ -23,26 +23,18 @@ import org.koin.compose.koinInject
 import org.override.atomo.core.common.SnackbarManager
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.home.presentation.components.HomeScaffold
-import org.override.atomo.feature.navigation.AppTab
-import org.override.atomo.feature.navigation.HomeNavigation
 import org.override.atomo.feature.navigation.wrapper.WrapperHomeNavigation
 
 @Composable
 fun HomeRoot(
     viewModel: HomeViewModel,
-    snackbarManager: SnackbarManager = koinInject(),
-    homeNavigation: HomeNavigation = koinInject()
+    snackbarManager: SnackbarManager = koinInject()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    
-    // FAB is visible only on Dashboard root (stack size 1)
-    val isFabVisible = homeNavigation.currentTab == AppTab.DASHBOARD && 
-                       homeNavigation.currentStack.size <= 1
 
     HomeScreen(
         state = state,
         snackbarManager = snackbarManager,
-        isFabVisible = isFabVisible,
         onAction = viewModel::onAction
     )
 }
@@ -52,13 +44,11 @@ fun HomeRoot(
 fun HomeScreen(
     state: HomeState,
     snackbarManager: SnackbarManager,
-    isFabVisible: Boolean,
     onAction: (HomeAction) -> Unit,
 ) {
     HomeScaffold(
         snackbarManager = snackbarManager,
         state = state,
-        isFabVisible = isFabVisible,
         content = {
             WrapperHomeNavigation()
         },
@@ -92,8 +82,7 @@ private fun Preview() {
         HomeScreen(
             state = HomeState(),
             snackbarManager = SnackbarManager(),
-            onAction = {},
-            isFabVisible = false
+            onAction = {}
         )
     }
 }

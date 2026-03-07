@@ -118,10 +118,6 @@ class OnboardingViewModel(
                 _state.update { it.copy(dishes = it.dishes.filter { dish -> dish != action.dish }) }
             }
 
-            is OnboardingAction.UpdateServiceName -> {
-                _state.update { it.copy(serviceName = action.name) }
-            }
-
             OnboardingAction.FinishOnboarding -> finishOnboarding()
             OnboardingAction.DismissError -> {
                 _state.update { it.copy(error = null) }

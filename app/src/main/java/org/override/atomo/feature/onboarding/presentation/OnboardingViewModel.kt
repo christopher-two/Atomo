@@ -41,8 +41,8 @@ import org.override.atomo.feature.profile.domain.repository.ProfileRepository
 import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.feature.session.domain.repository.SessionRepository
 import org.override.atomo.feature.shop.domain.model.Shop
-import org.override.atomo.feature.shop.domain.repository.ShopRepository
 import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
+import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
 import java.util.UUID
 
 /**
@@ -57,7 +57,8 @@ class OnboardingViewModel(
     private val menuRepository: MenuRepository,
     private val sessionRepository: SessionRepository,
     private val rootNavigation: RootNavigation,
-    private val snackbarManager: SnackbarManager
+    private val snackbarManager: SnackbarManager,
+    private val subscriptionUseCases: SubscriptionUseCases
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -118,6 +119,10 @@ class OnboardingViewModel(
                 _state.update { it.copy(dishes = it.dishes.filter { dish -> dish != action.dish }) }
             }
 
+            is OnboardingAction.SelectPlan -> {
+                _state.update { it.copy(selectedPlanId = action.planId) }
+            }
+
             OnboardingAction.FinishOnboarding -> finishOnboarding()
             OnboardingAction.DismissError -> {
                 _state.update { it.copy(error = null) }
@@ -146,6 +151,21 @@ class OnboardingViewModel(
                         templates = templates, 
                         selectedTemplateId = if (it.selectedTemplateId == null) templates.firstOrNull()?.id else it.selectedTemplateId 
                     ) 
+                }
+            }
+        }
+        
+        viewModelScope.launch {
+            subscriptionUseCases.syncPlans()
+        }
+
+        viewModelScope.launch {
+            subscriptionUseCases.getPlans().collect { plans ->
+                _state.update {
+                    it.copy(
+                        plans = plans,
+                        selectedPlanId = if (it.selectedPlanId == null) plans.firstOrNull()?.id else it.selectedPlanId
+                    )
                 }
             }
         }
@@ -203,7 +223,8 @@ class OnboardingViewModel(
             OnboardingStep.PROFILE -> OnboardingStep.MENU_DETAILS
             OnboardingStep.MENU_DETAILS -> OnboardingStep.TEMPLATE_SELECTION
             OnboardingStep.TEMPLATE_SELECTION -> OnboardingStep.MENU_ITEMS
-            OnboardingStep.MENU_ITEMS -> OnboardingStep.REVIEW
+            OnboardingStep.MENU_ITEMS -> OnboardingStep.PLAN_SELECTION
+            OnboardingStep.PLAN_SELECTION -> OnboardingStep.REVIEW
             OnboardingStep.REVIEW -> return // Already at last step
         }
         _state.update { it.copy(step = nextStep) }
@@ -216,14 +237,14 @@ class OnboardingViewModel(
             OnboardingStep.MENU_DETAILS -> OnboardingStep.PROFILE
             OnboardingStep.TEMPLATE_SELECTION -> OnboardingStep.MENU_DETAILS
             OnboardingStep.MENU_ITEMS -> OnboardingStep.TEMPLATE_SELECTION
-            OnboardingStep.REVIEW -> OnboardingStep.MENU_ITEMS
+            OnboardingStep.PLAN_SELECTION -> OnboardingStep.MENU_ITEMS
+            OnboardingStep.REVIEW -> OnboardingStep.PLAN_SELECTION
         }
         _state.update { it.copy(step = prevStep) }
     }
 
     private fun finishOnboarding() {
         val currentState = state.value
-        val currentProfile = currentState.profile ?: return
 
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
@@ -231,9 +252,17 @@ class OnboardingViewModel(
             val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
 
             // 1. Update profile locally
-            val updatedProfile = currentProfile.copy(
+            val updatedProfile = currentState.profile?.copy(
                 displayName = currentState.displayName,
                 username = currentState.username,
+                updatedAt = System.currentTimeMillis()
+            ) ?: org.override.atomo.feature.profile.domain.model.Profile(
+                id = userId,
+                username = currentState.username,
+                displayName = currentState.displayName,
+                avatarUrl = null,
+                socialLinks = emptyMap(),
+                createdAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis()
             )
 
@@ -249,7 +278,36 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 2. Create service locally
+            // 2. Create subscription locally
+            val planId = currentState.selectedPlanId ?: run {
+                _state.update { it.copy(isLoading = false, error = "Por favor selecciona un plan.") }
+                return@launch
+            }
+            
+            val subscriptionToCreate = org.override.atomo.feature.subscription.domain.model.Subscription(
+                id = UUID.randomUUID().toString(),
+                userId = userId,
+                planId = planId,
+                status = org.override.atomo.feature.subscription.domain.model.SubscriptionStatus.ACTIVE,
+                currentPeriodStart = System.currentTimeMillis(),
+                currentPeriodEnd = null,
+                cancelAtPeriodEnd = false,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            
+            val subscriptionResult = subscriptionUseCases.createSubscription(subscriptionToCreate)
+            if (subscriptionResult.isFailure) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Error al asignar plan: ${subscriptionResult.exceptionOrNull()?.message}"
+                    )
+                }
+                return@launch
+            }
+
+            // 3. Create service locally
             val serviceResult = createService(userId, currentState)
             if (serviceResult.isFailure) {
                 _state.update {
@@ -262,7 +320,7 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 3. Sync profile to remote immediately
+            // 4. Sync profile to remote immediately
             val profileSyncResult = profileRepository.syncUp(userId)
             if (profileSyncResult.isFailure) {
                 _state.update {
@@ -274,7 +332,13 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 4. Sync service to remote immediately
+            // 5. Sync subscription to remote. Needs to happen before syncing service because service has FK to user/subscription
+            val syncSubscriptionResult = subscriptionUseCases.syncSubscription(userId)
+            if (syncSubscriptionResult.isFailure) {
+                // Non-fatal, as we created it locally, but we need it remotely
+            }
+
+            // 6. Sync service to remote immediately
             val serviceSyncResult = syncService(userId)
             if (serviceSyncResult.isFailure) {
                 _state.update {
@@ -286,7 +350,7 @@ class OnboardingViewModel(
                 return@launch
             }
 
-            // 5. Navigate to Home
+            // 7. Navigate to Home
             _state.update { it.copy(isLoading = false) }
             snackbarManager.showMessage("¡Bienvenido a Átomo!")
             rootNavigation.replaceWith(RouteApp.Home)

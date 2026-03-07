@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -41,22 +43,18 @@ fun TemplateStepContent(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(
-            text = "Selecciona un Diseño",
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LazyRow(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Fixed(2),
+            modifier = Modifier.weight(1f).fillMaxWidth().padding(vertical = 8.dp),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalItemSpacing = 16.dp,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(state.templates) { template ->
                 val isSelected = template.id == state.selectedTemplateId
                 Card(
                     modifier = Modifier
-                        .width(200.dp)
+                        .fillMaxWidth()
                         .clickable { onAction(OnboardingAction.SelectTemplate(template.id)) }
                         .then(if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.primary, MaterialTheme.shapes.medium) else Modifier),
                     colors = CardDefaults.cardColors(
@@ -91,8 +89,6 @@ fun TemplateStepContent(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
 
         Row(
             modifier = Modifier.fillMaxWidth(),

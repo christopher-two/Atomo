@@ -21,6 +21,7 @@ import org.override.atomo.feature.subscription.domain.repository.SubscriptionRep
  * @property syncPlans Synchronizes plans from the backend.
  * @property getSubscription Retrieves the user's active subscription.
  * @property syncSubscription Synchronizes the user's subscription from the backend.
+ * @property createSubscription Creates a new subscription.
  * @property cancelSubscription Cancels the user's subscription.
  */
 data class SubscriptionUseCases(
@@ -28,6 +29,7 @@ data class SubscriptionUseCases(
     val syncPlans: SyncPlansUseCase,
     val getSubscription: GetSubscriptionUseCase,
     val syncSubscription: SyncSubscriptionUseCase,
+    val createSubscription: CreateSubscriptionUseCase,
     val cancelSubscription: CancelSubscriptionUseCase
 )
 
@@ -49,6 +51,11 @@ class GetSubscriptionUseCase(private val repository: SubscriptionRepository) {
 /** Synchronizes the user's subscription from the server. */
 class SyncSubscriptionUseCase(private val repository: SubscriptionRepository) {
     suspend operator fun invoke(userId: String): Result<Subscription?> = repository.syncSubscription(userId)
+}
+
+/** Creates a new subscription. */
+class CreateSubscriptionUseCase(private val repository: SubscriptionRepository) {
+    suspend operator fun invoke(subscription: Subscription): Result<Subscription> = repository.createSubscription(subscription)
 }
 
 /** Cancels the user's subscription. */

@@ -77,6 +77,7 @@ import org.override.atomo.feature.storage.domain.usecase.storage.UploadDishImage
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanAddDishUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CancelSubscriptionUseCase
+import org.override.atomo.feature.subscription.domain.usecase.subscription.CreateSubscriptionUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.GetExistingServicesUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.GetPlansUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.GetServiceLimitsUseCase
@@ -172,6 +173,7 @@ val UseCaseModule = module {
     singleOf(::SyncPlansUseCase)
     singleOf(::GetSubscriptionUseCase)
     singleOf(::SyncSubscriptionUseCase)
+    singleOf(::CreateSubscriptionUseCase)
     singleOf(::CancelSubscriptionUseCase)
     singleOf(::SubscriptionUseCases)
     

@@ -50,18 +50,6 @@ fun MenuItemsStepContent(
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(
-            text = "Crea tu Menú",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Text(
-            text = "Agrega categorías y platillos rápidamente. Podrás editarlos después.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(16.dp)

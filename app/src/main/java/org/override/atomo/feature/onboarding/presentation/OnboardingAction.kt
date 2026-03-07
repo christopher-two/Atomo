@@ -49,6 +49,10 @@ sealed interface OnboardingAction {
     /** Remove a dish. */
     data class RemoveDish(val dish: DishInput) : OnboardingAction
 
+    // Plan Selection Step (Step 5)
+    /** Select a subscription plan. */
+    data class SelectPlan(val planId: String) : OnboardingAction
+
     // Final
     /** Complete onboarding: save profile and create service. */
     data object FinishOnboarding : OnboardingAction

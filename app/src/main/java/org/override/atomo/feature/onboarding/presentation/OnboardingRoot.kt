@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.onboarding.presentation.components.MenuDetailsStepContent
 import org.override.atomo.feature.onboarding.presentation.components.MenuItemsStepContent
+import org.override.atomo.feature.onboarding.presentation.components.PlanSelectionStepContent
 import org.override.atomo.feature.onboarding.presentation.components.ProfileStepContent
 import org.override.atomo.feature.onboarding.presentation.components.ReviewStepContent
 import org.override.atomo.feature.onboarding.presentation.components.TemplateStepContent
@@ -57,10 +58,11 @@ fun OnboardingScreen(
     onAction: (OnboardingAction) -> Unit,
 ) {
     val progress = when (state.step) {
-        OnboardingStep.PROFILE -> 0.2f
-        OnboardingStep.MENU_DETAILS -> 0.4f
-        OnboardingStep.TEMPLATE_SELECTION -> 0.6f
-        OnboardingStep.MENU_ITEMS -> 0.8f
+        OnboardingStep.PROFILE -> 0.16f
+        OnboardingStep.MENU_DETAILS -> 0.33f
+        OnboardingStep.TEMPLATE_SELECTION -> 0.5f
+        OnboardingStep.MENU_ITEMS -> 0.66f
+        OnboardingStep.PLAN_SELECTION -> 0.83f
         OnboardingStep.REVIEW -> 1f
     }
 
@@ -87,6 +89,7 @@ fun OnboardingScreen(
                     OnboardingStep.MENU_DETAILS -> "Nombra tu Menú"
                     OnboardingStep.TEMPLATE_SELECTION -> "Elige un Diseño"
                     OnboardingStep.MENU_ITEMS -> "Personaliza tu Menú"
+                    OnboardingStep.PLAN_SELECTION -> "Selecciona un Plan"
                     OnboardingStep.REVIEW -> "Revisa y confirma"
                 },
                 style = MaterialTheme.typography.headlineMedium,
@@ -101,6 +104,7 @@ fun OnboardingScreen(
                     OnboardingStep.MENU_DETAILS -> "Dale a tu menú un nombre para poder identificarlo mejor"
                     OnboardingStep.TEMPLATE_SELECTION -> "Selecciona la plantilla para tu página web"
                     OnboardingStep.MENU_ITEMS -> "Agrega categorías y platillos base"
+                    OnboardingStep.PLAN_SELECTION -> "Elige el plan que mejor se adapte a tus necesidades"
                     OnboardingStep.REVIEW -> "Verifica que todo esté correcto"
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -142,6 +146,11 @@ fun OnboardingScreen(
                     )
                     
                     OnboardingStep.MENU_ITEMS -> MenuItemsStepContent(
+                        state = state,
+                        onAction = onAction
+                    )
+
+                    OnboardingStep.PLAN_SELECTION -> PlanSelectionStepContent(
                         state = state,
                         onAction = onAction
                     )

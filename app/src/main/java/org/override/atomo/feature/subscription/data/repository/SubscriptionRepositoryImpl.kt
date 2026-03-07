@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.override.atomo.feature.subscription.data.local.dao.SubscriptionDao
 import org.override.atomo.feature.subscription.data.mapper.toDomain
+import org.override.atomo.feature.subscription.data.mapper.toDto
 import org.override.atomo.feature.subscription.data.mapper.toEntity
 import org.override.atomo.feature.subscription.data.remote.dto.PlanDto
 import org.override.atomo.feature.subscription.data.remote.dto.SubscriptionDto
@@ -74,11 +75,21 @@ class SubscriptionRepositoryImpl(
     }
     
     override suspend fun createSubscription(subscription: Subscription): Result<Subscription> = runCatching {
-        supabase.from("subscriptions").insert(subscription)
+        // Persist locally first (optimistic); push to remote via syncSubscriptionUp()
         subscriptionDao.insertSubscription(subscription.toEntity())
         subscription
     }
-    
+
+    /**
+     * Pushes the locally stored subscription for [userId] to the remote backend.
+     * Must be called after [createSubscription] to complete the remote sync cycle.
+     */
+    override suspend fun syncSubscriptionUp(userId: String): Result<Unit> = runCatching {
+        val entity = subscriptionDao.getSubscription(userId) ?: return@runCatching
+        val dto = entity.toDomain().toDto()
+        supabase.from("subscriptions").upsert(dto) { onConflict = "id" }
+    }
+
     override suspend fun cancelSubscription(userId: String): Result<Unit> = runCatching {
         supabase.from("subscriptions")
             .update({ set("cancel_at_period_end", true) }) { filter { eq("user_id", userId) } }

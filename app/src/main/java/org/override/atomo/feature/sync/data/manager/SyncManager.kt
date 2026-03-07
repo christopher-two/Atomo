@@ -78,4 +78,12 @@ class SyncManager(private val workManager: WorkManager) {
             request
         )
     }
+
+    /**
+     * Cancels any pending upload worker for [userId].
+     * Use this before doing a direct (foreground) sync to avoid race conditions.
+     */
+    fun cancelUploadWorker(userId: String) {
+        workManager.cancelUniqueWork("upload_$userId")
+    }
 }

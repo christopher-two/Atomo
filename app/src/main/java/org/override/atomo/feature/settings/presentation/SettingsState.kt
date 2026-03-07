@@ -37,5 +37,6 @@ data class SettingsState(
         isBiometricAuthEnabled = false,
         isAnalyticsEnabled = true
     ),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val showDeleteAccountDialog: Boolean = false
 )

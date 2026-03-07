@@ -24,6 +24,7 @@ import org.override.atomo.core.common.RouteApp
 import org.override.atomo.feature.auth.data.repository.GoogleAuthManagerImpl
 import org.override.atomo.feature.auth.domain.repository.GoogleAuthManager
 import org.override.atomo.feature.auth.domain.usecase.ContinueWithGoogleUseCase
+import org.override.atomo.feature.auth.domain.usecase.DeleteAccountUseCase
 import org.override.atomo.feature.auth.domain.usecase.LogoutUseCase
 import org.override.atomo.feature.auth.domain.usecase.SaveUserSessionUseCase
 import org.override.atomo.feature.auth.presentation.AuthRoot
@@ -35,6 +36,7 @@ val AuthModule: Module
         factoryOf(::ContinueWithGoogleUseCase)
         factoryOf(::SaveUserSessionUseCase)
         factoryOf(::LogoutUseCase)
+        factoryOf(::DeleteAccountUseCase)
 
         // ViewModel
         viewModelOf(::AuthViewModel)

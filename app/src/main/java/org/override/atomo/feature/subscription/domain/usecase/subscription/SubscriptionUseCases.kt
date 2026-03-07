@@ -21,7 +21,8 @@ import org.override.atomo.feature.subscription.domain.repository.SubscriptionRep
  * @property syncPlans Synchronizes plans from the backend.
  * @property getSubscription Retrieves the user's active subscription.
  * @property syncSubscription Synchronizes the user's subscription from the backend.
- * @property createSubscription Creates a new subscription.
+ * @property createSubscription Creates a new subscription locally (optimistic).
+ * @property syncSubscriptionUp Pushes the local subscription to the remote backend.
  * @property cancelSubscription Cancels the user's subscription.
  */
 data class SubscriptionUseCases(
@@ -30,6 +31,7 @@ data class SubscriptionUseCases(
     val getSubscription: GetSubscriptionUseCase,
     val syncSubscription: SyncSubscriptionUseCase,
     val createSubscription: CreateSubscriptionUseCase,
+    val syncSubscriptionUp: SyncSubscriptionUpUseCase,
     val cancelSubscription: CancelSubscriptionUseCase
 )
 
@@ -53,9 +55,14 @@ class SyncSubscriptionUseCase(private val repository: SubscriptionRepository) {
     suspend operator fun invoke(userId: String): Result<Subscription?> = repository.syncSubscription(userId)
 }
 
-/** Creates a new subscription. */
+/** Creates a new subscription locally (optimistic). Remote push via [SyncSubscriptionUpUseCase]. */
 class CreateSubscriptionUseCase(private val repository: SubscriptionRepository) {
     suspend operator fun invoke(subscription: Subscription): Result<Subscription> = repository.createSubscription(subscription)
+}
+
+/** Pushes the locally stored subscription for the given user to the remote backend. */
+class SyncSubscriptionUpUseCase(private val repository: SubscriptionRepository) {
+    suspend operator fun invoke(userId: String): Result<Unit> = repository.syncSubscriptionUp(userId)
 }
 
 /** Cancels the user's subscription. */

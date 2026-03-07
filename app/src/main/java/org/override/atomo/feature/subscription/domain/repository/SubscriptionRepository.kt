@@ -42,8 +42,11 @@ interface SubscriptionRepository {
     /** Synchronizes the user's subscription from the remote source. */
     suspend fun syncSubscription(userId: String): Result<Subscription?>
 
-    /** Creates or upgrades a subscription. */
+    /** Creates or upgrades a subscription locally (optimistic). */
     suspend fun createSubscription(subscription: Subscription): Result<Subscription>
+
+    /** Pushes the locally stored subscription for [userId] to the remote backend. */
+    suspend fun syncSubscriptionUp(userId: String): Result<Unit>
 
     /** Cancels the user's subscription. */
     suspend fun cancelSubscription(userId: String): Result<Unit>

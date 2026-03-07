@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
+import org.override.atomo.feature.auth.domain.usecase.DeleteAccountUseCase
 import org.override.atomo.feature.auth.domain.usecase.LogoutUseCase
 import org.override.atomo.feature.navigation.AppTab
 import org.override.atomo.feature.navigation.HomeNavigation
@@ -33,6 +34,7 @@ class SettingsViewModel(
     private val useCases: SettingsUseCases,
     private val rootNavigation: RootNavigation,
     private val logoutUseCase: LogoutUseCase,
+    private val deleteAccountUseCase: DeleteAccountUseCase,
     private val homeNavigation: HomeNavigation
 ) : ViewModel() {
 
@@ -63,7 +65,9 @@ class SettingsViewModel(
             is SettingsAction.SetNotificationPriority -> updateNotificationPriority(action.priority)
             is SettingsAction.ToggleBiometricAuth -> updateBiometricAuth(action.enabled)
             is SettingsAction.ToggleAnalytics -> updateAnalytics(action.enabled)
+            is SettingsAction.ShowDeleteAccountDialog -> _state.update { it.copy(showDeleteAccountDialog = action.show) }
             is SettingsAction.Logout -> logout()
+            is SettingsAction.DeleteAccount -> deleteAccount()
             is SettingsAction.NavigateToPay -> homeNavigation.switchTab(AppTab.PAY)
             is SettingsAction.NavigateBack -> rootNavigation.back()
         }
@@ -146,6 +150,18 @@ class SettingsViewModel(
             
             if (result.isSuccess) {
                 // Navegar a Auth y limpiar backstack
+                rootNavigation.replaceWith(RouteApp.Auth)
+            }
+        }
+    }
+
+    private fun deleteAccount() {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            val result = deleteAccountUseCase()
+            _state.update { it.copy(isLoading = false) }
+            
+            if (result.isSuccess) {
                 rootNavigation.replaceWith(RouteApp.Auth)
             }
         }

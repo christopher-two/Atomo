@@ -43,6 +43,12 @@ sealed interface SettingsAction {
     /** Logout the current user. */
     data object Logout : SettingsAction
     
+    /** Delete the current user account and all data. */
+    data object DeleteAccount : SettingsAction
+    
+    /** Show or hide the delete account confirmation dialog. */
+    data class ShowDeleteAccountDialog(val show: Boolean) : SettingsAction
+    
     /** Navigate to the Pay/Subscription screen. */
     data object NavigateToPay : SettingsAction
     

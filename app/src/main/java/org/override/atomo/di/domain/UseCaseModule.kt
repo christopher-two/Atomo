@@ -9,6 +9,7 @@
 
 package org.override.atomo.di.domain
 
+import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 import org.override.atomo.feature.auth.domain.usecase.CheckSessionUseCase
@@ -28,9 +29,9 @@ import org.override.atomo.feature.digital_menu.domain.usecase.menu.CreateMenuUse
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.DeleteCategoryUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.DeleteDishUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.DeleteMenuUseCase
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenuTemplatesUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenuUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenusUseCase
-import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenuTemplatesUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.SyncMenusUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.UpdateCategoryUseCase
@@ -84,6 +85,7 @@ import org.override.atomo.feature.subscription.domain.usecase.subscription.GetSe
 import org.override.atomo.feature.subscription.domain.usecase.subscription.GetSubscriptionUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
 import org.override.atomo.feature.subscription.domain.usecase.subscription.SyncPlansUseCase
+import org.override.atomo.feature.subscription.domain.usecase.subscription.SyncSubscriptionUpUseCase
 import org.override.atomo.feature.subscription.domain.usecase.subscription.SyncSubscriptionUseCase
 import org.override.atomo.feature.sync.domain.usecase.sync.SyncAllServicesUseCase
 
@@ -109,7 +111,7 @@ val UseCaseModule = module {
     singleOf(::UpdateCategoryUseCase)
     singleOf(::DeleteCategoryUseCase)
     singleOf(::CreateDishUseCase)
-    factory { UpsertDishUseCase(get(), get(), get(), get()) }
+    factoryOf(::UpsertDishUseCase)
     singleOf(::UpdateDishUseCase)
     singleOf(::DeleteDishUseCase)
     
@@ -174,6 +176,7 @@ val UseCaseModule = module {
     singleOf(::GetSubscriptionUseCase)
     singleOf(::SyncSubscriptionUseCase)
     singleOf(::CreateSubscriptionUseCase)
+    singleOf(::SyncSubscriptionUpUseCase)
     singleOf(::CancelSubscriptionUseCase)
     singleOf(::SubscriptionUseCases)
     

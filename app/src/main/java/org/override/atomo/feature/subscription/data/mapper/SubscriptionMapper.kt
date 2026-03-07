@@ -121,6 +121,19 @@ fun Subscription.toEntity(): SubscriptionEntity = SubscriptionEntity(
     updatedAt = updatedAt
 )
 
+/** Maps Subscription domain model to SubscriptionDto for remote push. */
+fun Subscription.toDto(): SubscriptionDto = SubscriptionDto(
+    id = id,
+    userId = userId,
+    planId = planId,
+    status = status.name.lowercase(),
+    currentPeriodStart = currentPeriodStart.toString(),
+    currentPeriodEnd = currentPeriodEnd?.toString(),
+    cancelAtPeriodEnd = cancelAtPeriodEnd,
+    createdAt = createdAt.toString(),
+    updatedAt = updatedAt.toString()
+)
+
 /** Maps SubscriptionDto to SubscriptionEntity. */
 fun SubscriptionDto.toEntity(): SubscriptionEntity = SubscriptionEntity(
     id = id,

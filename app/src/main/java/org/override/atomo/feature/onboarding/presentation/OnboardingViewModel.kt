@@ -22,27 +22,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.override.atomo.core.common.RouteApp
 import org.override.atomo.core.common.SnackbarManager
-import org.override.atomo.domain.model.ServiceType
-import org.override.atomo.feature.cv.domain.model.Cv
-import org.override.atomo.feature.cv.domain.repository.CvRepository
-import org.override.atomo.feature.cv.domain.usecase.cv.CvUseCases
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
-import org.override.atomo.feature.invitation.domain.model.Invitation
-import org.override.atomo.feature.invitation.domain.repository.InvitationRepository
-import org.override.atomo.feature.invitation.domain.usecase.invitation.InvitationUseCases
 import org.override.atomo.feature.navigation.RootNavigation
-import org.override.atomo.feature.portfolio.domain.model.Portfolio
-import org.override.atomo.feature.portfolio.domain.repository.PortfolioRepository
-import org.override.atomo.feature.portfolio.domain.usecase.portfolio.PortfolioUseCases
 import org.override.atomo.feature.profile.domain.ProfileValidator
 import org.override.atomo.feature.profile.domain.repository.ProfileRepository
 import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.feature.session.domain.repository.SessionRepository
-import org.override.atomo.feature.shop.domain.model.Shop
-import org.override.atomo.feature.shop.domain.usecase.shop.ShopUseCases
 import org.override.atomo.feature.subscription.domain.usecase.subscription.SubscriptionUseCases
+import org.override.atomo.feature.sync.data.manager.SyncManager
 import java.util.UUID
 
 /**
@@ -52,13 +41,13 @@ import java.util.UUID
 class OnboardingViewModel(
     private val profileUseCases: ProfileUseCases,
     private val menuUseCases: MenuUseCases,
-    // Repositories for direct sync
     private val profileRepository: ProfileRepository,
     private val menuRepository: MenuRepository,
     private val sessionRepository: SessionRepository,
     private val rootNavigation: RootNavigation,
     private val snackbarManager: SnackbarManager,
-    private val subscriptionUseCases: SubscriptionUseCases
+    private val subscriptionUseCases: SubscriptionUseCases,
+    private val syncManager: SyncManager
 ) : ViewModel() {
 
     private var hasLoadedInitialData = false
@@ -144,13 +133,16 @@ class OnboardingViewModel(
                     username = profile?.username.orEmpty()
                 )
             }
-            
+        }
+
+        // Collect templates in its own coroutine (Flow de Room nunca completa)
+        viewModelScope.launch {
             menuUseCases.getMenuTemplates().collect { templates ->
-                _state.update { 
+                _state.update {
                     it.copy(
-                        templates = templates, 
-                        selectedTemplateId = if (it.selectedTemplateId == null) templates.firstOrNull()?.id else it.selectedTemplateId 
-                    ) 
+                        templates = templates,
+                        selectedTemplateId = it.selectedTemplateId ?: templates.firstOrNull()?.id
+                    )
                 }
             }
         }
@@ -249,9 +241,14 @@ class OnboardingViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 
-            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: return@launch
+            val userId = sessionRepository.getCurrentUserId().firstOrNull() ?: run {
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Error: Sesión no encontrada")
+                return@launch
+            }
 
-            // 1. Update profile locally
+            syncManager.cancelUploadWorker(userId)
+
             val updatedProfile = currentState.profile?.copy(
                 displayName = currentState.displayName,
                 username = currentState.username,
@@ -268,22 +265,17 @@ class OnboardingViewModel(
 
             val profileResult = profileUseCases.updateProfile(updatedProfile)
             if (profileResult.isFailure) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = profileResult.exceptionOrNull()?.message
-                            ?: "Error al guardar perfil"
-                    )
-                }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage(profileResult.exceptionOrNull()?.message ?: "Error al guardar perfil")
                 return@launch
             }
 
-            // 2. Create subscription locally
             val planId = currentState.selectedPlanId ?: run {
-                _state.update { it.copy(isLoading = false, error = "Por favor selecciona un plan.") }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Por favor selecciona un plan.")
                 return@launch
             }
-            
+
             val subscriptionToCreate = org.override.atomo.feature.subscription.domain.model.Subscription(
                 id = UUID.randomUUID().toString(),
                 userId = userId,
@@ -295,58 +287,44 @@ class OnboardingViewModel(
                 createdAt = System.currentTimeMillis(),
                 updatedAt = System.currentTimeMillis()
             )
-            
+
             val subscriptionResult = subscriptionUseCases.createSubscription(subscriptionToCreate)
             if (subscriptionResult.isFailure) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error al asignar plan: ${subscriptionResult.exceptionOrNull()?.message}"
-                    )
-                }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Error al asignar plan: ${subscriptionResult.exceptionOrNull()?.message}")
                 return@launch
             }
 
             // 3. Create service locally
             val serviceResult = createService(userId, currentState)
             if (serviceResult.isFailure) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = serviceResult.exceptionOrNull()?.message
-                            ?: "Error al crear servicio"
-                    )
-                }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage(serviceResult.exceptionOrNull()?.message ?: "Error al crear servicio")
                 return@launch
             }
 
-            // 4. Sync profile to remote immediately
+            syncManager.cancelUploadWorker(userId)
+
             val profileSyncResult = profileRepository.syncUp(userId)
             if (profileSyncResult.isFailure) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error al sincronizar perfil: ${profileSyncResult.exceptionOrNull()?.message}"
-                    )
-                }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Error al sincronizar perfil: ${profileSyncResult.exceptionOrNull()?.message}")
                 return@launch
             }
 
-            // 5. Sync subscription to remote. Needs to happen before syncing service because service has FK to user/subscription
-            val syncSubscriptionResult = subscriptionUseCases.syncSubscription(userId)
+            // 5. Push subscription to remote (must go before menu — menu may reference plan/user)
+            val syncSubscriptionResult = subscriptionUseCases.syncSubscriptionUp(userId)
             if (syncSubscriptionResult.isFailure) {
-                // Non-fatal, as we created it locally, but we need it remotely
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Error al sincronizar suscripción: ${syncSubscriptionResult.exceptionOrNull()?.message}")
+                return@launch
             }
 
-            // 6. Sync service to remote immediately
+            // 6. Push menu (and categories/dishes) to remote
             val serviceSyncResult = syncService(userId)
             if (serviceSyncResult.isFailure) {
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        error = "Error al sincronizar servicio: ${serviceSyncResult.exceptionOrNull()?.message}"
-                    )
-                }
+                _state.update { it.copy(isLoading = false) }
+                snackbarManager.showMessage("Error al sincronizar servicio: ${serviceSyncResult.exceptionOrNull()?.message}")
                 return@launch
             }
 

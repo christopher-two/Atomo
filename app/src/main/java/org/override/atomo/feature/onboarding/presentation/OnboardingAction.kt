@@ -9,7 +9,6 @@
 
 package org.override.atomo.feature.onboarding.presentation
 
-import org.override.atomo.feature.onboarding.presentation.DishInput
 /**
  * Represents the actions that can be performed during onboarding.
  */
@@ -28,7 +27,14 @@ sealed interface OnboardingAction {
     /** Update the username field (triggers validation). */
     data class UpdateUsername(val username: String) : OnboardingAction
 
-    // Menu Details Step (Step 2)
+    // Social Links Step (Step 2)
+    /** Update a social link value for a specific platform. */
+    data class UpdateSocialLink(val platform: String, val url: String) : OnboardingAction
+
+    /** Format (clean up) a social link when its field loses focus. */
+    data class FormatSocialLink(val platform: String) : OnboardingAction
+
+    // Menu Details Step (Step 3)
     /** Update the service name field. */
     data class UpdateServiceName(val name: String) : OnboardingAction
 
@@ -49,9 +55,6 @@ sealed interface OnboardingAction {
     /** Remove a dish. */
     data class RemoveDish(val dish: DishInput) : OnboardingAction
 
-    // Plan Selection Step (Step 5)
-    /** Select a subscription plan. */
-    data class SelectPlan(val planId: String) : OnboardingAction
 
     // Final
     /** Complete onboarding: save profile and create service. */

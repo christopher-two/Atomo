@@ -11,7 +11,6 @@ package org.override.atomo.feature.onboarding.presentation
 
 import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 import org.override.atomo.feature.profile.domain.model.Profile
-import org.override.atomo.feature.subscription.domain.model.Plan
 
 data class DishInput(
     val name: String,
@@ -50,20 +49,19 @@ data class OnboardingState(
     val isCheckingUsername: Boolean = false,
     val isUsernameAvailable: Boolean = true,
 
-    // Step 2: Menu Details
+    // Step 2: Social Links
+    val socialLinks: Map<String, String> = emptyMap(),
+
+    // Step 3: Menu Details
     val serviceName: String = "",
 
-    // Step 3: Template Selection
+    // Step 4: Template Selection
     val templates: List<MenuTemplate> = emptyList(),
     val selectedTemplateId: String? = null,
 
-    // Step 4: Menu Items
+    // Step 5: Menu Items
     val categories: List<String> = emptyList(),
     val dishes: List<DishInput> = emptyList(),
-
-    // Step 5: Plan Selection
-    val plans: List<Plan> = emptyList(),
-    val selectedPlanId: String? = null,
 
     // Step 6: Review
     val profile: Profile? = null
@@ -77,19 +75,19 @@ data class OnboardingState(
                     usernameError == null &&
                     !isCheckingUsername
 
+            OnboardingStep.SOCIAL_LINKS -> true
             OnboardingStep.MENU_DETAILS -> serviceName.isNotBlank()
             OnboardingStep.TEMPLATE_SELECTION -> selectedTemplateId != null
             OnboardingStep.MENU_ITEMS -> true
-            OnboardingStep.PLAN_SELECTION -> selectedPlanId != null
             OnboardingStep.REVIEW -> true
         }
 }
 
 enum class OnboardingStep {
     PROFILE,
+    SOCIAL_LINKS,
     MENU_DETAILS,
     TEMPLATE_SELECTION,
     MENU_ITEMS,
-    PLAN_SELECTION,
     REVIEW
 }

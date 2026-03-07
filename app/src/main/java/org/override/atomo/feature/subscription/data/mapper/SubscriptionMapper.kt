@@ -18,6 +18,7 @@ import org.override.atomo.feature.subscription.data.remote.dto.SubscriptionDto
 import org.override.atomo.feature.subscription.domain.model.Plan
 import org.override.atomo.feature.subscription.domain.model.Subscription
 import org.override.atomo.feature.subscription.domain.model.SubscriptionStatus
+import java.time.Instant
 
 private val json = Json { ignoreUnknownKeys = true }
 
@@ -127,11 +128,11 @@ fun Subscription.toDto(): SubscriptionDto = SubscriptionDto(
     userId = userId,
     planId = planId,
     status = status.name.lowercase(),
-    currentPeriodStart = currentPeriodStart.toString(),
-    currentPeriodEnd = currentPeriodEnd?.toString(),
+    currentPeriodStart = Instant.ofEpochMilli(currentPeriodStart).toString(),
+    currentPeriodEnd = currentPeriodEnd?.let { Instant.ofEpochMilli(it).toString() },
     cancelAtPeriodEnd = cancelAtPeriodEnd,
-    createdAt = createdAt.toString(),
-    updatedAt = updatedAt.toString()
+    createdAt = Instant.ofEpochMilli(createdAt).toString(),
+    updatedAt = Instant.ofEpochMilli(updatedAt).toString()
 )
 
 /** Maps SubscriptionDto to SubscriptionEntity. */

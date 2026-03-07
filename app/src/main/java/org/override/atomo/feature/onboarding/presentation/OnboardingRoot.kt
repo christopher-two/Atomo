@@ -22,7 +22,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,9 +36,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.override.atomo.core.ui.theme.AtomoTheme
 import org.override.atomo.feature.onboarding.presentation.components.MenuDetailsStepContent
 import org.override.atomo.feature.onboarding.presentation.components.MenuItemsStepContent
-import org.override.atomo.feature.onboarding.presentation.components.PlanSelectionStepContent
 import org.override.atomo.feature.onboarding.presentation.components.ProfileStepContent
 import org.override.atomo.feature.onboarding.presentation.components.ReviewStepContent
+import org.override.atomo.feature.onboarding.presentation.components.SocialLinksStepContent
 import org.override.atomo.feature.onboarding.presentation.components.TemplateStepContent
 
 @Composable
@@ -52,6 +53,7 @@ fun OnboardingRoot(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun OnboardingScreen(
     state: OnboardingState,
@@ -59,10 +61,10 @@ fun OnboardingScreen(
 ) {
     val progress = when (state.step) {
         OnboardingStep.PROFILE -> 0.16f
-        OnboardingStep.MENU_DETAILS -> 0.33f
-        OnboardingStep.TEMPLATE_SELECTION -> 0.5f
-        OnboardingStep.MENU_ITEMS -> 0.66f
-        OnboardingStep.PLAN_SELECTION -> 0.83f
+        OnboardingStep.SOCIAL_LINKS -> 0.33f
+        OnboardingStep.MENU_DETAILS -> 0.50f
+        OnboardingStep.TEMPLATE_SELECTION -> 0.66f
+        OnboardingStep.MENU_ITEMS -> 0.83f
         OnboardingStep.REVIEW -> 1f
     }
 
@@ -75,7 +77,7 @@ fun OnboardingScreen(
                 .padding(paddingValues)
         ) {
             // Progress indicator
-            LinearProgressIndicator(
+            LinearWavyProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -86,10 +88,10 @@ fun OnboardingScreen(
             Text(
                 text = when (state.step) {
                     OnboardingStep.PROFILE -> "Completa tu perfil"
+                    OnboardingStep.SOCIAL_LINKS -> "Tus redes sociales"
                     OnboardingStep.MENU_DETAILS -> "Nombra tu Menú"
                     OnboardingStep.TEMPLATE_SELECTION -> "Elige un Diseño"
                     OnboardingStep.MENU_ITEMS -> "Personaliza tu Menú"
-                    OnboardingStep.PLAN_SELECTION -> "Selecciona un Plan"
                     OnboardingStep.REVIEW -> "Revisa y confirma"
                 },
                 style = MaterialTheme.typography.headlineMedium,
@@ -101,10 +103,10 @@ fun OnboardingScreen(
             Text(
                 text = when (state.step) {
                     OnboardingStep.PROFILE -> "Cuéntanos un poco sobre ti"
+                    OnboardingStep.SOCIAL_LINKS -> "Agrega tus perfiles para que tus clientes te encuentren"
                     OnboardingStep.MENU_DETAILS -> "Dale a tu menú un nombre para poder identificarlo mejor"
                     OnboardingStep.TEMPLATE_SELECTION -> "Selecciona la plantilla para tu página web"
                     OnboardingStep.MENU_ITEMS -> "Agrega categorías y platillos base"
-                    OnboardingStep.PLAN_SELECTION -> "Elige el plan que mejor se adapte a tus necesidades"
                     OnboardingStep.REVIEW -> "Verifica que todo esté correcto"
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -130,35 +132,12 @@ fun OnboardingScreen(
                     .verticalScroll(rememberScrollState())
             ) { step ->
                 when (step) {
-                    OnboardingStep.PROFILE -> ProfileStepContent(
-                        state = state,
-                        onAction = onAction
-                    )
-
-                    OnboardingStep.MENU_DETAILS -> MenuDetailsStepContent(
-                        state = state,
-                        onAction = onAction
-                    )
-                    
-                    OnboardingStep.TEMPLATE_SELECTION -> TemplateStepContent(
-                        state = state,
-                        onAction = onAction
-                    )
-                    
-                    OnboardingStep.MENU_ITEMS -> MenuItemsStepContent(
-                        state = state,
-                        onAction = onAction
-                    )
-
-                    OnboardingStep.PLAN_SELECTION -> PlanSelectionStepContent(
-                        state = state,
-                        onAction = onAction
-                    )
-
-                    OnboardingStep.REVIEW -> ReviewStepContent(
-                        state = state,
-                        onAction = onAction
-                    )
+                    OnboardingStep.PROFILE -> ProfileStepContent(state = state, onAction = onAction)
+                    OnboardingStep.SOCIAL_LINKS -> SocialLinksStepContent(state = state, onAction = onAction)
+                    OnboardingStep.MENU_DETAILS -> MenuDetailsStepContent(state = state, onAction = onAction)
+                    OnboardingStep.TEMPLATE_SELECTION -> TemplateStepContent(state = state, onAction = onAction)
+                    OnboardingStep.MENU_ITEMS -> MenuItemsStepContent(state = state, onAction = onAction)
+                    OnboardingStep.REVIEW -> ReviewStepContent(state = state, onAction = onAction)
                 }
             }
         }

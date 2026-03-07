@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -48,47 +46,46 @@ fun MenuItemsStepContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(state.categories) { category ->
-                CategorySection(
-                    categoryName = category,
-                    dishes = state.dishes.filter { it.categoryName == category },
-                    onAction = onAction
-                )
-            }
+        // Categories + dishes — Column en vez de LazyColumn para evitar
+        // conflicto con el verticalScroll del padre (LazyColumn colapsa a altura 0)
+        state.categories.forEach { category ->
+            CategorySection(
+                categoryName = category,
+                dishes = state.dishes.filter { it.categoryName == category },
+                onAction = onAction
+            )
+        }
 
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    OutlinedTextField(
-                        value = newCategoryName,
-                        onValueChange = { newCategoryName = it },
-                        placeholder = { Text("Nueva categoría (Ej: Bebidas)") },
-                        modifier = Modifier.weight(1f),
-                        singleLine = true
-                    )
-                    IconButton(
-                        onClick = {
-                            if (newCategoryName.isNotBlank() && !state.categories.contains(newCategoryName)) {
-                                onAction(OnboardingAction.AddCategory(newCategoryName))
-                                newCategoryName = ""
-                            }
-                        }
-                    ) {
-                        Icon(Icons.Default.Add, contentDescription = "Agregar categoría")
+        // Add category row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedTextField(
+                value = newCategoryName,
+                onValueChange = { newCategoryName = it },
+                placeholder = { Text("Nueva categoría (Ej: Bebidas)") },
+                modifier = Modifier.weight(1f),
+                singleLine = true
+            )
+            IconButton(
+                onClick = {
+                    val trimmed = newCategoryName.trim()
+                    if (trimmed.isNotBlank() && !state.categories.contains(trimmed)) {
+                        onAction(OnboardingAction.AddCategory(trimmed))
+                        newCategoryName = ""
                     }
                 }
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Agregar categoría")
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),

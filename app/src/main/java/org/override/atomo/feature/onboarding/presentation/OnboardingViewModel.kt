@@ -86,13 +86,17 @@ class OnboardingViewModel(
                 _state.update { it.copy(selectedTemplateId = action.templateId) }
             }
             is OnboardingAction.AddCategory -> {
-                _state.update { it.copy(categories = it.categories + action.name) }
+                val trimmed = action.name.trim()
+                if (trimmed.isNotBlank()) {
+                    _state.update { it.copy(categories = it.categories + trimmed) }
+                }
             }
             is OnboardingAction.RemoveCategory -> {
+                val trimmed = action.name.trim()
                 _state.update {
                     it.copy(
-                        categories = it.categories.filter { cat -> cat != action.name },
-                        dishes = it.dishes.filter { dish -> dish.categoryName != action.name }
+                        categories = it.categories.filter { cat -> cat != trimmed },
+                        dishes = it.dishes.filter { dish -> dish.categoryName != trimmed }
                     )
                 }
             }
@@ -378,22 +382,28 @@ class OnboardingViewModel(
         // Map Categories to specific UUIDs
         val categoryIdMap = mutableMapOf<String, String>()
         state.categories.forEachIndexed { index, name ->
+            val trimmedName = name.trim()
             val catId = UUID.randomUUID().toString()
-            categoryIdMap[name] = catId
+            categoryIdMap[trimmedName] = catId
             menuUseCases.createCategory(
                 org.override.atomo.feature.digital_menu.domain.model.MenuCategory(
                     id = catId,
                     menuId = menuId,
-                    name = name,
+                    name = trimmedName,
                     sortOrder = index,
                     createdAt = now
                 )
             )
         }
+        Log.d(TAG, "createService: categories created — map=$categoryIdMap")
 
         // Add Dishes mapped to Category UUIDs
         state.dishes.forEachIndexed { index, dishInput ->
-            val catId = categoryIdMap[dishInput.categoryName] ?: return@forEachIndexed
+            val catId = categoryIdMap[dishInput.categoryName.trim()]
+            if (catId == null) {
+                Log.w(TAG, "createService: dish '${dishInput.name}' skipped — categoryName '${dishInput.categoryName}' not found in map")
+                return@forEachIndexed
+            }
             menuUseCases.createDish(
                 org.override.atomo.feature.digital_menu.domain.model.Dish(
                     id = UUID.randomUUID().toString(),

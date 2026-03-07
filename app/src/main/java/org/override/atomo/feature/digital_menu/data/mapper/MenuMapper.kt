@@ -12,12 +12,15 @@ package org.override.atomo.feature.digital_menu.data.mapper
 import org.override.atomo.feature.digital_menu.data.local.entity.DishEntity
 import org.override.atomo.feature.digital_menu.data.local.entity.MenuCategoryEntity
 import org.override.atomo.feature.digital_menu.data.local.entity.MenuEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuTemplateEntity
 import org.override.atomo.feature.digital_menu.data.remote.dto.DishDto
 import org.override.atomo.feature.digital_menu.data.remote.dto.MenuCategoryDto
 import org.override.atomo.feature.digital_menu.data.remote.dto.MenuDto
+import org.override.atomo.feature.digital_menu.data.remote.dto.MenuTemplateDto
 import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 import org.override.atomo.feature.profile.data.mapper.parseTimestamp
 
 // Menu mappers
@@ -169,4 +172,45 @@ fun Dish.toDto(): DishDto = DishDto(
     imageUrl = imageUrl,
     isVisible = isVisible,
     sortOrder = sortOrder
+)
+
+// Template mappers
+
+/** Maps MenuTemplateEntity to MenuTemplate domain model. */
+fun MenuTemplateEntity.toDomain(): MenuTemplate = MenuTemplate(
+    id = id,
+    name = name,
+    description = description,
+    previewImageUrl = previewImageUrl,
+    isActive = isActive,
+    createdAt = createdAt
+)
+
+/** Maps MenuTemplate domain model to MenuTemplateEntity. */
+fun MenuTemplate.toEntity(): MenuTemplateEntity = MenuTemplateEntity(
+    id = id,
+    name = name,
+    description = description,
+    previewImageUrl = previewImageUrl,
+    isActive = isActive,
+    createdAt = createdAt
+)
+
+/** Maps MenuTemplateDto to MenuTemplateEntity. */
+fun MenuTemplateDto.toEntity(): MenuTemplateEntity = MenuTemplateEntity(
+    id = id,
+    name = name,
+    description = description,
+    previewImageUrl = previewImageUrl,
+    isActive = isActive,
+    createdAt = createdAt?.let { parseTimestamp(it) } ?: System.currentTimeMillis()
+)
+
+/** Maps MenuTemplate domain model to MenuTemplateDto. */
+fun MenuTemplate.toDto(): MenuTemplateDto = MenuTemplateDto(
+    id = id,
+    name = name,
+    description = description,
+    previewImageUrl = previewImageUrl,
+    isActive = isActive
 )

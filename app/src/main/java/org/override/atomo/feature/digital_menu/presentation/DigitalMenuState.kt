@@ -13,11 +13,14 @@ import androidx.compose.runtime.Stable
 import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 
 @Stable
 data class DigitalMenuState(
     val isLoading: Boolean = false,
     val menus: List<Menu> = emptyList(),
+    val templates: List<MenuTemplate> = emptyList(),
+    val username: String? = null,
     val error: String? = null,
     val canCreate: Boolean = false,
     val limitReached: Boolean = false,
@@ -33,7 +36,8 @@ data class DigitalMenuState(
             (editingMenu.name         != menuSnapshot.name         ||
              editingMenu.description  != menuSnapshot.description  ||
              editingMenu.primaryColor != menuSnapshot.primaryColor ||
-             editingMenu.fontFamily   != menuSnapshot.fontFamily)
+             editingMenu.fontFamily   != menuSnapshot.fontFamily   ||
+             editingMenu.templateId   != menuSnapshot.templateId)
 }
 
 /**
@@ -41,14 +45,18 @@ data class DigitalMenuState(
  * Conserva los cambios del usuario en edición; actualiza solo categories/dishes
  * desde la fuente de verdad.
  */
-fun DigitalMenuState.withLiveMenus(menus: List<Menu>): DigitalMenuState {
+fun DigitalMenuState.withLiveMenusAndTemplates(
+    menus: List<Menu>, 
+    templates: List<MenuTemplate>,
+    username: String?
+): DigitalMenuState {
     val activeMenu = if (isEditing && editingMenu != null) {
         val liveMenu = menus.find { it.id == editingMenu.id } ?: editingMenu
         editingMenu.copy(categories = liveMenu.categories, dishes = liveMenu.dishes)
     } else {
         menus.firstOrNull()
     }
-    return copy(menus = menus, editingMenu = activeMenu)
+    return copy(menus = menus, templates = templates, username = username, editingMenu = activeMenu)
 }
 
 sealed interface DigitalMenuOverlay {

@@ -120,6 +120,7 @@ fun DigitalMenuContent(
         state.isEditing -> {
             DigitalMenuEditor(
                 menu = state.editingMenu,
+                templates = state.templates,
                 onAction = onAction
             )
         }
@@ -160,14 +161,14 @@ fun DigitalMenuContent(
                 onSave = { name -> onAction(DigitalMenuAction.SaveCategory(name)) }
             )
         }
-
+        
         DigitalMenuOverlay.PreviewSheet -> {
             ModalBottomSheet(
                 onDismissRequest = { onAction(DigitalMenuAction.SetOverlay(null)) },
                 sheetState = sheetState
             ) {
                 AtomoWebView(
-                    url = "https://atomo.click/preview/elegance",
+                    url = "https://menu.atomo.click/${state.username ?: ""}",
                     modifier = Modifier.fillMaxSize(),
                     onPageFinished = { _, _ ->
                         previewPageLoaded.value = true

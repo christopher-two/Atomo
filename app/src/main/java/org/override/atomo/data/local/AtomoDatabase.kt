@@ -20,6 +20,7 @@ import org.override.atomo.feature.digital_menu.data.local.dao.MenuDao
 import org.override.atomo.feature.digital_menu.data.local.entity.DishEntity
 import org.override.atomo.feature.digital_menu.data.local.entity.MenuCategoryEntity
 import org.override.atomo.feature.digital_menu.data.local.entity.MenuEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuTemplateEntity
 import org.override.atomo.feature.invitation.data.local.dao.InvitationDao
 import org.override.atomo.feature.invitation.data.local.entity.InvitationEntity
 import org.override.atomo.feature.invitation.data.local.entity.InvitationResponseEntity
@@ -42,6 +43,7 @@ import org.override.atomo.feature.subscription.data.local.entity.SubscriptionEnt
         MenuEntity::class,
         MenuCategoryEntity::class,
         DishEntity::class,
+        MenuTemplateEntity::class,
         PortfolioEntity::class,
         PortfolioItemEntity::class,
         CvEntity::class,

@@ -57,3 +57,16 @@ data class DishDto(
     @SerialName("sort_order") val sortOrder: Int = 0,
     @SerialName("created_at") val createdAt: String? = null
 )
+
+/**
+ * Data Transfer Object for Menu Template.
+ */
+@Serializable
+data class MenuTemplateDto(
+    val id: String,
+    val name: String,
+    val description: String? = null,
+    @SerialName("preview_image_url") val previewImageUrl: String? = null,
+    @SerialName("is_active") val isActive: Boolean = true,
+    @SerialName("created_at") val createdAt: String? = null
+)

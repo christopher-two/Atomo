@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.Flow
 import org.override.atomo.feature.digital_menu.data.local.entity.DishEntity
 import org.override.atomo.feature.digital_menu.data.local.entity.MenuCategoryEntity
 import org.override.atomo.feature.digital_menu.data.local.entity.MenuEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuTemplateEntity
 
 @Dao
 interface MenuDao {
@@ -44,6 +45,9 @@ interface MenuDao {
     
     @Update
     suspend fun updateMenu(menu: MenuEntity)
+    
+    @Update
+    suspend fun updateMenus(menus: List<MenuEntity>)
     
     @Delete
     suspend fun deleteMenu(menu: MenuEntity)
@@ -73,6 +77,9 @@ interface MenuDao {
     
     @Update
     suspend fun updateCategory(category: MenuCategoryEntity)
+    
+    @Update
+    suspend fun updateCategories(categories: List<MenuCategoryEntity>)
     
     @Delete
     suspend fun deleteCategory(category: MenuCategoryEntity)
@@ -106,6 +113,9 @@ interface MenuDao {
     @Update
     suspend fun updateDish(dish: DishEntity)
     
+    @Update
+    suspend fun updateDishes(dishes: List<DishEntity>)
+    
     @Delete
     suspend fun deleteDish(dish: DishEntity)
     
@@ -121,4 +131,13 @@ interface MenuDao {
     @Query("SELECT * FROM dishes WHERE isSynced = 0")
     suspend fun getAllUnsyncedDishes(): List<DishEntity>
 
+    // Template operations
+    @Query("SELECT * FROM menu_templates WHERE isActive = 1 ORDER BY createdAt DESC")
+    fun getMenuTemplatesFlow(): Flow<List<MenuTemplateEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMenuTemplates(templates: List<MenuTemplateEntity>)
+    
+    @Query("DELETE FROM menu_templates")
+    suspend fun deleteAllMenuTemplates()
 }

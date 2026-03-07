@@ -22,14 +22,19 @@ import org.override.atomo.feature.digital_menu.data.local.dao.MenuDao
 import org.override.atomo.feature.digital_menu.data.mapper.toDomain
 import org.override.atomo.feature.digital_menu.data.mapper.toDto
 import org.override.atomo.feature.digital_menu.data.mapper.toEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.MenuCategoryEntity
+import org.override.atomo.feature.digital_menu.data.local.entity.DishEntity
 import org.override.atomo.feature.digital_menu.data.remote.dto.DishDto
 import org.override.atomo.feature.digital_menu.data.remote.dto.MenuCategoryDto
 import org.override.atomo.feature.digital_menu.data.remote.dto.MenuDto
 import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
 import org.override.atomo.feature.sync.data.manager.SyncManager
+import org.override.atomo.feature.digital_menu.data.remote.dto.MenuTemplateDto
 
 /**
  * Implementation of [MenuRepository] using [MenuDao] and [SupabaseClient].
@@ -259,6 +264,7 @@ class MenuRepositoryImpl(
      * @return A Result containing the list of synchronized Menus.
      */
     override suspend fun syncMenus(userId: String): Result<List<Menu>> = runCatching {
+        syncDownMenuTemplates()
         syncDownMenus(userId)
 
         val currentMenus = menuDao.getMenus(userId)
@@ -289,19 +295,46 @@ class MenuRepositoryImpl(
             }
         }
 
-        val entitiesToInsert = dtos.mapNotNull { dto ->
+        val entitiesToInsert = mutableListOf<MenuEntity>()
+        val entitiesToUpdate = mutableListOf<MenuEntity>()
+
+        dtos.forEach { dto ->
             val local = localMenus.find { it.id == dto.id }
-            if (local != null && !local.isSynced) {
-                null
+            if (local != null) {
+                if (local.isSynced) {
+                    entitiesToUpdate.add(dto.toEntity().copy(isSynced = true))
+                }
             } else {
-                dto.toEntity().copy(isSynced = true)
+                entitiesToInsert.add(dto.toEntity().copy(isSynced = true))
             }
         }
 
         if (entitiesToInsert.isNotEmpty()) {
             menuDao.insertMenus(entitiesToInsert)
         }
+        if (entitiesToUpdate.isNotEmpty()) {
+            menuDao.updateMenus(entitiesToUpdate)
+        }
         return dtos
+    }
+    
+    /**
+     * Downloads and syncs menu templates from the server.
+     */
+    private suspend fun syncDownMenuTemplates() {
+        try {
+            val dtos = supabase.from("menu_templates")
+                .select()
+                .decodeList<MenuTemplateDto>()
+                
+            val entities = dtos.map { it.toEntity() }
+            menuDao.deleteAllMenuTemplates()
+            if (entities.isNotEmpty()) {
+                menuDao.insertMenuTemplates(entities)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     /**
@@ -321,14 +354,25 @@ class MenuRepositoryImpl(
             }
         }
 
-        val toInsert = remoteCategories.mapNotNull { dto ->
+        val toInsert = mutableListOf<MenuCategoryEntity>()
+        val toUpdate = mutableListOf<MenuCategoryEntity>()
+
+        remoteCategories.forEach { dto ->
             val local = localCategories.find { it.id == dto.id }
-            if (local != null && !local.isSynced) null
-            else dto.toEntity().copy(isSynced = true)
+            if (local != null) {
+                if (local.isSynced) {
+                    toUpdate.add(dto.toEntity().copy(isSynced = true))
+                }
+            } else {
+                toInsert.add(dto.toEntity().copy(isSynced = true))
+            }
         }
 
         if (toInsert.isNotEmpty()) {
             menuDao.insertCategories(toInsert)
+        }
+        if (toUpdate.isNotEmpty()) {
+            menuDao.updateCategories(toUpdate)
         }
     }
 
@@ -349,14 +393,25 @@ class MenuRepositoryImpl(
             }
         }
 
-        val toInsert = remoteDishes.mapNotNull { dto ->
+        val toInsert = mutableListOf<DishEntity>()
+        val toUpdate = mutableListOf<DishEntity>()
+
+        remoteDishes.forEach { dto ->
             val local = localDishes.find { it.id == dto.id }
-            if (local != null && !local.isSynced) null
-            else dto.toEntity().copy(isSynced = true)
+            if (local != null) {
+                if (local.isSynced) {
+                    toUpdate.add(dto.toEntity().copy(isSynced = true))
+                }
+            } else {
+                toInsert.add(dto.toEntity().copy(isSynced = true))
+            }
         }
 
         if (toInsert.isNotEmpty()) {
             menuDao.insertDishes(toInsert)
+        }
+        if (toUpdate.isNotEmpty()) {
+            menuDao.updateDishes(toUpdate)
         }
     }
 
@@ -453,7 +508,7 @@ class MenuRepositoryImpl(
                     } else {
                         supabase.from("menus").upsert(dto) { onConflict = "id" }
                     }
-                    menuDao.insertMenu(entity.copy(isSynced = true))
+                    menuDao.updateMenu(entity.copy(isSynced = true))
                 }
             }
         }
@@ -522,5 +577,9 @@ class MenuRepositoryImpl(
         }
 
         domainObject
+    }
+    
+    override fun getMenuTemplatesFlow(): Flow<List<MenuTemplate>> {
+        return menuDao.getMenuTemplatesFlow().map { it.map { t -> t.toDomain() } }
     }
 }

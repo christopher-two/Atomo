@@ -14,7 +14,7 @@ import org.override.atomo.domain.model.ServiceType
 
 object AtomoUrlGenerator {
 
-    private const val BASE_URL = "https://atomo.click"
+    private const val BASE_URL = "atomo.click"
 
     /**
      * Generates the "Link in Bio" URL for a user.
@@ -39,6 +39,6 @@ object AtomoUrlGenerator {
             ServiceType.SHOP -> "shop"
             ServiceType.INVITATION -> "invitation"
         }
-        return "$BASE_URL/$username/$slug"
+        return "https://$slug.$BASE_URL/$username"
     }
 }

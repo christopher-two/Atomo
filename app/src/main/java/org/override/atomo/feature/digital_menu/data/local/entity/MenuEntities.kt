@@ -104,3 +104,17 @@ data class DishEntity(
 
     val createdAt: Long
 )
+
+/**
+ * Room Entity for Menu Template.
+ */
+@Entity(tableName = "menu_templates")
+data class MenuTemplateEntity(
+    @PrimaryKey
+    val id: String,
+    val name: String,
+    val description: String?,
+    val previewImageUrl: String?,
+    val isActive: Boolean = true,
+    val createdAt: Long
+)

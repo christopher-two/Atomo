@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 
 /**
  * Repository interface for managing Menus, Categories, and Dishes.
@@ -47,6 +48,8 @@ interface MenuRepository {
     /** Synchronizes local changes to the remote data source. */
     suspend fun syncUp(userId: String): Result<Unit>
 
+    /** Retrieves menu templates as a Flow. */
+    fun getMenuTemplatesFlow(): Flow<List<MenuTemplate>>
     
     // Category operations
 

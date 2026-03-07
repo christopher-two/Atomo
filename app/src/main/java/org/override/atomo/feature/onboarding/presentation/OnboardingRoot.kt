@@ -33,9 +33,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.override.atomo.core.ui.theme.AtomoTheme
+import org.override.atomo.feature.onboarding.presentation.components.MenuDetailsStepContent
+import org.override.atomo.feature.onboarding.presentation.components.MenuItemsStepContent
 import org.override.atomo.feature.onboarding.presentation.components.ProfileStepContent
 import org.override.atomo.feature.onboarding.presentation.components.ReviewStepContent
-import org.override.atomo.feature.onboarding.presentation.components.ServiceStepContent
+import org.override.atomo.feature.onboarding.presentation.components.TemplateStepContent
 
 @Composable
 fun OnboardingRoot(
@@ -55,8 +57,10 @@ fun OnboardingScreen(
     onAction: (OnboardingAction) -> Unit,
 ) {
     val progress = when (state.step) {
-        OnboardingStep.PROFILE -> 0.33f
-        OnboardingStep.SERVICE -> 0.66f
+        OnboardingStep.PROFILE -> 0.2f
+        OnboardingStep.MENU_DETAILS -> 0.4f
+        OnboardingStep.TEMPLATE_SELECTION -> 0.6f
+        OnboardingStep.MENU_ITEMS -> 0.8f
         OnboardingStep.REVIEW -> 1f
     }
 
@@ -80,7 +84,9 @@ fun OnboardingScreen(
             Text(
                 text = when (state.step) {
                     OnboardingStep.PROFILE -> "Completa tu perfil"
-                    OnboardingStep.SERVICE -> "Crea tu primer servicio"
+                    OnboardingStep.MENU_DETAILS -> "Nombra tu Menú"
+                    OnboardingStep.TEMPLATE_SELECTION -> "Elige un Diseño"
+                    OnboardingStep.MENU_ITEMS -> "Personaliza tu Menú"
                     OnboardingStep.REVIEW -> "Revisa y confirma"
                 },
                 style = MaterialTheme.typography.headlineMedium,
@@ -92,7 +98,9 @@ fun OnboardingScreen(
             Text(
                 text = when (state.step) {
                     OnboardingStep.PROFILE -> "Cuéntanos un poco sobre ti"
-                    OnboardingStep.SERVICE -> "Elige el tipo de servicio que quieres crear"
+                    OnboardingStep.MENU_DETAILS -> "Dale a tu menú un nombre para poder identificarlo mejor"
+                    OnboardingStep.TEMPLATE_SELECTION -> "Selecciona la plantilla para tu página web"
+                    OnboardingStep.MENU_ITEMS -> "Agrega categorías y platillos base"
                     OnboardingStep.REVIEW -> "Verifica que todo esté correcto"
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -123,7 +131,17 @@ fun OnboardingScreen(
                         onAction = onAction
                     )
 
-                    OnboardingStep.SERVICE -> ServiceStepContent(
+                    OnboardingStep.MENU_DETAILS -> MenuDetailsStepContent(
+                        state = state,
+                        onAction = onAction
+                    )
+                    
+                    OnboardingStep.TEMPLATE_SELECTION -> TemplateStepContent(
+                        state = state,
+                        onAction = onAction
+                    )
+                    
+                    OnboardingStep.MENU_ITEMS -> MenuItemsStepContent(
                         state = state,
                         onAction = onAction
                     )

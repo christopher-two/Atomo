@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
+import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 import org.override.atomo.feature.digital_menu.domain.repository.MenuRepository
 import org.override.atomo.feature.image.domain.repository.ImageManager
 import org.override.atomo.feature.storage.domain.usecase.storage.DeleteDishImageUseCase
@@ -31,6 +32,7 @@ import java.util.UUID
  * @property createMenu Creates a new Menu.
  * @property updateMenu Updates an existing Menu.
  * @property deleteMenu Deletes a Menu.
+ * @property getMenuTemplates Retrieves all available Menu Templates.
  * @property createCategory Creates a category.
  * @property createDish Creates a dish.
  * @property updateDish Updates a dish.
@@ -43,6 +45,7 @@ data class MenuUseCases(
     val createMenu: CreateMenuUseCase,
     val updateMenu: UpdateMenuUseCase,
     val deleteMenu: DeleteMenuUseCase,
+    val getMenuTemplates: GetMenuTemplatesUseCase,
     val createCategory: CreateCategoryUseCase,
     val updateCategory: UpdateCategoryUseCase,
     val deleteCategory: DeleteCategoryUseCase,
@@ -51,6 +54,11 @@ data class MenuUseCases(
     val updateDish: UpdateDishUseCase,
     val deleteDish: DeleteDishUseCase
 )
+
+/** Retrieves all menu templates as a Flow. */
+class GetMenuTemplatesUseCase(private val repository: MenuRepository) {
+    operator fun invoke(): Flow<List<MenuTemplate>> = repository.getMenuTemplatesFlow()
+}
 
 /** Retrieves all menus for a user as a Flow. */
 class GetMenusUseCase(private val repository: MenuRepository) {

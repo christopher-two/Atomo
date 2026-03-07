@@ -30,6 +30,7 @@ import org.override.atomo.feature.digital_menu.domain.usecase.menu.DeleteDishUse
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.DeleteMenuUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenuUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenusUseCase
+import org.override.atomo.feature.digital_menu.domain.usecase.menu.GetMenuTemplatesUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.SyncMenusUseCase
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.UpdateCategoryUseCase
@@ -114,6 +115,8 @@ val UseCaseModule = module {
     // Storage
     singleOf(::UploadDishImageUseCase)
     singleOf(::DeleteDishImageUseCase)
+    
+    singleOf(::GetMenuTemplatesUseCase)
     singleOf(::MenuUseCases)
     
     // Portfolio

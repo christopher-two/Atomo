@@ -101,3 +101,22 @@ data class Dish(
     val sortOrder: Int,
     val createdAt: Long
 )
+
+/**
+ * Represents a predefined visual template that a user can select for their digital menu.
+ *
+ * @property id The unique identifier of the template (e.g. "minimalist", "dark-luxe").
+ * @property name The human-readable name of the template.
+ * @property description Optional descriptive text outlining the template's style.
+ * @property previewImageUrl Optional URL to an image previewing how the template looks.
+ * @property isActive Determines if this template is currently available for selection.
+ * @property createdAt The creation timestamp.
+ */
+data class MenuTemplate(
+    val id: String,
+    val name: String,
+    val description: String?,
+    val previewImageUrl: String?,
+    val isActive: Boolean,
+    val createdAt: Long
+)

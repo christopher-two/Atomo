@@ -9,9 +9,7 @@
 
 package org.override.atomo.feature.onboarding.presentation
 
-import org.override.atomo.domain.model.ServiceType
-
-
+import org.override.atomo.feature.onboarding.presentation.DishInput
 /**
  * Represents the actions that can be performed during onboarding.
  */
@@ -30,12 +28,26 @@ sealed interface OnboardingAction {
     /** Update the username field (triggers validation). */
     data class UpdateUsername(val username: String) : OnboardingAction
 
-    // Service Step (Step 2)
-    /** Select a service type. */
-    data class SelectServiceType(val type: ServiceType) : OnboardingAction
-
+    // Menu Details Step (Step 2)
     /** Update the service name field. */
     data class UpdateServiceName(val name: String) : OnboardingAction
+
+    // Template Selection Step (Step 3)
+    /** Select a menu template. */
+    data class SelectTemplate(val templateId: String) : OnboardingAction
+
+    // Menu Items Step (Step 4)
+    /** Add a new category. */
+    data class AddCategory(val name: String) : OnboardingAction
+    
+    /** Remove a category. */
+    data class RemoveCategory(val name: String) : OnboardingAction
+
+    /** Add a new dish. */
+    data class AddDish(val dish: DishInput) : OnboardingAction
+    
+    /** Remove a dish. */
+    data class RemoveDish(val dish: DishInput) : OnboardingAction
 
     // Final
     /** Complete onboarding: save profile and create service. */

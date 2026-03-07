@@ -9,9 +9,15 @@
 
 package org.override.atomo.feature.onboarding.presentation
 
-import org.override.atomo.domain.model.ServiceType
-
+import org.override.atomo.feature.digital_menu.domain.model.MenuTemplate
 import org.override.atomo.feature.profile.domain.model.Profile
+
+data class DishInput(
+    val name: String,
+    val price: Double,
+    val categoryName: String,
+    val description: String = ""
+)
 
 /**
  * Represents the UI state for the Onboarding feature.
@@ -24,8 +30,11 @@ import org.override.atomo.feature.profile.domain.model.Profile
  * @property usernameError Validation error for username.
  * @property isCheckingUsername Whether username availability is being checked.
  * @property isUsernameAvailable Whether the current username is available.
- * @property selectedServiceType The type of service selected by the user.
- * @property serviceName The name for the new service.
+ * @property serviceName The name for the new menu.
+ * @property templates Loaded menu templates.
+ * @property selectedTemplateId The ID of the chosen template.
+ * @property categories List of temporary category names.
+ * @property dishes List of temporary dish inputs.
  * @property profile The loaded user profile.
  */
 data class OnboardingState(
@@ -40,9 +49,16 @@ data class OnboardingState(
     val isCheckingUsername: Boolean = false,
     val isUsernameAvailable: Boolean = true,
 
-    // Step 2: Service Selection
-    val selectedServiceType: ServiceType? = null,
+    // Step 2: Menu Details
     val serviceName: String = "",
+
+    // Step 3: Template Selection
+    val templates: List<MenuTemplate> = emptyList(),
+    val selectedTemplateId: String? = null,
+
+    // Step 4: Menu Items
+    val categories: List<String> = emptyList(),
+    val dishes: List<DishInput> = emptyList(),
 
     // Step 3: Review
     val profile: Profile? = null
@@ -56,14 +72,17 @@ data class OnboardingState(
                     usernameError == null &&
                     !isCheckingUsername
 
-            OnboardingStep.SERVICE -> selectedServiceType != null && serviceName.isNotBlank()
+            OnboardingStep.MENU_DETAILS -> serviceName.isNotBlank()
+            OnboardingStep.TEMPLATE_SELECTION -> selectedTemplateId != null
+            OnboardingStep.MENU_ITEMS -> true
             OnboardingStep.REVIEW -> true
         }
 }
 
-/** Steps in the onboarding wizard. */
 enum class OnboardingStep {
     PROFILE,
-    SERVICE,
+    MENU_DETAILS,
+    TEMPLATE_SELECTION,
+    MENU_ITEMS,
     REVIEW
 }

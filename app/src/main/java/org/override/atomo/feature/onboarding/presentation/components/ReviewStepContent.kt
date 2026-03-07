@@ -19,12 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,9 +33,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import org.override.atomo.domain.model.ServiceType
 import org.override.atomo.feature.onboarding.presentation.OnboardingAction
 import org.override.atomo.feature.onboarding.presentation.OnboardingState
 
@@ -88,32 +82,33 @@ fun ReviewStepContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Service summary card
-        state.selectedServiceType?.let { serviceType ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            )
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Tu Menú Digital",
+                    style = MaterialTheme.typography.titleMedium
                 )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Tu primer servicio",
-                        style = MaterialTheme.typography.titleMedium
-                    )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    ListItem(
-                        headlineContent = { Text(state.serviceName) },
-                        supportingContent = { Text(getServiceTypeLabel(serviceType)) },
-                        leadingContent = {
-                            Icon(
-                                imageVector = getServiceTypeIcon(serviceType),
-                                contentDescription = null
-                            )
-                        }
-                    )
-                }
+                ListItem(
+                    headlineContent = { Text(state.serviceName) },
+                    supportingContent = { 
+                        val templateName = state.templates.find { it.id == state.selectedTemplateId }?.name ?: ""
+                        Text("Template: $templateName\nCategorías: ${state.categories.size}\nPlatillos: ${state.dishes.size}") 
+                    },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Restaurant,
+                            contentDescription = null
+                        )
+                    }
+                )
             }
         }
 
@@ -168,20 +163,4 @@ fun ReviewStepContent(
             }
         }
     }
-}
-
-private fun getServiceTypeIcon(type: ServiceType): ImageVector = when (type) {
-    ServiceType.DIGITAL_MENU -> Icons.Default.Restaurant
-    ServiceType.PORTFOLIO -> Icons.Default.Work
-    ServiceType.CV -> Icons.Default.Description
-    ServiceType.SHOP -> Icons.Default.ShoppingCart
-    ServiceType.INVITATION -> Icons.Default.Event
-}
-
-private fun getServiceTypeLabel(type: ServiceType): String = when (type) {
-    ServiceType.DIGITAL_MENU -> "Menú Digital"
-    ServiceType.PORTFOLIO -> "Portafolio"
-    ServiceType.CV -> "Currículum"
-    ServiceType.SHOP -> "Tienda"
-    ServiceType.INVITATION -> "Invitación"
 }

@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -29,6 +30,7 @@ import org.override.atomo.feature.digital_menu.domain.model.Dish
 import org.override.atomo.feature.digital_menu.domain.model.Menu
 import org.override.atomo.feature.digital_menu.domain.model.MenuCategory
 import org.override.atomo.feature.digital_menu.domain.usecase.menu.MenuUseCases
+import org.override.atomo.feature.profile.domain.usecase.profile.ProfileUseCases
 import org.override.atomo.feature.session.domain.repository.SessionRepository
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateResult
 import org.override.atomo.feature.subscription.domain.usecase.subscription.CanCreateServiceUseCase
@@ -36,6 +38,7 @@ import java.util.UUID
 
 class DigitalMenuViewModel(
     private val sessionRepository: SessionRepository,
+    private val profileUseCases: ProfileUseCases,
     private val menuUseCases: MenuUseCases,
     private val canCreateServiceUseCase: CanCreateServiceUseCase,
     private val snackbarManager: SnackbarManager
@@ -50,9 +53,18 @@ class DigitalMenuViewModel(
             checkCreationLimit(userId)
             menuUseCases.getMenus(userId)
         }
+        
+    private val templatesFlow = menuUseCases.getMenuTemplates()
 
-    val state = combine(menusFlow, _state) { menus, local ->
-        local.withLiveMenus(menus)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val usernameFlow = sessionRepository.getCurrentUserId()
+        .filterNotNull()
+        .flatMapLatest { userId ->
+            profileUseCases.getProfile(userId).map { it?.username }
+        }
+
+    val state = combine(menusFlow, templatesFlow, usernameFlow, _state) { menus, templates, username, local ->
+        local.withLiveMenusAndTemplates(menus, templates, username)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000L),
@@ -75,6 +87,17 @@ class DigitalMenuViewModel(
 
             DigitalMenuAction.ToggleEditMode -> toggleEditMode()
             is DigitalMenuAction.UpdateEditingMenu -> updateLocal { it.copy(editingMenu = action.menu) }
+            is DigitalMenuAction.UpdateTemplate -> {
+                val menu = state.value.editingMenu
+                if (menu != null) {
+                    updateLocal { 
+                        it.copy(
+                            editingMenu = menu.copy(templateId = action.templateId),
+                            activeOverlay = null 
+                        ) 
+                    }
+                }
+            }
             DigitalMenuAction.SaveMenu -> saveMenu()
             DigitalMenuAction.CancelEdit -> handleCancelEdit()
 
@@ -150,7 +173,7 @@ class DigitalMenuViewModel(
                 name = "My New Menu",
                 description = "Digital Menu Description",
                 isActive = true,
-                templateId = "minimalist",
+                templateId = state.value.templates.firstOrNull()?.id ?: "minimalist",
                 primaryColor = "#000000",
                 fontFamily = "Inter",
                 logoUrl = null,

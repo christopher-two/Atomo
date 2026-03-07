@@ -20,9 +20,10 @@ sealed interface DigitalMenuAction {
     data object UpgradePlan : DigitalMenuAction
     data object Back : DigitalMenuAction
 
-    // Editor Actions
+    // Menu Edition Action
     data object ToggleEditMode : DigitalMenuAction
     data class UpdateEditingMenu(val menu: Menu) : DigitalMenuAction
+    data class UpdateTemplate(val templateId: String) : DigitalMenuAction
     data object SaveMenu : DigitalMenuAction
     data object CancelEdit : DigitalMenuAction
 

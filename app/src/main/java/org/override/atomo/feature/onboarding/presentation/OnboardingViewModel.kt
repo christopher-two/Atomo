@@ -51,18 +51,10 @@ import java.util.UUID
  */
 class OnboardingViewModel(
     private val profileUseCases: ProfileUseCases,
-    private val shopUseCases: ShopUseCases,
     private val menuUseCases: MenuUseCases,
-    private val portfolioUseCases: PortfolioUseCases,
-    private val cvUseCases: CvUseCases,
-    private val invitationUseCases: InvitationUseCases,
     // Repositories for direct sync
     private val profileRepository: ProfileRepository,
     private val menuRepository: MenuRepository,
-    private val shopRepository: ShopRepository,
-    private val portfolioRepository: PortfolioRepository,
-    private val cvRepository: CvRepository,
-    private val invitationRepository: InvitationRepository,
     private val sessionRepository: SessionRepository,
     private val rootNavigation: RootNavigation,
     private val snackbarManager: SnackbarManager
@@ -97,8 +89,33 @@ class OnboardingViewModel(
             }
 
             is OnboardingAction.UpdateUsername -> updateUsername(action.username)
-            is OnboardingAction.SelectServiceType -> {
-                _state.update { it.copy(selectedServiceType = action.type) }
+            is OnboardingAction.UpdateServiceName -> {
+                _state.update { it.copy(serviceName = action.name) }
+            }
+
+            is OnboardingAction.SelectTemplate -> {
+                _state.update { it.copy(selectedTemplateId = action.templateId) }
+            }
+
+            is OnboardingAction.AddCategory -> {
+                _state.update { it.copy(categories = it.categories + action.name) }
+            }
+
+            is OnboardingAction.RemoveCategory -> {
+                _state.update { 
+                    it.copy(
+                        categories = it.categories.filter { cat -> cat != action.name },
+                        dishes = it.dishes.filter { dish -> dish.categoryName != action.name }
+                    ) 
+                }
+            }
+
+            is OnboardingAction.AddDish -> {
+                _state.update { it.copy(dishes = it.dishes + action.dish) }
+            }
+
+            is OnboardingAction.RemoveDish -> {
+                _state.update { it.copy(dishes = it.dishes.filter { dish -> dish != action.dish }) }
             }
 
             is OnboardingAction.UpdateServiceName -> {
@@ -125,6 +142,15 @@ class OnboardingViewModel(
                     displayName = profile?.displayName.orEmpty(),
                     username = profile?.username.orEmpty()
                 )
+            }
+            
+            menuUseCases.getMenuTemplates().collect { templates ->
+                _state.update { 
+                    it.copy(
+                        templates = templates, 
+                        selectedTemplateId = if (it.selectedTemplateId == null) templates.firstOrNull()?.id else it.selectedTemplateId 
+                    ) 
+                }
             }
         }
     }
@@ -178,8 +204,10 @@ class OnboardingViewModel(
     private fun nextStep() {
         val currentStep = state.value.step
         val nextStep = when (currentStep) {
-            OnboardingStep.PROFILE -> OnboardingStep.SERVICE
-            OnboardingStep.SERVICE -> OnboardingStep.REVIEW
+            OnboardingStep.PROFILE -> OnboardingStep.MENU_DETAILS
+            OnboardingStep.MENU_DETAILS -> OnboardingStep.TEMPLATE_SELECTION
+            OnboardingStep.TEMPLATE_SELECTION -> OnboardingStep.MENU_ITEMS
+            OnboardingStep.MENU_ITEMS -> OnboardingStep.REVIEW
             OnboardingStep.REVIEW -> return // Already at last step
         }
         _state.update { it.copy(step = nextStep) }
@@ -189,8 +217,10 @@ class OnboardingViewModel(
         val currentStep = state.value.step
         val prevStep = when (currentStep) {
             OnboardingStep.PROFILE -> return // Already at first step
-            OnboardingStep.SERVICE -> OnboardingStep.PROFILE
-            OnboardingStep.REVIEW -> OnboardingStep.SERVICE
+            OnboardingStep.MENU_DETAILS -> OnboardingStep.PROFILE
+            OnboardingStep.TEMPLATE_SELECTION -> OnboardingStep.MENU_DETAILS
+            OnboardingStep.MENU_ITEMS -> OnboardingStep.TEMPLATE_SELECTION
+            OnboardingStep.REVIEW -> OnboardingStep.MENU_ITEMS
         }
         _state.update { it.copy(step = prevStep) }
     }
@@ -249,7 +279,7 @@ class OnboardingViewModel(
             }
 
             // 4. Sync service to remote immediately
-            val serviceSyncResult = syncService(userId, currentState.selectedServiceType)
+            val serviceSyncResult = syncService(userId)
             if (serviceSyncResult.isFailure) {
                 _state.update {
                     it.copy(
@@ -267,110 +297,70 @@ class OnboardingViewModel(
         }
     }
 
-    private suspend fun syncService(userId: String, serviceType: ServiceType?): Result<Unit> {
-        return when (serviceType) {
-            ServiceType.SHOP -> shopRepository.syncUp(userId)
-            ServiceType.DIGITAL_MENU -> menuRepository.syncUp(userId)
-            ServiceType.PORTFOLIO -> portfolioRepository.syncUp(userId)
-            ServiceType.CV -> cvRepository.syncUp(userId)
-            ServiceType.INVITATION -> invitationRepository.syncUp(userId)
-            null -> Result.failure(Exception("No service type selected"))
-        }
+    private suspend fun syncService(userId: String): Result<Unit> {
+        return menuRepository.syncUp(userId)
     }
 
     private suspend fun createService(userId: String, state: OnboardingState): Result<Unit> {
-        val serviceType = state.selectedServiceType
-            ?: return Result.failure(Exception("No service type selected"))
         val serviceName = state.serviceName
         val now = System.currentTimeMillis()
 
         // Default theme values
-        val defaultPrimaryColor = "#6200EE"
-        val defaultFontFamily = "Poppins"
-        val defaultTemplateId = "default"
+        val defaultPrimaryColor = "#000000"
+        val defaultFontFamily = "Inter"
+        val templateId = state.selectedTemplateId ?: "minimalist"
+        val menuId = UUID.randomUUID().toString()
 
-        return when (serviceType) {
-            ServiceType.SHOP -> {
-                shopUseCases.createShop(
-                    Shop(
-                        id = UUID.randomUUID().toString(),
-                        userId = userId,
-                        name = serviceName,
-                        description = null,
-                        isActive = true,
-                        primaryColor = defaultPrimaryColor,
-                        fontFamily = defaultFontFamily,
-                        createdAt = now
-                    )
-                ).map { }
-            }
-
-            ServiceType.DIGITAL_MENU -> {
-                menuUseCases.createMenu(
-                    Menu(
-                        id = UUID.randomUUID().toString(),
-                        userId = userId,
-                        name = serviceName,
-                        description = null,
-                        isActive = true,
-                        templateId = defaultTemplateId,
-                        primaryColor = defaultPrimaryColor,
-                        fontFamily = defaultFontFamily,
-                        logoUrl = null,
-                        createdAt = now
-                    )
-                ).map { }
-            }
-
-            ServiceType.PORTFOLIO -> {
-                portfolioUseCases.createPortfolio(
-                    Portfolio(
-                        id = UUID.randomUUID().toString(),
-                        userId = userId,
-                        title = serviceName,
-                        description = null,
-                        isVisible = true,
-                        templateId = defaultTemplateId,
-                        primaryColor = defaultPrimaryColor,
-                        fontFamily = defaultFontFamily,
-                        createdAt = now
-                    )
-                ).map { }
-            }
-
-            ServiceType.CV -> {
-                cvUseCases.createCv(
-                    Cv(
-                        id = UUID.randomUUID().toString(),
-                        userId = userId,
-                        title = serviceName,
-                        professionalSummary = null,
-                        isVisible = true,
-                        templateId = defaultTemplateId,
-                        primaryColor = defaultPrimaryColor,
-                        fontFamily = defaultFontFamily,
-                        createdAt = now
-                    )
-                ).map { }
-            }
-
-            ServiceType.INVITATION -> {
-                invitationUseCases.createInvitation(
-                    Invitation(
-                        id = UUID.randomUUID().toString(),
-                        userId = userId,
-                        eventName = serviceName,
-                        eventDate = null,
-                        location = null,
-                        description = null,
-                        isActive = true,
-                        templateId = defaultTemplateId,
-                        primaryColor = defaultPrimaryColor,
-                        fontFamily = defaultFontFamily,
-                        createdAt = now
-                    )
-                ).map { }
-            }
+        val result = menuUseCases.createMenu(
+            Menu(
+                id = menuId,
+                userId = userId,
+                name = serviceName,
+                description = null,
+                isActive = true,
+                templateId = templateId,
+                primaryColor = defaultPrimaryColor,
+                fontFamily = defaultFontFamily,
+                logoUrl = null,
+                createdAt = now
+            )
+        )
+        if (result.isFailure) return result.map { }
+        
+        // Map Categories to specific UUIDs
+        val categoryIdMap = mutableMapOf<String, String>()
+        state.categories.forEachIndexed { index, name ->
+            val catId = UUID.randomUUID().toString()
+            categoryIdMap[name] = catId
+            menuUseCases.createCategory(
+                org.override.atomo.feature.digital_menu.domain.model.MenuCategory(
+                    id = catId,
+                    menuId = menuId,
+                    name = name,
+                    sortOrder = index,
+                    createdAt = now
+                )
+            )
         }
+        
+        // Add Dishes mapped to Category UUIDs
+        state.dishes.forEachIndexed { index, dishInput ->
+            val catId = categoryIdMap[dishInput.categoryName] ?: return@forEachIndexed
+            menuUseCases.createDish(
+                org.override.atomo.feature.digital_menu.domain.model.Dish(
+                    id = UUID.randomUUID().toString(),
+                    menuId = menuId,
+                    categoryId = catId,
+                    name = dishInput.name,
+                    description = dishInput.description,
+                    price = dishInput.price,
+                    imageUrl = null,
+                    isVisible = true,
+                    sortOrder = index,
+                    createdAt = now
+                )
+            )
+        }
+        return Result.success(Unit)
     }
 }
